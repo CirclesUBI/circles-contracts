@@ -1,81 +1,107 @@
-pragma solidity ^0.4.10;
+pragma solidity ^0.4.24;
 
-import "ds-token/token.sol";
+contract CirclesToken {
 
-contract CirclesToken is DSToken("") {
+  address person;
+  uint256 rateUpdatedTimestamp;
 
-    address public person;
+  constructor(address _person) public {
+    person = _person;
+    rateUpdatedTimestamp = now;
+  }
 
-    uint public lastTouched;
-    uint public factor = 1736111111111111; // ~1050 tokens per week
+  // TODO: Optional - Figure out address to string conversion
+  //function name() view returns (string name) {
+  //  return "Circles" + person.toString();
+  //}
 
-    function CirclesToken(address person_) {
-        person = person_;
-        lastTouched = time();
+  // TODO: Optional - Implement?
+  // IDK if there is something short enough that would make sense here
+  //function symbol view() returns (string symbol) {
+  //  return "CIR"
+  //}
+
+  // TODO: Optional - Choose, with issuanceRate
+  function decimals() view returns (uint8 decimals) {
+    return 18;
+  }
+
+  //TODO: Choose, with decimals()
+  uint256 constant issuanceRate = 1;
+
+  function totalSupply() view returns (uint256 totalSupply) {
+    (now - rateUpdatedTimestamp) * issuanceRate
+  }
+
+  uint256 heldElsewhere;
+  mapping (address => uint256) balances;
+
+  function balanceOf(address _owner) view returns (uint256 balance) {
+    if (address == person) {
+      totalSupply() - heldElsewhere;
+    } else {
+      balances[tokenOwner];
+    }
+  }
+
+  event Transfer(address indexed _from, address indexed _to, uint256 _value)
+
+  function transfer(address _to, uint256 _value) returns (bool success) {
+    require( balanceOf(msg.sender) >= _value, "Insufficient Balance" );
+
+    // decrement _from balance
+    if (msg.sender == person) {
+      heldElsewhere = heldElsewhere + _value;
+    } else {
+      balances[msg.sender] = balances[msg.sender] - _value;
     }
 
-    function time() returns (uint) {
-        return block.timestamp;
+    // increment _to balance
+    if (_to == person) {
+      heldElsewhere = heldElsewhere - _value;
+    } else {
+      balances[_to] = balances[_to] + _value;
     }
 
-    function look() returns (uint) {
-        var period = time() - lastTouched;
-        return factor * period;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+
+  mapping (address => mapping (address = uint256)) public allowances;
+
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require( allowances[_from][msg.sender] >= _value, "Not authorized" );
+    require( balanceOf(_from) >= _value, "Insufficient Balance" );
+
+    // decrement _from balance
+    allowances[_from][msg.sender] = allowances[_from][msg.sender] - _value;
+    if (_from == person) {
+      heldElsewhere = heldElsewhere + _value;
+    } else {
+      balances[_from] = balances[_from] - _value;
     }
 
-    // the universal basic income part
-    function update() {
-        var gift = look();
-        this.mint(cast(gift));
-        this.push(person, cast(gift));
-        lastTouched = time();
+    // increment _to balance
+    if (_to == person) {
+      heldElsewhere = heldElsewhere - _value;
+    } else {
+      balances[_to] = balances[_to] + _value;
     }
 
-    function transferFrom(
-        address src, address dst, uint wad
-    ) returns (bool) {
-        update();
+    Transfer(_from, _to, _value);
+    return true;
+  }
 
-        // TokenManager doesn't need approval to transferFrom
-        if (msg.sender == owner) {
-            assert(_balances[src] >= wad);
-        
-            _balances[src] = sub(_balances[src], wad);
-            _balances[dst] = add(_balances[dst], wad);
-        
-            Transfer(src, dst, wad);
-        
-            return true;
-        } else {
-            return super.transferFrom(src, dst, wad);
-        }
-        
-    }
+  event Approval(address indexed _owner, address indexed _spender, uint256 _value)
 
-    function transfer(address dst, uint wad) returns (bool) {
-        if (msg.sender != address(this)) {
-            update();
-        }
-        return super.transfer(dst, wad);
-    }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    allowances[msg.sender][_spender] = _value;
 
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
 
-    function approve(address guy, uint wad) returns (bool) {
-        update();
-        return super.approve(guy, wad);
-    }
-
-    function totalSupply() constant returns (uint256) {
-        return super.totalSupply() + look();
-    }
-
-    function balanceOf(address src) constant returns (uint256) {
-        var balance = super.balanceOf(src);
-
-        if (src == person) {
-            balance = add(balance, look());
-        }
-
-        return balance;
-    }
+  function allowance(address _owner, address _spender) view returns (uint256 remaining) {
+    return allowances[_owner][_spender];
+  }
 }
