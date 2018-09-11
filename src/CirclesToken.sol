@@ -2,13 +2,18 @@ pragma solidity ^0.4.24;
 
 contract CirclesToken {
 
-  address person;
-  uint256 rateUpdatedTimestamp;
+  address person; // Identifier of the token owner
+  uint256 rateUpdatedTimestamp; // Last time the generation rate was updated
 
   constructor(address _person) public {
     person = _person;
     rateUpdatedTimestamp = now;
   }
+
+  ///////
+  // Optional ERC20 Functions
+  // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
+  ///////
 
   // TODO: Optional - Figure out address to string conversion
   //function name() view returns (string name) {
@@ -25,6 +30,11 @@ contract CirclesToken {
   function decimals() view returns (uint8 decimals) {
     return 18;
   }
+
+  ///////
+  // Required ERC20 functions
+  // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
+  ///////
 
   //TODO: Choose, with decimals()
   uint256 constant issuanceRate = 1;
