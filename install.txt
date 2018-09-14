@@ -1,8 +1,0 @@
-git submodule update --init --recursive
-export ETH_GAS=4600000
-
-you also need to set ETH_FROM to one of the accounts on your client
-export ETH_FROM=
-(for instance: export ETH_FROM=0xbc6a6d9fdec9bf669cbe4365c7b88f670bac2060)
-
-dapp create CirclesHub
