@@ -1,5 +1,9 @@
 pragma solidity ^0.4.24;
 
+// TODO: Fix external function calls
+// TODO: ability to update rates
+import "./CirclesPerson.sol";
+
 contract CirclesToken {
 
   address person; // Identifier of the token owner
@@ -39,6 +43,7 @@ contract CirclesToken {
   //TODO: Choose, with decimals()
   uint256 constant issuanceRate = 1;
 
+  //TODO: non-continuous payout?
   function totalSupply() view returns (uint256 totalSupply) {
     (now - rateUpdatedTimestamp) * issuanceRate
   }
@@ -56,35 +61,10 @@ contract CirclesToken {
 
   event Transfer(address indexed _from, address indexed _to, uint256 _value)
 
-  function transfer(address _to, uint256 _value) returns (bool success) {
-    require( balanceOf(msg.sender) >= _value, "Insufficient Balance" );
+  function _transfer(address _from, address _to, _value) internal returns (bool success) {
+    require( balanceOf(_from) >= _value, "Insufficient balance" );
 
     // decrement _from balance
-    if (msg.sender == person) {
-      heldElsewhere = heldElsewhere + _value;
-    } else {
-      balances[msg.sender] = balances[msg.sender] - _value;
-    }
-
-    // increment _to balance
-    if (_to == person) {
-      heldElsewhere = heldElsewhere - _value;
-    } else {
-      balances[_to] = balances[_to] + _value;
-    }
-
-    Transfer(msg.sender, _to, _value);
-    return true;
-  }
-
-  mapping (address => mapping (address = uint256)) public allowances;
-
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
-    require( allowances[_from][msg.sender] >= _value, "Not authorized" );
-    require( balanceOf(_from) >= _value, "Insufficient Balance" );
-
-    // decrement _from balance
-    allowances[_from][msg.sender] = allowances[_from][msg.sender] - _value;
     if (_from == person) {
       heldElsewhere = heldElsewhere + _value;
     } else {
@@ -102,6 +82,18 @@ contract CirclesToken {
     return true;
   }
 
+  function transfer(address _to, uint256 _value) returns (bool success) {
+    return _transfer(msg.sender, _to, _value);
+  }
+
+  mapping (address => mapping (address = uint256)) public allowances;
+
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require( allowances[_from][msg.sender] >= _value, "Not authorized" );
+    allowances[_from][msg.sender] = allowances[_from][msg.sender] - _value;
+    return _transfer(msg.sender, _to, _value);
+  }
+
   event Approval(address indexed _owner, address indexed _spender, uint256 _value)
 
   function approve(address _spender, uint256 _value) returns (bool success) {
@@ -114,4 +106,16 @@ contract CirclesToken {
   function allowance(address _owner, address _spender) view returns (uint256 remaining) {
     return allowances[_owner][_spender];
   }
+
+  ///////
+  // Support trusted currency exchanges for transitive payments
+  ///////
+
+  // TODO: Worry about accounts that may have a __circles_approveExchange function?
+  function exchange(address _offeredToken, address _offeredBy, address _offeredTo, unit256 _value) returns (bool success) {
+    require( _offeredToken.transferFrom(_offeredBy, _offeredTo, _value), "Unable to transfer offered token" );
+    require( _offeredTo.__circles_approveExchange(_offeredToken, _value), "Offered token not accepted at this time" );
+    require( _transfer(_offeredTo, _offeredBy, _value), "Unable to transfer desired token" );
+  }
+
 }
