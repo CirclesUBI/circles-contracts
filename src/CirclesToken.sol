@@ -113,6 +113,8 @@ contract CirclesToken {
   ///////
 
   // TODO: Worry about accounts that may have a __circles_approveExchange function?
+  // Note: Theoretically a user could trust a non-circles ERC20 and offer 1-to-1 exchanges between other non-circles crypto.
+  //  I actually think this is some pretty neat functionality!
   function exchange(address _offeredToken, address _offeredBy, address _offeredTo, unit256 _value) returns (bool success) {
     require( _offeredToken.transferFrom(_offeredBy, _offeredTo, _value), "Unable to transfer offered token" );
     require( _offeredTo.__circles_approveExchange(_offeredToken, _value), "Offered token not accepted at this time" );
