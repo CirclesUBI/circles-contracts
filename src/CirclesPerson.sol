@@ -1,6 +1,8 @@
 pragma solidity ^0.4.24;
 
-contract CirclesPerson {
+import "./PersonInterface.sol";
+
+contract CirclesPerson is PersonInterface {
 
   // TODO: Allow a person to spend ERC20s / send arbitrary transactions.
   //  This is essentially a proxy contract like uPort uses.
