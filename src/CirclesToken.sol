@@ -32,7 +32,7 @@ contract CirclesToken {
   //}
 
   // TODO: Optional - Choose, with issuanceRate
-  function decimals() view returns (uint8 decimals) {
+  function decimals() public pure returns (uint8 _decimals) {
     return 18;
   }
 
@@ -45,24 +45,24 @@ contract CirclesToken {
   uint256 constant issuanceRate = 1;
 
   //TODO: non-continuous payout?
-  function totalSupply() view returns (uint256 totalSupply) {
-    (now - rateUpdatedTimestamp) * issuanceRate
+  function totalSupply() public view returns (uint256 _totalSupply) {
+    return (now - rateUpdatedTimestamp) * issuanceRate;
   }
 
   uint256 heldElsewhere;
   mapping (address => uint256) balances;
 
-  function balanceOf(address _owner) view returns (uint256 balance) {
-    if (address == person) {
-      totalSupply() - heldElsewhere;
+  function balanceOf(address _owner) public view returns (uint256 balance) {
+    if (_owner == person) {
+      return totalSupply() - heldElsewhere;
     } else {
-      balances[tokenOwner];
+      return balances[_owner];
     }
   }
 
-  event Transfer(address indexed _from, address indexed _to, uint256 _value)
+  event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
-  function _transfer(address _from, address _to, _value) internal returns (bool success) {
+  function _transfer(address _from, address _to, uint256 _value) internal returns (bool success) {
     require( balanceOf(_from) >= _value, "Insufficient balance" );
 
     // decrement _from balance
@@ -79,32 +79,32 @@ contract CirclesToken {
       balances[_to] = balances[_to] + _value;
     }
 
-    Transfer(_from, _to, _value);
+    emit Transfer(_from, _to, _value);
     return true;
   }
 
-  function transfer(address _to, uint256 _value) returns (bool success) {
+  function transfer(address _to, uint256 _value) public returns (bool success) {
     return _transfer(msg.sender, _to, _value);
   }
 
-  mapping (address => mapping (address = uint256)) public allowances;
+  mapping (address => mapping (address => uint256)) public allowances;
 
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
     require( allowances[_from][msg.sender] >= _value, "Not authorized" );
     allowances[_from][msg.sender] = allowances[_from][msg.sender] - _value;
     return _transfer(msg.sender, _to, _value);
   }
 
-  event Approval(address indexed _owner, address indexed _spender, uint256 _value)
+  event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
-  function approve(address _spender, uint256 _value) returns (bool success) {
+  function approve(address _spender, uint256 _value) public returns (bool success) {
     allowances[msg.sender][_spender] = _value;
 
-    Approval(msg.sender, _spender, _value);
+    emit Approval(msg.sender, _spender, _value);
     return true;
   }
 
-  function allowance(address _owner, address _spender) view returns (uint256 remaining) {
+  function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
     return allowances[_owner][_spender];
   }
 
@@ -115,10 +115,11 @@ contract CirclesToken {
   // TODO: Worry about accounts that may have a __circles_approveExchange function?
   // Note: Theoretically a user could trust a non-circles ERC20 and offer 1-to-1 exchanges between other non-circles crypto.
   //  I actually think this is some pretty neat functionality!
-  function exchange(address _offeredToken, address _offeredBy, address _offeredTo, unit256 _value) returns (bool success) {
-    require( _offeredToken.transferFrom(_offeredBy, _offeredTo, _value), "Unable to transfer offered token" );
-    require( _offeredTo.__circles_approveExchange(_offeredToken, _value), "Offered token not accepted at this time" );
+  function exchange(address _offeredToken, address _offeredBy, address _offeredTo, uint256 _value) public returns (bool success) {
+    require( _offeredToken.call("transferFrom", _offeredBy, _offeredTo, _value), "Unable to transfer offered token" );
+    require( _offeredTo.call("__circles_approveExchange", _offeredToken, _value), "Offered token not accepted at this time" );
     require( _transfer(_offeredTo, _offeredBy, _value), "Unable to transfer desired token" );
+    return true;
   }
 
 }
