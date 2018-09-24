@@ -2,9 +2,10 @@ pragma solidity ^0.4.24;
 
 // TODO: Ability to update issuance rate
 // TODO: Overflow protection
-import "./CirclesPerson.sol";
+import "./TokenInterface.sol";
+import "./PersonInterface.sol";
 
-contract CirclesToken {
+contract CirclesToken is TokenInterface {
 
   address person; // Identifier of the token owner
   uint256 rateUpdatedTimestamp; // Last time the generation rate was updated
@@ -115,8 +116,8 @@ contract CirclesToken {
   // Note: Theoretically a user could trust a non-circles ERC20 and offer 1-to-1 exchanges between other non-circles crypto.
   //  I actually think this is some pretty neat functionality!
   function exchange(address _offeredToken, address _offeredBy, address _offeredTo, uint256 _value) public returns (bool success) {
-    require( _offeredToken.call("transferFrom", _offeredBy, _offeredTo, _value), "Unable to transfer offered token" );
-    require( _offeredTo.call("__circles_approveExchange", _offeredToken, _value), "Offered token not accepted at this time" );
+    require( TokenInterface(_offeredToken).transferFrom(_offeredBy, _offeredTo, _value), "Unable to transfer offered token" );
+    require( PersonInterface(_offeredTo).__circles_approveExchange(_offeredToken, _value), "Offered token not accepted at this time" );
     require( _transfer(_offeredTo, _offeredBy, _value), "Unable to transfer desired token" );
     return true;
   }
