@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 
-// TODO: Fix external function calls
 // TODO: Ability to update issuance rate
 // TODO: Overflow protection
 import "./CirclesPerson.sol";
