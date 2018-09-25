@@ -4,15 +4,20 @@ pragma solidity ^0.4.24;
 // TODO: Overflow protection
 import "src/main/model/TokenInterface.sol";
 import "src/main/model/PersonInterface.sol";
+import "src/main/model/ERC20Interface.sol";
 
-contract CirclesToken is TokenInterface {
+contract CirclesToken is TokenInterface, ERC20Interface {
 
   address person; // Identifier of the token owner
+  string public name;
+  string public symbol;
   uint256 rateUpdatedTimestamp; // Last time the generation rate was updated
 
-  constructor(address _person) public {
-    person = _person;
+  constructor(address _person, string _name, string _symbol) public {
     rateUpdatedTimestamp = now;
+    person = _person;
+    name = _name; //TODO: string(address(person))?
+    symbol = _symbol; //TODO: Limit length?
   }
 
   ///////
@@ -20,19 +25,16 @@ contract CirclesToken is TokenInterface {
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
   ///////
 
-  // TODO: Optional - Figure out address to string conversion
-  //function name() view returns (string name) {
-  //  return "Circles" + person.toString();
-  //}
-
-  // TODO: Optional - Implement?
-  // IDK if there is something short enough that would make sense here
-  //function symbol view() returns (string symbol) {
-  //  return "CIR"
-  //}
+  function name() public view returns (string) {
+    return name;
+  }
+  
+  function symbol() public view returns (string) {
+    return symbol;
+  }
 
   // TODO: Optional - Choose, with issuanceRate
-  function decimals() public pure returns (uint8 _decimals) {
+  function decimals() public pure returns (uint8) {
     return 18;
   }
 
@@ -45,7 +47,7 @@ contract CirclesToken is TokenInterface {
   uint256 constant issuanceRate = 1;
 
   //TODO: non-continuous payout?
-  function totalSupply() public view returns (uint256 _totalSupply) {
+  function totalSupply() public view returns (uint256) {
     return (now - rateUpdatedTimestamp) * issuanceRate;
   }
 
@@ -59,8 +61,6 @@ contract CirclesToken is TokenInterface {
       return balances[_owner];
     }
   }
-
-  event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
   function _transfer(address _from, address _to, uint256 _value) internal returns (bool success) {
     require( balanceOf(_from) >= _value, "Insufficient balance" );
@@ -94,8 +94,6 @@ contract CirclesToken is TokenInterface {
     allowances[_from][msg.sender] = allowances[_from][msg.sender] - _value;
     return _transfer(msg.sender, _to, _value);
   }
-
-  event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
   function approve(address _spender, uint256 _value) public returns (bool success) {
     allowances[msg.sender][_spender] = _value;
