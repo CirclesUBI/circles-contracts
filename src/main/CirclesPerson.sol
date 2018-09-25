@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./PersonInterface.sol";
+import "src/main/model/PersonInterface.sol";
 
 contract CirclesPerson is PersonInterface {
 

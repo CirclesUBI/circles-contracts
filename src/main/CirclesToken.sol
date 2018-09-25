@@ -2,8 +2,8 @@ pragma solidity ^0.4.24;
 
 // TODO: Ability to update issuance rate
 // TODO: Overflow protection
-import "./TokenInterface.sol";
-import "./PersonInterface.sol";
+import "src/main/model/TokenInterface.sol";
+import "src/main/model/PersonInterface.sol";
 
 contract CirclesToken is TokenInterface {
 
