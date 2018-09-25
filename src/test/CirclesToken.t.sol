@@ -18,7 +18,7 @@ contract CirclesTokenTest is DSTest {
 
   function setUp() public {
     alice = new Alice();
-    aliceToken = new CirclesToken(alice);
+    aliceToken = new CirclesToken(alice, "aliceToken", "no-scope420");
   }
 
   function testFail_basic_sanity() public {
@@ -28,4 +28,5 @@ contract CirclesTokenTest is DSTest {
   function test_basic_sanity() public {
     assertTrue(true);
   }
+
 }
