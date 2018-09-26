@@ -2,9 +2,9 @@ pragma solidity ^0.4.24;
 
 // TODO: Ability to update issuance rate
 // TODO: Overflow protection
-import "src/main/model/TokenInterface.sol";
-import "src/main/model/PersonInterface.sol";
-import "src/main/model/ERC20Interface.sol";
+import "./model/TokenInterface.sol";
+import "./model/PersonInterface.sol";
+import "./model/ERC20Interface.sol";
 
 contract CirclesToken is TokenInterface, ERC20Interface {
 
