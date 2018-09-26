@@ -76,10 +76,11 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount]) {
 
     describe('when the recipient is the zero address', function () {
       const to = ZERO_ADDRESS;
-
+/* TODO? Not in the standard
       it('reverts', async function () {
         await assertRevert(this.token.transfer(to, 100, { from: owner }));
       });
+*/
     });
   });
 
@@ -95,9 +96,9 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount]) {
 
           logs.length.should.equal(1);
           logs[0].event.should.equal('Approval');
-          logs[0].args.owner.should.equal(owner);
-          logs[0].args.spender.should.equal(spender);
-          logs[0].args.value.should.be.bignumber.equal(amount);
+          logs[0].args._owner.should.equal(owner);
+          logs[0].args._spender.should.equal(spender);
+          logs[0].args._value.should.be.bignumber.equal(amount);
         });
 
         describe('when there was no approved amount before', function () {
@@ -129,9 +130,9 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount]) {
 
           logs.length.should.equal(1);
           logs[0].event.should.equal('Approval');
-          logs[0].args.owner.should.equal(owner);
-          logs[0].args.spender.should.equal(spender);
-          logs[0].args.value.should.be.bignumber.equal(amount);
+          logs[0].args._owner.should.equal(owner);
+          logs[0].args._spender.should.equal(spender);
+          logs[0].args._value.should.be.bignumber.equal(amount);
         });
 
         describe('when there was no approved amount before', function () {
@@ -160,9 +161,11 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount]) {
       const amount = 100;
       const spender = ZERO_ADDRESS;
 
+/* TODO? Not in the standard
       it('reverts', async function () {
         await assertRevert(this.token.approve(spender, amount, { from: owner }));
       });
+*/
     });
   });
 
@@ -199,9 +202,9 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount]) {
 
             logs.length.should.equal(1);
             logs[0].event.should.equal('Transfer');
-            logs[0].args.from.should.equal(owner);
-            logs[0].args.to.should.equal(to);
-            logs[0].args.value.should.be.bignumber.equal(amount);
+            logs[0].args._from.should.equal(owner);
+            logs[0].args._to.should.equal(to);
+            logs[0].args._value.should.be.bignumber.equal(amount);
           });
         });
 
@@ -245,12 +248,15 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount]) {
         await this.token.approve(spender, amount, { from: owner });
       });
 
+/* TODO? Not in standard
       it('reverts', async function () {
         await assertRevert(this.token.transferFrom(owner, to, amount, { from: spender }));
       });
+*/
     });
   });
 
+/* TODO? Not in standard
   describe('decrease allowance', function () {
     describe('when the spender is not the zero address', function () {
       const spender = recipient;
@@ -540,4 +546,5 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount]) {
       describeBurnFrom('for less amount than allowance', allowance.sub(1));
     });
   });
+*/
 });
