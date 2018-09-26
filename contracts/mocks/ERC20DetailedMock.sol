@@ -1,8 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "../CirclesToken.sol";
+import "../TimeIssuedToken.sol";
 
-contract ERC20DetailedMock is CirclesToken {
-  constructor(string _name, string _symbol, uint8 _decimals) CirclesToken(address(0), _name, _symbol, _decimals) public {
+contract ERC20DetailedMock is TimeIssuedToken {
+  constructor(string _name, string _symbol, uint8 _decimals)
+    TimeIssuedToken(address(0), 0, _name, _symbol, _decimals) public {
   }
 }

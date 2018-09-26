@@ -1,23 +1,77 @@
 pragma solidity ^0.4.24;
 
-import "./model/PersonInterface.sol";
+import "./interfaces/TokenInterface.sol";
 
-contract CirclesPerson is PersonInterface {
+contract CirclesPerson {
 
-  // TODO: Allow a person to spend ERC20s / send arbitrary transactions.
-  //  This is essentially a proxy contract like uPort uses.
+  // TODO: Add limits?
+  mapping (address => bool) isEligableExchangeInput;
+  // TODO: Add exchange rates?
+  mapping (address => bool) isEligableExchangeOutput;
 
-  // TODO: Add limits
-  mapping (address => bool) isTokenTrusted;
+  //TODO: Update owner mechanism
+  function updateExchangeInput( address _token
+                              , bool _isTrusted ) public
+                                                    returns (bool success) {
 
-  function updateRelationship(address _token, bool _isTrusted) public returns (bool success) {
     require( msg.sender == address(this), "Not authorized" );
-    isTokenTrusted[_token] = _isTrusted;
+    isEligableExchangeInput[_token] = _isTrusted;
     return true;
   }
 
-  function __circles_approveExchange(address _offeredToken, uint256) public view returns (bool approved) {
-    return isTokenTrusted[_offeredToken];
+  function updateExchangeOutput( address _token
+                               , bool _isTrusted ) public
+                                                     returns (bool success) {
+
+    require( msg.sender == address(this), "Not authorized" );
+    isEligableExchangeOutput[_token] = _isTrusted;
+    return true;
+  }
+
+  function isExchangeApproved( address _offeredToken
+                             , address _desiredToken ) public view
+			                                 returns (bool) {
+
+    return
+      isEligableExchangeInput[_offeredToken]
+      && isEligableExchangeOutput[_desiredToken];
+  }
+
+  // TODO: modifier instead of internal function? and spellcheck, lol
+  function _exchangePrerequisates( address _offeredToken
+                                 , address _desiredToken
+		                 , uint256 _value         ) internal {
+
+    require( isExchangeApproved(_offeredToken, _desiredToken)
+           , "Offered token not accepted at this time"
+    );
+
+    require( TokenInterface(_offeredToken)
+               .transferFrom(msg.sender, this, _value)
+           , "Unable to transfer offered token"
+    );
+  }
+
+  function exchangeTransfer( address _offeredToken
+                           , address _desiredToken
+                           , address _destination, uint256 _value ) public {
+
+    _exchangePrerequisates(_offeredToken, _desiredToken, _value);
+
+    require( TokenInterface(_desiredToken).transfer(_destination, _value)
+           , "Unable to transfer desired token"
+    );
+  }
+
+  function exchangeApprove( address _offeredToken
+                          , address _desiredToken
+                          , address _destination, uint256 _value ) public {
+
+    _exchangePrerequisates(_offeredToken, _desiredToken, _value);
+
+    require( TokenInterface(_desiredToken).approve(_destination, _value)
+           , "Unable to approve transfer of desired token"
+    );
   }
 
 }
