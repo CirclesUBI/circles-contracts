@@ -11,13 +11,15 @@ contract CirclesToken is TokenInterface, ERC20Interface {
   address person; // Identifier of the token owner
   string public name;
   string public symbol;
+  uint8 public decimals;
   uint256 rateUpdatedTimestamp; // Last time the generation rate was updated
 
-  constructor(address _person, string _name, string _symbol) public {
+  constructor(address _person, string _name, string _symbol, uint8 _decimals) public {
     rateUpdatedTimestamp = now;
     person = _person;
     name = _name; //TODO: string(address(person))?
     symbol = _symbol; //TODO: Limit length?
+    decimals = _decimals;
   }
 
   ///////
@@ -33,9 +35,8 @@ contract CirclesToken is TokenInterface, ERC20Interface {
     return symbol;
   }
 
-  // TODO: Optional - Choose, with issuanceRate
-  function decimals() public pure returns (uint8) {
-    return 18;
+  function decimals() public view returns (uint8) {
+    return decimals;
   }
 
   ///////
@@ -92,7 +93,7 @@ contract CirclesToken is TokenInterface, ERC20Interface {
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
     require( allowances[_from][msg.sender] >= _value, "Not authorized" );
     allowances[_from][msg.sender] = allowances[_from][msg.sender] - _value;
-    return _transfer(msg.sender, _to, _value);
+    return _transfer(_from, _to, _value);
   }
 
   function approve(address _spender, uint256 _value) public returns (bool success) {
