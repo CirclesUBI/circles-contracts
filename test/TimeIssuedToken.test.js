@@ -19,8 +19,10 @@ contract('TimeIssuedToken', function ([_, person, another]) {
 
     describe('at creation', function () {
       it('balances start at 0', async function () {
-        (await this.token.balanceOf(person)).should.be.bignumber.equal(0);
-        (await this.token.totalSupply()).should.be.bignumber.equal(0);
+        (await this.token.balanceOf(person)).should.be.bignumber.greaterThan(0 - duration.seconds(3)*rate);
+        (await this.token.balanceOf(person)).should.be.bignumber.lessThan(0 + duration.seconds(3)*rate);
+        (await this.token.totalSupply()).should.be.bignumber.greaterThan(0 - duration.seconds(3)*rate);
+        (await this.token.totalSupply()).should.be.bignumber.lessThan(0 + duration.seconds(3)*rate);
       });
     });
 
@@ -30,8 +32,10 @@ contract('TimeIssuedToken', function ([_, person, another]) {
       });
 
       it('currency issued at `rate`', async function () {
-        (await this.token.totalSupply()).should.be.bignumber.equal(duration.weeks(1)*rate);
-        (await this.token.balanceOf(person)).should.be.bignumber.equal(duration.weeks(1)*rate);
+        (await this.token.totalSupply()).should.be.bignumber.greaterThan(duration.weeks(1)*rate - duration.seconds(3)*rate);
+        (await this.token.totalSupply()).should.be.bignumber.lessThan(duration.weeks(1)*rate + duration.seconds(3)*rate);
+        (await this.token.balanceOf(person)).should.be.bignumber.greaterThan(duration.weeks(1)*rate - duration.seconds(3)*rate);
+        (await this.token.balanceOf(person)).should.be.bignumber.lessThan(duration.weeks(1)*rate + duration.seconds(3)*rate);
         (await this.token.balanceOf(another)).should.be.bignumber.equal(0);
       });
     });
