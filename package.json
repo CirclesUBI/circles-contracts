@@ -1,0 +1,21 @@
+{
+  "name": "circles-contracts",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "scripts/test.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CirclesUBI/circles-contracts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CirclesUBI/circles-contracts/issues"
+  },
+  "homepage": "https://github.com/CirclesUBI/circles-contracts",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-bignumber": "^2.0.2",
+    "ganache-cli": "^6.1.8",
+    "truffle": "^4.1.14"
+  }
+}
