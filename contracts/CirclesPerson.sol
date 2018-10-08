@@ -8,13 +8,19 @@ contract CirclesPerson {
   mapping (address => bool) isEligableExchangeInput;
   // TODO: Add exchange rates?
   mapping (address => bool) isEligableExchangeOutput;
+  // TODO: use auth lib
+  address owner;
+
+  constructor() public {
+    owner = msg.sender;
+  }
 
   //TODO: Update owner mechanism
   function updateExchangeInput( address _token
                               , bool _isTrusted ) public
                                                     returns (bool success) {
 
-    require( msg.sender == address(this), "Not authorized" );
+    require( msg.sender == owner, "Not authorized" );
     isEligableExchangeInput[_token] = _isTrusted;
     return true;
   }
@@ -23,7 +29,7 @@ contract CirclesPerson {
                                , bool _isTrusted ) public
                                                      returns (bool success) {
 
-    require( msg.sender == address(this), "Not authorized" );
+    require( msg.sender == owner, "Not authorized" );
     isEligableExchangeOutput[_token] = _isTrusted;
     return true;
   }
