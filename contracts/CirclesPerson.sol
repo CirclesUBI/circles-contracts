@@ -5,9 +5,9 @@ import "./interfaces/TokenInterface.sol";
 contract CirclesPerson {
 
   // TODO: Add limits?
-  mapping (address => bool) isEligableExchangeInput;
+  mapping (address => bool) public isEligableExchangeInput;
   // TODO: Add exchange rates?
-  mapping (address => bool) isEligableExchangeOutput;
+  mapping (address => bool) public isEligableExchangeOutput;
   // TODO: use auth lib
   address owner;
 
