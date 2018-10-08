@@ -108,7 +108,7 @@ contract TimeIssuedToken is ERC20Interface {
 		       , uint256 _value ) public
 		                            returns (bool success) {
 
-    require( allowances[_from][msg.sender] >= _value, "Not authorized" );
+    require( allowances[_from][msg.sender] >= _value, "transferFrom: not authorized" );
     allowances[_from][msg.sender] = allowances[_from][msg.sender] - _value;
     return _transfer(_from, _to, _value);
   }
