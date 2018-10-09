@@ -12,10 +12,10 @@ contract CirclesToken is TokenInterface, ERC20Interface {
   string public name;
   string public symbol;
   uint8 public decimals;
-  uint256 rateUpdatedTimestamp; // Last time the generation rate was updated
+  uint256 createdTimestamp; // Last time the generation rate was updated
 
   constructor(address _person, string _name, string _symbol, uint8 _decimals) public {
-    rateUpdatedTimestamp = now;
+    createdTimestamp = now;
     person = _person;
     name = _name; //TODO: string(address(person))?
     symbol = _symbol; //TODO: Limit length?
@@ -49,7 +49,7 @@ contract CirclesToken is TokenInterface, ERC20Interface {
 
   //TODO: non-continuous payout?
   function totalSupply() public view returns (uint256) {
-    return (now - rateUpdatedTimestamp) * issuanceRate;
+    return (now - createdTimestamp) * issuanceRate;
   }
 
   uint256 heldElsewhere;
