@@ -11,12 +11,12 @@ contract TimeIssuedToken is ERC20Interface {
   uint8 public decimals;
   address person;               // Reciever of time-generated tokens
   uint256 issuanceRate;         // Tokens generated per TODO milisecond?
-  uint256 rateUpdatedTimestamp; // Last time issuanceRate was updated
+  uint256 createdTimestamp; // Last time issuanceRate was updated
 
   constructor( address _person, uint256 _issuanceRate
              , string _name, string _symbol, uint8 _decimals ) public {
 
-    rateUpdatedTimestamp = now;
+    createdTimestamp = now;
 
     person       = _person;
     issuanceRate = _issuanceRate;
@@ -54,7 +54,7 @@ contract TimeIssuedToken is ERC20Interface {
   function totalSupply() public view
                            returns (uint256) {
 
-    return (now - rateUpdatedTimestamp) * issuanceRate;
+    return (now - createdTimestamp) * issuanceRate;
   }
 
   uint256 heldElsewhere;
