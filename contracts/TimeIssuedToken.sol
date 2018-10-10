@@ -27,6 +27,15 @@ contract TimeIssuedToken is ERC20Interface {
   }
 
   ///////
+  // Circles specific functions
+  ///////
+
+  function person() public view
+                    returns (address) {
+    return person;
+  }
+
+  ///////
   // Optional ERC20 Functions
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
   ///////
