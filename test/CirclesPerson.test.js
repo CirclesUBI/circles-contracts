@@ -116,7 +116,7 @@ contract('CirclesPerson', accounts => {
   describe('exchangeTransfer', () => {
     it('can spend one hop through the trust graph', async () => {
       await alice.token.approve(bob.person.address, web3.toWei(100), {
-        from: bob.address
+        from: alice.address
       });
 
       await bob.person.updateExchangeInput(alice.token.address, true, {
@@ -126,18 +126,11 @@ contract('CirclesPerson', accounts => {
         from: bob.address
       });
 
-      await bob.person.exchangeApprove(
-        alice.token.address,
-        bob.token.address,
-        carol.address,
-        web3.toWei(100),
-        { from: bob.address }
-      );
-
       await bob.person.exchangeTransfer(
         alice.token.address,
         bob.token.address,
-        carol.address,
+        alice.person.address,
+        carol.person.address,
         web3.toWei(10),
         { from: alice.address }
       );
