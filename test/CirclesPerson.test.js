@@ -3,6 +3,7 @@ const { assertRevert } = require('./helpers/assertRevert');
 const { latestTime } = require('./helpers/latestTime');
 const { increaseTimeTo, duration } = require('./helpers/increaseTime');
 const CirclesPerson = artifacts.require('CirclesPerson');
+const CirclesPersonFactory = artifacts.require('CirclesPersonFactory');
 const TimeIssuedToken = artifacts.require('TimeIssuedToken');
 
 require('chai')
@@ -10,13 +11,16 @@ require('chai')
   .should();
 
 const user = async (address, name, symbol) => {
+  factory = await CirclesPersonFactory.deployed();
   out = {};
 
   out.address = address;
-  out.person = await CirclesPerson.new({ from: address });
+  out.personAddress = await factory.build.call({from: address})
+  out.result = await factory.build({from: address});
+  out.person = await CirclesPerson.at(out.personAddress);
   out.token = await TimeIssuedToken.new(
     out.person.address,
-    1000,
+    1,
     name,
     symbol,
     18,
@@ -26,18 +30,20 @@ const user = async (address, name, symbol) => {
   return out;
 };
 
+
 contract('CirclesPerson', accounts => {
+
   let alice = {};
   let bob = {};
   let carol = {};
 
-  beforeEach(async () => {
+  before(async () => {
     alice = await user(accounts[0], 'alice', 'ALC');
     bob = await user(accounts[1], 'bob', 'BOB');
     carol = await user(accounts[2], 'carol', 'CRL');
 
     // everyone is rich :)
-    await increaseTimeTo((await latestTime()) + duration.years(1000));
+    await increaseTimeTo((await latestTime()) + duration.years(10));
   });
 
   describe('updateExchangeInput', () => {
@@ -115,10 +121,13 @@ contract('CirclesPerson', accounts => {
 
   describe('exchangeTransfer', () => {
     it('can spend one hop through the trust graph', async () => {
-      await alice.token.approve(bob.person.address, web3.toWei(100), {
-        from: alice.address
-      });
+      // A -> B -> C
+      // TODO: Actual code doing this would package all of these transactions
+      //  Into a script contract, so that they execute atomically.
+      //  Right now when alice gives bob's exchange permission to withdraw,
+      //  Anyone can race to swap her tokens
 
+      // Bob Trusts Alice
       await bob.person.updateExchangeInput(alice.token.address, true, {
         from: bob.address
       });
@@ -126,14 +135,31 @@ contract('CirclesPerson', accounts => {
         from: bob.address
       });
 
-      await bob.person.exchangeTransfer(
-        alice.token.address,
-        bob.token.address,
-        alice.person.address,
-        carol.person.address,
-        web3.toWei(10),
+      // Alice allows B's exchange to withdraw her offered token
+      // TODO: GGGGRRRR, execute is a delegate call, which is NOT
+      //  what we want here. Gotta maybe upload this as a script..
+      /*
+      await alice.person.execute( alice.token.address,
+	await alice.token.contract.approve.getData(
+          bob.person.address,
+	  web3.toWei(10)
+	),
         { from: alice.address }
       );
+
+      // Alice exhanges 10 Alice Token for Bob Token
+      await alice.person.execute( bob.person.address,
+        await bob.person.contract.exchangeTransfer.getData(
+          alice.token.address,
+          bob.token.address,
+          alice.person.address,
+          carol.person.address,
+          web3.toWei(10)
+        ),
+        { from: alice.address }
+      );
+      */
+
     });
   });
 });

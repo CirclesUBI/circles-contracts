@@ -1,34 +1,32 @@
 pragma solidity ^0.4.24;
 
-import "./interfaces/TokenInterface.sol";
+import "./interfaces/ERC20Interface.sol";
+import "../lib/ds-proxy/src/proxy.sol";
 
-contract CirclesPerson {
+contract CirclesPerson is DSProxy {
 
   // TODO: Add limits?
   mapping (address => bool) public isEligableExchangeInput;
   // TODO: Add exchange rates?
   mapping (address => bool) public isEligableExchangeOutput;
-  // TODO: use auth lib
-  address owner;
 
-  constructor() public {
-    owner = msg.sender;
+  constructor(address _dsProxyCacheAddr) DSProxy(_dsProxyCacheAddr) public {
   }
 
   function updateExchangeInput( address _token
                               , bool _isTrusted ) public
-                                                    returns (bool success) {
+			                            auth
+                                                      returns (bool success) {
 
-    require( msg.sender == owner, "Not authorized" );
     isEligableExchangeInput[_token] = _isTrusted;
     return true;
   }
 
   function updateExchangeOutput( address _token
                                , bool _isTrusted ) public
-                                                     returns (bool success) {
+			                             auth
+                                                       returns (bool success) {
 
-    require( msg.sender == owner, "Not authorized" );
     isEligableExchangeOutput[_token] = _isTrusted;
     return true;
   }
@@ -42,21 +40,28 @@ contract CirclesPerson {
       && isEligableExchangeOutput[_desiredToken];
   }
 
-  // TODO: modifier instead of internal function? and spellcheck, lol
-  function _exchangePrerequisates( address _source
-                                 , address _offeredToken
+  // TODO: modifier instead of internal function? 
+  function _exchangePrerequisites( address _offeredToken
                                  , address _desiredToken
+				 , address _source
                                  , uint256 _value ) internal {
 
     require( isExchangeApproved(_offeredToken, _desiredToken)
            , "Offered token not accepted at this time"
     );
 
-    require( TokenInterface(_offeredToken)
-               .transferFrom(_source, this, _value)
+    require( ERC20Interface(_offeredToken).transferFrom(_source, this, _value)
            , "Unable to transfer offered token"
     );
   }
+
+  // !!! WARNING !!!
+  // 
+  //  BE SURE NOT TO APPROVE AN EXCHANGE TO MOVE YOUR TOKENS WITHOUT ALSO
+  //  RUNNING A TRANSFER OR APPROVAL IN THE SAME TRANSACTION SCRIPT, OR ANYONE
+  //  COULD STEAL THOSE COINS
+  //
+  // !!! WARNING !!!
 
   function exchangeTransfer( address _offeredToken
                            , address _desiredToken
@@ -64,9 +69,9 @@ contract CirclesPerson {
                            , address _destination 
                            , uint256 _value ) public {
 
-    _exchangePrerequisates(_source, _offeredToken, _desiredToken, _value);
+    _exchangePrerequisites(_offeredToken, _desiredToken, _source, _value);
 
-    require( TokenInterface(_desiredToken).transferFrom(this, _destination, _value)
+    require( ERC20Interface(_desiredToken).transfer(_destination, _value)
            , "Unable to transfer desired token"
     );
   }
@@ -77,9 +82,9 @@ contract CirclesPerson {
                           , address _destination
                           , uint256 _value ) public {
 
-    _exchangePrerequisates(_source, _offeredToken, _desiredToken, _value);
+    _exchangePrerequisites(_offeredToken, _desiredToken, _source, _value);
 
-    require( TokenInterface(_desiredToken).approve(_destination, _value)
+    require( ERC20Interface(_desiredToken).approve(_destination, _value)
            , "Unable to approve transfer of desired token"
     );
   }

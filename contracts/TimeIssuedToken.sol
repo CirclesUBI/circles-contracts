@@ -9,7 +9,7 @@ contract TimeIssuedToken is ERC20Interface {
   string public name;
   string public symbol;
   uint8 public decimals;
-  address person;               // Reciever of time-generated tokens
+  address public person;        // Reciever of time-generated tokens
   uint256 issuanceRate;         // Tokens generated per TODO milisecond?
   uint256 rateUpdatedTimestamp; // Last time issuanceRate was updated
 
@@ -24,15 +24,6 @@ contract TimeIssuedToken is ERC20Interface {
     symbol       = _symbol;
     decimals     = _decimals;
 
-  }
-
-  ///////
-  // Circles specific functions
-  ///////
-
-  function person() public view
-                    returns (address) {
-    return person;
   }
 
   ///////
