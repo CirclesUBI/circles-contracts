@@ -1,0 +1,7 @@
+name            ds-auth
+description     Simple access control pattern
+version         K75
+
+author          Nikolai Mushegian <nikolai@nexusdev.us>
+author          Daniel Brockman <daniel@brockman.se>
+license         Apache-2.0
