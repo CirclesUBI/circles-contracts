@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
 
-interface ERC20Interface {
+interface ERC20 {
   function name() external view returns (string);
   function symbol() external view returns (string);
   function decimals() external view returns (uint8);
