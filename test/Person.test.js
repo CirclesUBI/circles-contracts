@@ -2,8 +2,8 @@ const BigNumber = web3.BigNumber;
 const { assertRevert } = require('./helpers/assertRevert');
 const { latestTime } = require('./helpers/latestTime');
 const { increaseTimeTo, duration } = require('./helpers/increaseTime');
-const CirclesPerson = artifacts.require('CirclesPerson');
-const CirclesPersonFactory = artifacts.require('CirclesPersonFactory');
+const Person = artifacts.require('Person');
+const PersonFactory = artifacts.require('PersonFactory');
 const TimeIssuedToken = artifacts.require('TimeIssuedToken');
 
 require('chai')
@@ -11,13 +11,13 @@ require('chai')
   .should();
 
 const user = async (address, name, symbol) => {
-  factory = await CirclesPersonFactory.deployed();
+  factory = await PersonFactory.deployed();
   out = {};
 
   out.address = address;
   out.personAddress = await factory.build.call({from: address})
   out.result = await factory.build({from: address});
-  out.person = await CirclesPerson.at(out.personAddress);
+  out.person = await Person.at(out.personAddress);
   out.token = await TimeIssuedToken.new(
     out.person.address,
     1,
@@ -31,7 +31,7 @@ const user = async (address, name, symbol) => {
 };
 
 
-contract('CirclesPerson', accounts => {
+contract('Person', accounts => {
 
   let alice = {};
   let bob = {};

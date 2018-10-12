@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./interfaces/ERC20Interface.sol";
 import "../lib/ds-proxy/src/proxy.sol";
 
-contract CirclesPerson is DSProxy {
+contract Person is DSProxy {
 
   // TODO: Add limits?
   mapping (address => bool) public isEligableExchangeInput;
