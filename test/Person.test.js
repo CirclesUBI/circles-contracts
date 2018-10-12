@@ -3,32 +3,16 @@ const { assertRevert } = require('./helpers/assertRevert');
 const { latestTime } = require('./helpers/latestTime');
 const { increaseTimeTo, duration } = require('./helpers/increaseTime');
 const Person = artifacts.require('Person');
-const CirclesPersonFactory = artifacts.require('CirclesPersonFactory');
-const TimeIssuedToken = artifacts.require('TimeIssuedToken');
 
 require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
 const user = async (address, name, symbol) => {
-  factory = await PersonFactory.deployed();
   out = {};
 
-  const rate = 1;
-  const decimals = 18;
-
   out.address = address;
-  out.personAddress = await factory.build.call({ from: address });
-  out.result = await factory.build({ from: address });
-  out.person = await Person.at(out.personAddress);
-  out.token = await TimeIssuedToken.new(
-    out.person.address,
-    rate,
-    name,
-    symbol,
-    decimals,
-    { from: address }
-  );
+  out.person = await Person.new(name, symbol);
 
   return out;
 };
@@ -44,26 +28,39 @@ contract('Person', accounts => {
     carol = await user(accounts[2], 'carol', 'CRL');
 
     // everyone is rich :)
-    await increaseTimeTo((await latestTime()) + duration.years(10));
+    await increaseTimeTo((await latestTime()) + duration.days(1));
   });
 
-  describe('trust', () => {
-    it('reverts if called by non owner', async () => {
+  describe('trust/untrust', () => {
+    it('revert if called by non owner', async () => {
       assertRevert(
-        alice.person.trust(bob.token.address, true, {
+        alice.person.trust(bob.person.address, {
+          from: bob.address
+        })
+      );
+
+      assertRevert(
+        alice.person.untrust(bob.person.address, {
           from: bob.address
         })
       );
     });
 
-    it('updates the trusted mapping', async () => {
-      (await alice.person.trusted(bob.token.address)).should.equal(false);
+    it('update the trusted mapping', async () => {
+      const trusted = async () =>
+        await alice.person.trusted(bob.person.address);
 
-      await alice.person.trust(bob.token.address, true, {
+      (await trusted()).should.equal(false);
+
+      await alice.person.trust(bob.person.address, {
         from: alice.address
       });
+      (await trusted()).should.equal(true);
 
-      (await alice.person.trusted(bob.token.address)).should.equal(true);
+      await alice.person.untrust(bob.person.address, {
+        from: alice.address
+      });
+      (await trusted()).should.equal(false);
     });
   });
 
@@ -76,35 +73,14 @@ contract('Person', accounts => {
       //  Anyone can race to swap her tokens
 
       // Bob Trusts Alice
-      await bob.person.updateExchangeInput(alice.token.address, true, {
-        from: bob.address
-      });
-      await bob.person.updateExchangeOutput(bob.token.address, true, {
+      await bob.person.trust(alice.person.address, {
         from: bob.address
       });
 
-      // Alice allows B's exchange to withdraw her offered token
-      // TODO: GGGGRRRR, execute is a delegate call, which is NOT
-      //  what we want here. Gotta maybe upload this as a script..
-      await alice.person.execute(
-        alice.token.address,
-        await alice.token.contract.approve.getData(
-          bob.person.address,
-          web3.toWei(10)
-        ),
-        { from: alice.address }
-      );
-
-      // Alice exhanges 10 Alice Token for Bob Token
-      await alice.person.execute(
-        bob.person.address,
-        await bob.person.contract.exchangeTransfer.getData(
-          alice.token.address,
-          bob.token.address,
-          alice.person.address,
-          carol.person.address,
-          web3.toWei(10)
-        ),
+      // Alice transfers 10 Circles to Carol through Bob
+      await alice.person.exchangeTransfer(
+        [carol.person.address, bob.person.address],
+        web3.toWei(10),
         { from: alice.address }
       );
     });

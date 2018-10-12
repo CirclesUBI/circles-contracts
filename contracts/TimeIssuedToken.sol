@@ -2,9 +2,9 @@ pragma solidity ^0.4.24;
 
 // TODO: Ability to update issuance rate
 // TODO: Overflow protection
-import "./interfaces/ERC20Interface.sol";
+import "./interfaces/ERC20.sol";
 
-contract TimeIssuedToken is ERC20Interface {
+contract TimeIssuedToken is ERC20 {
 
   string public name;
   string public symbol;

@@ -1,58 +1,107 @@
 pragma solidity ^0.4.24;
 
-import "./interfaces/ERC20Interface.sol";
-import "../lib/ds-proxy/src/proxy.sol";
+import "../lib/ds-proxy/lib/ds-auth/src/auth.sol";
+import "./interfaces/ERC20.sol";
+import "./TimeIssuedToken.sol";
 
-contract Person is DSProxy {
+contract Person is DSAuth {
 
-  // TODO: Add limits?
-  mapping (address => bool) public trusted;
+    // ---------------------------------------------------------------------------------
+    // Token
 
-  constructor(address _dsProxyCacheAddr) DSProxy(_dsProxyCacheAddr) public {}
+    TimeIssuedToken public token; 
 
-  function trust( 
-    address _token, 
-    bool trust 
-  ) public auth returns (bool success) {
-    // can this fail?
-    trusted[_token] = trust;
-    return true;
-  }
+    constructor(
+        string name,
+        string symbol
+    ) public {
+        uint8 decimals = 18;
+        uint256 issuanceRate = 1;
 
-  function exchangeTransfer( 
-      address src, 
-      address given, 
-      address dest, 
-      address received, 
-      uint256 value 
-  ) public {
-    require(trusted[offered], "offered token is not trusted");
+        token = new TimeIssuedToken(this, issuanceRate, name, symbol, decimals);
+    }
 
-    require(given.transferFrom(src, this, value), "cannot transfer given token from src");
+    function token() public view returns (address) {
+        return address(token);
+    }
 
-    require(received.transferFrom(this, dest, value), "cannot transfer received token to dest");
-  }
+    // ---------------------------------------------------------------------------------
+    // Trust
 
-  // !!! WARNING !!!
-  // 
-  //  BE SURE NOT TO APPROVE AN EXCHANGE TO MOVE YOUR TOKENS WITHOUT ALSO
-  //  RUNNING A TRANSFER OR APPROVAL IN THE SAME TRANSACTION SCRIPT, OR ANYONE
-  //  COULD STEAL THOSE COINS
-  //
-  // !!! WARNING !!!
+    // TODO: Add limits?
+    mapping (address => bool) public trusted;
 
-  function exchangeApprove( 
-    address src, 
-    address given, 
-    address dest, 
-    address received, 
-    uint256 value 
-  ) public {
-    require(trusted[offered], "offered token is not trusted");
+    function trust( address person ) public auth {
+        trusted[person] = true;
+    }
 
-    require(given.transferFrom(src, this, value), "cannot transfer given token from src");
+    function untrust( address person ) public auth {
+        trusted[person] = false;
+    }
 
-    require(ERC(received).approve(dest, value), "Unable to approve transfer of desired token");
-  }
+    // ---------------------------------------------------------------------------------
+    // Exchange
+
+    function exchangeTransfer( 
+        address[] path, 
+        uint256 value 
+    ) public {
+        Person next = Person(path[path.length - 1]);
+        path = shrink(path);
+
+        require(token.approve(next, value));
+        require(next.exchangeTransfer(this, path, value));
+    }
+
+    function exchangeTransfer( 
+        address prev,
+        address[] path, 
+        uint256 value 
+    ) private {
+        if (path.length == 0) {
+            return;
+        }
+
+        require(trusted[prev], "offered token is not trusted");
+
+        Person next = Person(path[path.length - 1]);
+        path = shrink(path);
+
+        require(token.transferFrom(prev, this, value));
+        require(token.approve(next, value));
+        require(next.exchangeTransfer(this, path, value));
+    }
+
+    function shrink(address[] path) private returns (address[]) {
+        delete path[path.length - 1];
+        path.length--;
+        return path;
+    }
+
+
+    // !!! WARNING !!!
+    // 
+    //  BE SURE NOT TO APPROVE AN EXCHANGE TO MOVE YOUR TOKENS WITHOUT ALSO
+    //  RUNNING A TRANSFER OR APPROVAL IN THE SAME TRANSACTION SCRIPT, OR ANYONE
+    //  COULD STEAL THOSE COINS
+    //
+    // !!! WARNING !!!
+
+    // function exchangeApprove( 
+    //     address src, 
+    //     address given, 
+    //     address dest, 
+    //     address received, 
+    //     uint256 value 
+    // ) public {
+    //     require(trusted[given], 
+    //             "given token is not trusted");
+
+    //     require(ERC20(given).transferFrom(src, this, value), 
+    //             "cannot transfer given token from src");
+
+    //     require(ERC20(received).approve(dest, value), 
+    //             "Unable to approve transfer of desired token");
+    // }
 
 }
