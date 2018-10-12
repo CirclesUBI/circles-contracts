@@ -59,6 +59,7 @@ contract Person is DSAuth {
         uint256 value 
     ) private {
         if (path.length == 0) {
+            require(token.transferFrom(prev, this, value));
             return;
         }
 
