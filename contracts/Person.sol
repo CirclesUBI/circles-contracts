@@ -4,6 +4,8 @@ import "./interfaces/ERC20Interface.sol";
 import "../lib/ds-proxy/src/proxy.sol";
 
 contract Person is DSProxy {
+  // TODO: remove test event
+  event Hi(string);
 
   // TODO: Add limits?
   mapping (address => bool) public isEligableExchangeInput;

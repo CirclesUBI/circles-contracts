@@ -10,6 +10,9 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
+const solc = require('solc');
+const abi = require('ethereumjs-abi');
+
 const user = async (address, name, symbol) => {
   factory = await PersonFactory.deployed();
   out = {};
@@ -135,15 +138,40 @@ contract('Person', accounts => {
         from: bob.address
       });
 
+      let scriptSrc = `
+                    pragma solidity ^0.4.24;
+                    contract Script {
+                      event Hi(string);
+                      function execute() public {
+                        emit Hi("Hello World");
+                      }
+                    }
+                  `;
+
+      let compiled = solc.compile(scriptSrc, 1);
+      let bytecode = compiled.contracts[':Script'].bytecode;
+
+      let code = "0x" + bytecode;
+      console.log("code");
+      console.log(code);
+      let data = "0x61461954";
+      console.log("data");
+      console.log(data);
+
+      const { logs } = await alice.person.execute( code, data, { from: alice.address });
+      console.log(logs);
+
+      console.log(error);
+
       // Alice allows B's exchange to withdraw her offered token
       // TODO: GGGGRRRR, execute is a delegate call, which is NOT
       //  what we want here. Gotta maybe upload this as a script..
       /*
       await alice.person.execute( alice.token.address,
-	await alice.token.contract.approve.getData(
+        await alice.token.contract.approve.getData(
           bob.person.address,
-	  web3.toWei(10)
-	),
+          web3.toWei(10)
+        ),
         { from: alice.address }
       );
 
