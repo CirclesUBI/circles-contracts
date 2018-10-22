@@ -50,7 +50,7 @@ Pull in the contract that you want to test, in this case: [`ERC20DetailedMock.so
 contract('ERC20Detailed', function () {
 ```
 Don't know what `contract(` is, and confused about why we aren't using `describe(`? GO BACK AND READ WHAT I TOLD YOU TO READ: [Truffle "writing tests in javascript" page](https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript)
-```
+```javascript
   let detailedERC20 = null;
 
   const _name = 'My Detailed ERC20';
@@ -58,13 +58,13 @@ Don't know what `contract(` is, and confused about why we aren't using `describe
   const _decimals = 18;
 ```
 Just some javascript, do whatever your javascripting heart can dream up.
-```
+```javascript
   beforeEach(async function () {
     detailedERC20 = await ERC20DetailedMock.new(_name, _symbol, _decimals);
   });
 ```
 Some stuff that runs before each test. See [Mocha documentatoin](https://mochajs.org/#run-cycle-overview). In this case we are deploying a new `ERC20DetailedMock` contract.
-```
+```javascript
   it('has a name', async function () {
     (await detailedERC20.name()).should.be.equal(_name);
   });
