@@ -11,7 +11,6 @@ require('chai')
   .should();
 
 const solc = require('solc');
-const abi = require('ethereumjs-abi');
 
 const user = async (address, name, symbol) => {
   factory = await PersonFactory.deployed();
