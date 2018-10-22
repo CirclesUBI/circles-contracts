@@ -49,7 +49,7 @@ Pull in the contract that you want to test, in this case: [`ERC20DetailedMock.so
 ```javascript
 contract('ERC20Detailed', function () {
 ```
-Don't know what `contract(` is, and confused about why we aren't using `describe(`? GO BACK AND READ WHAT I TOLD YOU TO READ: [Truffle "writing tests in javascript" page](https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript)
+Don't know what `contract(` is, and confused about why we aren't using `describe(`? read this thing: [Truffle "writing tests in javascript" page](https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript)
 ```javascript
   let detailedERC20 = null;
 
