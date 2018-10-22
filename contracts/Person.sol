@@ -4,9 +4,6 @@ import "./interfaces/ERC20Interface.sol";
 import "../lib/ds-proxy/src/proxy.sol";
 
 contract Person is DSProxy {
-  // TODO: remove test event
-  event Hi(string);
-
   // TODO: Add limits?
   mapping (address => bool) public isEligableExchangeInput;
   // TODO: Add exchange rates?
@@ -42,19 +39,20 @@ contract Person is DSProxy {
       && isEligableExchangeOutput[_desiredToken];
   }
 
-  // TODO: modifier instead of internal function? 
-  function _exchangePrerequisites( address _offeredToken
+  modifier _exchangePrerequisites( address _offeredToken
                                  , address _desiredToken
-				 , address _source
-                                 , uint256 _value ) internal {
+                                 , address _source
+                                 , uint256 _value ) {
 
     require( isExchangeApproved(_offeredToken, _desiredToken)
            , "Offered token not accepted at this time"
     );
 
-    require( ERC20Interface(_offeredToken).transferFrom(_source, this, _value)
+    require( ERC20Interface(_offeredToken).transferFrom(_source, address(this), _value)
            , "Unable to transfer offered token"
     );
+
+    _;
   }
 
   // !!! WARNING !!!
@@ -69,26 +67,32 @@ contract Person is DSProxy {
                            , address _desiredToken
                            , address _source
                            , address _destination 
-                           , uint256 _value ) public {
-
-    _exchangePrerequisites(_offeredToken, _desiredToken, _source, _value);
+                           , uint256 _value )
+      public 
+      _exchangePrerequisites(_offeredToken, _desiredToken, _source, _value)
+      returns (bool success) {
 
     require( ERC20Interface(_desiredToken).transfer(_destination, _value)
            , "Unable to transfer desired token"
     );
+
+    return true;
   }
 
   function exchangeApprove( address _offeredToken
                           , address _desiredToken
                           , address _source
                           , address _destination
-                          , uint256 _value ) public {
-
-    _exchangePrerequisites(_offeredToken, _desiredToken, _source, _value);
+                          , uint256 _value )
+      public
+      _exchangePrerequisites(_offeredToken, _desiredToken, _source, _value) 
+      returns (bool success) {
 
     require( ERC20Interface(_desiredToken).approve(_destination, _value)
            , "Unable to approve transfer of desired token"
     );
+
+    return true;
   }
 
 }

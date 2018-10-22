@@ -140,53 +140,53 @@ contract('Person', accounts => {
 
       let scriptSrc = `
                     pragma solidity ^0.4.24;
+                    contract ERC20 {
+                      function approve(address, uint256) returns (bool);
+                    }
+                    contract Person {
+                      function exchangeTransfer( address _offeredToken
+                                               , address _desiredToken
+                                               , address _source
+                                               , address _destination
+                                               , uint256 _value )
+                                               returns (bool);
+                    }
                     contract Script {
-                      event Hi(string);
                       function execute() public {
-                        emit Hi("Hello World");
+                        require(
+                          ERC20(${alice.token.address}).approve(
+                            ${bob.person.address},
+                            10),
+                          "Approve failed"
+                        );
+                        require(
+                          Person(${bob.person.address}).exchangeTransfer(
+                            ${alice.token.address},
+                            ${bob.token.address},
+                            ${alice.person.address},
+                            ${carol.person.address},
+                            10),
+                          "ExchnageTransfer failed"
+                        );
                       }
                     }
                   `;
 
-      let compiled = solc.compile(scriptSrc, 1);
+      let compiled = solc.compile(scriptSrc);
       let bytecode = compiled.contracts[':Script'].bytecode;
 
       let code = "0x" + bytecode;
-      console.log("code");
-      console.log(code);
       let data = "0x61461954";
-      console.log("data");
-      console.log(data);
 
-      const { logs } = await alice.person.execute( code, data, { from: alice.address });
-      console.log(logs);
+      await alice.person.execute( code, data, { from: alice.address });
 
-      console.log(error);
+      (await alice.token.balanceOf(
+        bob.person.address
+      )).should.be.bignumber.equal(10);
 
-      // Alice allows B's exchange to withdraw her offered token
-      // TODO: GGGGRRRR, execute is a delegate call, which is NOT
-      //  what we want here. Gotta maybe upload this as a script..
-      /*
-      await alice.person.execute( alice.token.address,
-        await alice.token.contract.approve.getData(
-          bob.person.address,
-          web3.toWei(10)
-        ),
-        { from: alice.address }
-      );
-
-      // Alice exhanges 10 Alice Token for Bob Token
-      await alice.person.execute( bob.person.address,
-        await bob.person.contract.exchangeTransfer.getData(
-          alice.token.address,
-          bob.token.address,
-          alice.person.address,
-          carol.person.address,
-          web3.toWei(10)
-        ),
-        { from: alice.address }
-      );
-      */
+      (await bob.token.balanceOf(
+        carol.person.address
+      )).should.be.bignumber.equal(10);
 
     });
   });
