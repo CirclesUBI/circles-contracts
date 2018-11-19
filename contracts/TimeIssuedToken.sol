@@ -9,7 +9,7 @@ contract TimeIssuedToken is ERC20Interface {
   string public name;
   string public symbol;
   uint8 public decimals;
-  address person;               // Reciever of time-generated tokens
+  address public person;        // Reciever of time-generated tokens
   uint256 issuanceRate;         // Tokens generated per TODO milisecond?
   uint256 createdTimestamp; // Last time issuanceRate was updated
 
@@ -108,7 +108,7 @@ contract TimeIssuedToken is ERC20Interface {
 		       , uint256 _value ) public
 		                            returns (bool success) {
 
-    require( allowances[_from][msg.sender] >= _value, "Not authorized" );
+    require( allowances[_from][msg.sender] >= _value, "transferFrom: not authorized" );
     allowances[_from][msg.sender] = allowances[_from][msg.sender] - _value;
     return _transfer(_from, _to, _value);
   }
