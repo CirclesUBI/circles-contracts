@@ -1,8 +1,9 @@
 pragma solidity ^0.4.24;
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
-contract CirclesHub {
+contract CirclesHub is Ownable {
 
     uint constant LIMIT_EPOCH = 3600;
 
