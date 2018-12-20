@@ -72,7 +72,7 @@ contract Hub is Ownable {
 
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
-    function transferThrough(address[] nodes, address[] tokens, uint wad) note {
+    function transferThrough(address[] nodes, address[] tokens, uint wad) {
 
         uint tokenIndex = 0;
 
@@ -83,8 +83,8 @@ contract Hub is Ownable {
         for (var x = 0; x < nodes.length; x++) {
 
             var node = nodes[x];
-            // Cast token to a CirclesToken at tokenIndex
-            var token = CirclesToken(tokens[tokenIndex]);
+            // Cast token to a Token at tokenIndex
+            var token = Token(tokens[tokenIndex]);
 
             // If there exist a previous validator
             if (prevValidator != 0) {

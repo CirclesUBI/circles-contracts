@@ -11,10 +11,9 @@ contract Token is Ownable, StandardToken {
     uint public lastTouched;
     address public hub;
     HubI public controller;
-    //uint public issuanceRate = 1736111111111111; // ~1050 tokens per week
 
     constructor(address _hub) {
-        // super here, make sure to set standard vars
+        // super here, make sure to send standard vars
         hub = _hub;
         lastTouched = time();
     }
@@ -37,8 +36,8 @@ contract Token is Ownable, StandardToken {
     // the universal basic income part
     function update() {
         uint256 gift = look();
-        this.mint(cast(gift));
-        this.push(person, cast(gift));
+        //this.mint(cast(gift));
+        //this.push(owner, cast(gift));
         lastTouched = time();
     }
 
@@ -73,8 +72,8 @@ contract Token is Ownable, StandardToken {
     function balanceOf(address src) constant returns (uint256) {
         var balance = super.balanceOf(src);
 
-        if (src == person) {
-            balance = add(balance, look());
+        if (src == owner) {
+            balance = balance + look();
         }
 
         return balance;
