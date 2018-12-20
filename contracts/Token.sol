@@ -3,54 +3,54 @@ pragma solidity ^0.4.24;
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "./HubI.sol";
 
 contract CirclesToken is Ownable, StandardToken {
+    using SafeMath for uint256;
 
     uint public lastTouched;
     address public hub;
-    uint public factor = 1736111111111111; // ~1050 tokens per week
+    HubI public controller;
+    //uint public issuanceRate = 1736111111111111; // ~1050 tokens per week
 
     constructor(address _hub) {
+        // super here, make sure to set standard vars
         hub = _hub;
         lastTouched = time();
+    }
+
+    modifier onlyHub() {
+        require(msg.sender == hub);
+        _;
     }
 
     function time() returns (uint) {
         return block.timestamp;
     }
 
-    function look() returns (uint) {
-        var period = time() - lastTouched;
-        return factor * period;
+    function look() returns (uint256) {
+        uint256 period = time() - lastTouched;
+        uint256 issuance = HubI(hub).issuanceRate();
+        return issuance * period;
     }
 
     // the universal basic income part
     function update() {
-        var gift = look();
+        uint256 gift = look();
         this.mint(cast(gift));
         this.push(person, cast(gift));
         lastTouched = time();
     }
 
-    function transferFrom(
-        address src, address dst, uint wad
-    ) returns (bool) {
-        update();
+    function hubTransfer(
+        address from, address to, uint256 amount
+    ) onlyHub returns (bool) {
+        require(balances[from] >= amount);
+        // maybe update() here?
 
-        // TokenManager doesn't need approval to transferFrom
-        if (msg.sender == owner) {
-            assert(_balances[src] >= wad);
-        
-            _balances[src] = sub(_balances[src], wad);
-            _balances[dst] = add(_balances[dst], wad);
-        
-            Transfer(src, dst, wad);
-        
-            return true;
-        } else {
-            return super.transferFrom(src, dst, wad);
-        }
-        
+        balances[from] = balances[from] - amount;
+        balances[to] = balances[to] + amount;
+        emit Transfer(from, to, amount);
     }
 
     function transfer(address dst, uint wad) returns (bool) {
