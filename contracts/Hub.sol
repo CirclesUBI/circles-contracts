@@ -4,6 +4,9 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract CirclesHub is Ownable {
+    using SafeMath for uint256;
+
+    uint256 public issuanceRate = 1736111111111111; // ~1050 tokens per week
 
     uint constant LIMIT_EPOCH = 3600;
 
