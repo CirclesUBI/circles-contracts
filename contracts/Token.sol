@@ -5,7 +5,7 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "./HubI.sol";
 
-contract CirclesToken is Ownable, StandardToken {
+contract Token is Ownable, StandardToken {
     using SafeMath for uint256;
 
     uint public lastTouched;
