@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.24
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
@@ -10,8 +10,8 @@ import "./Token.sol";
 //role of validators
 //registrar to be able to change hub?
 //if we do a registrar to be able to swap out hub, do we care about token logic?
-//standard token params
 //finish update function in token
+//organization is a userToToken that has no UBI
 
 
 contract Hub is Ownable {
@@ -19,7 +19,8 @@ contract Hub is Ownable {
 
     uint256 public issuanceRate = 1736111111111111; // ~1050 tokens per week
     //unint256 public demurrageRate = ??;
-    uint256 public defaultDecimals = 18;
+    uint256 public decimals = 18;
+    string public symbol = 'CRC';
 
     // do users manager their own token weights, and is this the best way to handle this param?
     uint constant LIMIT_EPOCH = 3600;
@@ -44,11 +45,11 @@ contract Hub is Ownable {
     function time() returns (uint) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function signup() external returns (bool) {
+    function signup(string _name) external returns (bool) {
         assert(address(userToToken[msg.sender]) == 0);
 
         // need to pass in default params here ...
-        Token token = new Token(msg.sender);
+        Token token = new Token(msg.sender, _name);
         userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
 

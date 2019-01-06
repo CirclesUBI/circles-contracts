@@ -8,13 +8,15 @@ import "./HubI.sol";
 contract Token is Ownable, StandardToken {
     using SafeMath for uint256;
 
+    string public constant name;
     uint public lastTouched;
     address public hub;
     HubI public controller;
 
-    constructor(address _hub) {
-        // super here, make sure to send standard vars
-        hub = _hub;
+    constructor(address _hub, string _name) {
+        // no need to super(), StandardToken has no constructors
+        name = _name;
+	hub = _hub;
         lastTouched = time();
     }
 
@@ -25,6 +27,14 @@ contract Token is Ownable, StandardToken {
 
     function time() returns (uint) {
         return block.timestamp;
+    }
+
+    function symbol() public constant returns (string) {
+        return HubI(hub).symbol();
+    }
+
+    function decimals() public constant returns (uint8) {
+        return HubI(hub).decimals();
     }
 
     function look() returns (uint256) {
