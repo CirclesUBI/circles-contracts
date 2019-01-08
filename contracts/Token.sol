@@ -13,7 +13,7 @@ contract Token is Ownable, StandardToken {
     address public hub;
     HubI public controller;
 
-    constructor(address _hub, string _name) {
+    constructor(address _hub, string _name) public {
         // no need to super(), StandardToken has no constructors
         name = _name;
 	hub = _hub;
@@ -25,33 +25,33 @@ contract Token is Ownable, StandardToken {
         _;
     }
 
-    function time() returns (uint) {
+    function time() internal returns (uint) {
         return block.timestamp;
     }
 
-    function symbol() public constant returns (string) {
+    function symbol() public view returns (string) {
         return HubI(hub).symbol();
     }
 
-    function decimals() public constant returns (uint8) {
+    function decimals() public view returns (uint8) {
         return HubI(hub).decimals();
     }
 
-    function look() returns (uint256) {
+    function look() public view returns (uint256) {
         uint256 period = time() - lastTouched;
         uint256 issuance = HubI(hub).issuanceRate();
         return issuance * period;
     }
 
     // the universal basic income part
-    function update() {
+    function update() public {
         uint256 gift = look();
         //this.mint(cast(gift));
         //this.push(owner, cast(gift));
         lastTouched = time();
     }
 
-    function hubTransfer(
+    function hubTransfer public (
         address from, address to, uint256 amount
     ) onlyHub returns (bool) {
         require(balances[from] >= amount);
@@ -62,7 +62,7 @@ contract Token is Ownable, StandardToken {
         emit Transfer(from, to, amount);
     }
 
-    function transfer(address dst, uint wad) returns (bool) {
+    function transfer(address dst, uint wad) public returns (bool) {
         if (msg.sender != address(this)) {
             update();
         }
@@ -70,7 +70,7 @@ contract Token is Ownable, StandardToken {
     }
 
 
-    function approve(address guy, uint wad) returns (bool) {
+    function approve(address guy, uint wad) public returns (bool) {
         update();
         return super.approve(guy, wad);
     }
@@ -88,4 +88,4 @@ contract Token is Ownable, StandardToken {
 
         return balance;
     }
-}
+i
