@@ -5,24 +5,45 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "./HubI.sol";
 
-contract Token is Ownable, StandardToken {
+contract Token is StandardToken {
     using SafeMath for uint256;
 
     string public constant name;
     uint public lastTouched;
     address public hub;
     HubI public controller;
+    address public owner;
+    uint lastTouched;
 
-    constructor(address _hub, string _name) public {
-        // no need to super(), StandardToken has no constructors
-        name = _name;
-	hub = _hub;
+    event TokenIssuance(address indexed amount);
+
+    modifier onlyHub() {
+	 require(msg.sender == hub);
+         _;                                                                                        }     
+
+    modifier onlyOwner() {
+	require(msg.sender == owner);
+	_;
+    }
+
+    constructor(address _owner, string _name) public {
+	require(_owner != 0)
+	name = _name;
+	owner = _owner;
+	hub = msg.sender;
         lastTouched = time();
     }
 
-    modifier onlyHub() {
-        require(msg.sender == hub);
-        _;
+    function changeOwner(address _newOwner) public onlyOwner returns (bool) {
+	require(_newOwner != 0);
+	owner = _newOwner;
+	return true;
+    }
+
+    function updateHub(address _hub) public onlyOwner returns (bool) {
+        require(_hub != 0);
+	hub = _hub;
+	return true;
     }
 
     function time() internal returns (uint) {
@@ -68,7 +89,6 @@ contract Token is Ownable, StandardToken {
         }
         return super.transfer(dst, wad);
     }
-
 
     function approve(address guy, uint wad) public returns (bool) {
         update();

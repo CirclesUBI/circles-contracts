@@ -4,21 +4,19 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./Token.sol";
 
-//update issuance
-//update demurrage
 //update limit_epoch
 //role of validators
-//registrar to be able to change hub?
-//if we do a registrar to be able to swap out hub, do we care about token logic?
+//hubfactory?
 //finish update function in token
 //organization is a userToToken that has no UBI
-
+//event for token issuance
+//what should initial demurrage rate be? And initial issuance?
 
 contract Hub is Ownable {
     using SafeMath for uint256;
 
     uint256 public issuanceRate = 1736111111111111; // ~1050 tokens per week
-    //unint256 public demurrageRate = ??;
+    unint256 public demurrageRate = 0;
     uint256 public decimals = 18;
     string public symbol = 'CRC';
 
@@ -40,6 +38,17 @@ contract Hub is Ownable {
     event Trust(address indexed from, address indexed to, uint256 limit);
     event RegisterValidator(address indexed validator);
 
+    function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
+        // safety checks on issuance go here
+	issuanceRate = _issuance;
+	return true;
+    }
+
+    function updateDemurrage(uint256 _demurrage) public onlyOwner returns (bool) {
+        // safety checks on demurrage go here
+	demurrageRate = _demurrage;
+        return true;
+    }
 
 
     function time() public view returns (uint) { return block.timestamp; }
