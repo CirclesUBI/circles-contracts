@@ -8,15 +8,15 @@ import "./Token.sol";
 //role of validators
 //hubfactory?
 //finish update function in token
-//organization is a userToToken that has no UBI
-//event for token issuance
 //what should initial demurrage rate be? And initial issuance?
+
+
 
 contract Hub is Ownable {
     using SafeMath for uint256;
 
     uint256 public issuanceRate = 1736111111111111; // ~1050 tokens per week
-    unint256 public demurrageRate = 0;
+    uint256 public demurrageRate = 0;
     uint256 public decimals = 18;
     string public symbol = 'CRC';
 
@@ -31,6 +31,7 @@ contract Hub is Ownable {
 
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
+    mapping (address => bool) public isOrganization;
     mapping (address => bool) public isValidator;
     mapping (address => mapping (address => EdgeWeight)) public edges;
 
@@ -55,11 +56,11 @@ contract Hub is Ownable {
 
     // No exit allowed. Once you create a personal token, you're in for good.
     function signup(string _name) external returns (bool) {
-        assert(address(userToToken[msg.sender]) == 0);
+        require(address(userToToken[msg.sender]) = 0);
+	require(!isOrganization[msg.sender]);
 
-        // need to pass in default params here ...
         Token token = new Token(msg.sender, _name);
-        userToToken[msg.sender] = token;
+	userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
 
         emit Signup(msg.sender);
@@ -75,7 +76,8 @@ contract Hub is Ownable {
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address toTrust, bool yes, uint limit) public {
-        assert(address(tokenToUser[toTrust]) != 0 || isValidator[toTrust]);
+        require(address(tokenToUser[toTrust]) != 0 || isValidator[toTrust]);
+	require(!isOrganization[toTrust]);
         edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(msg.sender, toTrust, limit);
     }
