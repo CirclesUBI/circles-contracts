@@ -22,7 +22,7 @@ contract Hub is Ownable {
     uint256 public decimals = 18;
     string public symbol = 'CRC';
 
-    // do users manager their own token weights, and is this the best way to handle this param?
+    // do users manage their own token weights, and is this the best way to handle this param?
     uint constant LIMIT_EPOCH = 3600;
 
     struct EdgeWeight {
@@ -33,7 +33,7 @@ contract Hub is Ownable {
 
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
-    mapping (address => bool) isValidator;
+    mapping (address => bool) public isValidator;
     mapping (address => mapping (address => EdgeWeight)) public edges;
 
     event Signup(address indexed user);
@@ -42,7 +42,7 @@ contract Hub is Ownable {
 
 
 
-    function time() returns (uint) { return block.timestamp; }
+    function time() public view returns (uint) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
     function signup(string _name) external returns (bool) {
@@ -65,7 +65,7 @@ contract Hub is Ownable {
 
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
-    function trust(address toTrust, bool yes, uint limit) {
+    function trust(address toTrust, bool yes, uint limit) public {
         assert(address(tokenToUser[toTrust]) != 0 || isValidator[toTrust]);
         edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(msg.sender, toTrust, limit);
@@ -73,7 +73,7 @@ contract Hub is Ownable {
 
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
-    function transferThrough(address[] nodes, address[] tokens, uint wad) {
+    function transferThrough(address[] nodes, address[] tokens, uint wad) public {
 
         uint tokenIndex = 0;
 
