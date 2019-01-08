@@ -70,6 +70,7 @@ contract Token is StandardToken {
         //this.mint(cast(gift));
         //this.push(owner, cast(gift));
         lastTouched = time();
+        emit TokenIssuance(gift);
     }
 
     function hubTransfer public (
