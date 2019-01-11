@@ -1,49 +1,48 @@
 pragma solidity ^0.4.24;
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
 import "./HubI.sol";
 
 contract Token is StandardToken {
     using SafeMath for uint256;
 
-    string public constant name;
+    string public name;
     uint public lastTouched;
     address public hub;
     HubI public controller;
     address public owner;
-    uint lastTouched;
 
-    event TokenIssuance(address indexed amount);
+    event TokenIssuance(uint256 amount);
 
     modifier onlyHub() {
-	 require(msg.sender == hub);
-         _;                                                                                        }     
+	    require(msg.sender == hub);
+        _;
+    }     
 
     modifier onlyOwner() {
-	require(msg.sender == owner);
-	_;
+	    require(msg.sender == owner);
+	    _;
     }
 
     constructor(address _owner, string _name) public {
-	require(_owner != 0)
-	name = _name;
-	owner = _owner;
-	hub = msg.sender;
+	    require(_owner != 0);
+	    name = _name;
+	    owner = _owner;
+	    hub = msg.sender;
         lastTouched = time();
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-	require(_newOwner != 0);
-	owner = _newOwner;
-	return true;
+	    require(_newOwner != 0);
+	    owner = _newOwner;
+	    return true;
     }
 
     function updateHub(address _hub) public onlyOwner returns (bool) {
         require(_hub != 0);
-	hub = _hub;
-	return true;
+	    hub = _hub;
+	    return true;
     }
 
     function time() internal returns (uint) {
@@ -73,9 +72,9 @@ contract Token is StandardToken {
         emit TokenIssuance(gift);
     }
 
-    function hubTransfer public (
+    function hubTransfer(
         address from, address to, uint256 amount
-    ) onlyHub returns (bool) {
+    ) public onlyHub returns (bool) {
         require(balances[from] >= amount);
         // maybe update() here?
 
@@ -109,4 +108,4 @@ contract Token is StandardToken {
 
         return balance;
     }
-i
+}
