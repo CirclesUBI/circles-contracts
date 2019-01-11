@@ -4,12 +4,10 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./Token.sol";
 
-//update limit_epoch
 //role of validators
 //hubfactory?
 //finish update function in token
 //what should initial demurrage rate be? And initial issuance?
-
 
 
 contract Hub is Ownable {
@@ -20,13 +18,12 @@ contract Hub is Ownable {
     uint256 public decimals = 18;
     string public symbol = 'CRC';
 
-    // do users manage their own token weights, and is this the best way to handle this param?
-    uint constant LIMIT_EPOCH = 3600;
+    uint256 public LIMIT_EPOCH = 3600;
 
     struct EdgeWeight {
-        uint limit;
-        uint value;
-        uint lastTouched;
+        uint256 limit;
+        uint256 value;
+        uint256 lastTouched;
     }
 
     mapping (address => Token) public userToToken;
@@ -38,6 +35,7 @@ contract Hub is Ownable {
     event Signup(address indexed user);
     event Trust(address indexed from, address indexed to, uint256 limit);
     event RegisterValidator(address indexed validator);
+    event UpdateTrustLimit(address indexed from, address indexed to, uint256 limit);
 
     function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
         // safety checks on issuance go here
@@ -51,6 +49,17 @@ contract Hub is Ownable {
         return true;
     }
 
+    function updateLimitEpoch(uint256 _limitEpoch) public onlyOwner returns (bool) {
+        //safetyyyy
+	LIMIT_EPOCH = _limitEpoch;
+	return true;
+    }
+
+    function updateSymbol(string _symbol) public onlyOwner returns (bool) {
+	//maybe we don't need to validate this one?
+	symbol = _symbol;
+	return true;
+    }
 
     function time() public view returns (uint) { return block.timestamp; }
 
@@ -80,6 +89,13 @@ contract Hub is Ownable {
 	require(!isOrganization[toTrust]);
         edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(msg.sender, toTrust, limit);
+    }
+
+    function updateTrustLimit(address toUpdate, uint256 limit) public {
+        require(address(tokenToUser[toTrust]));
+	require(edges[msg.sender][toUpdate]);
+	edges[msg.sender][toUpdate] = EdgeWeight(_limit, 0, time());
+        emit UpdateTrustLimit(msg.sender, toUpdate, limit);	
     }
 
     // Starts with msg.sender then ,
