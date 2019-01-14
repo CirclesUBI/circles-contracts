@@ -1,10 +1,10 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
 
 interface ERC20Interface {
-  function name() external view returns (string);
-  function symbol() external view returns (string);
+  function name() external view returns (string memory);
+  function symbol() external view returns (string memory);
   function decimals() external view returns (uint8);
   function totalSupply() external view returns (uint256);
   function balanceOf(address _owner) external view returns (uint256 balance);

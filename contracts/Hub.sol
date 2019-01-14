@@ -1,6 +1,6 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Token.sol";
 
 //role of validators  
@@ -42,8 +42,8 @@ contract Hub {
 	    _;
     }
 
-    constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string _symbol, uint256 _limitEpoch) public {
-        require (_owner != 0);
+    constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch) public {
+        require (_owner != address(0));
 	    owner = _owner;
 	    issuanceRate = _issuance;
 	    demurrageRate = _demurrage;
@@ -53,7 +53,7 @@ contract Hub {
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-        require(_newOwner != 0);
+        require(_newOwner != address(0));
 	    owner = _newOwner;
 	    return true;
     }
@@ -76,7 +76,7 @@ contract Hub {
 	    return true;
     }
 
-    function updateSymbol(string _symbol) public onlyOwner returns (bool) {
+    function updateSymbol(string memory _symbol) public onlyOwner returns (bool) {
 	    //maybe we don't need to validate this one?
 	    symbol = _symbol;
 	    return true;
@@ -85,8 +85,8 @@ contract Hub {
     function time() public view returns (uint) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function signup(string _name) external returns (bool) {
-        require(address(userToToken[msg.sender]) == 0);
+    function signup(string calldata _name) external returns (bool) {
+        require(address(userToToken[msg.sender]) == address(0));
 	    require(!isOrganization[msg.sender]);
 
         Token token = new Token(msg.sender, _name);
@@ -106,22 +106,22 @@ contract Hub {
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address toTrust, bool yes, uint limit) public {
-        require(address(tokenToUser[toTrust]) != 0 || isValidator[toTrust]);
+        require(address(tokenToUser[toTrust]) != address(0) || isValidator[toTrust]);
 	    require(!isOrganization[toTrust]);
         edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(msg.sender, toTrust, limit);
     }
 
     function updateTrustLimit(address toUpdate, uint256 limit) public {
-        require(address(tokenToUser[toUpdate]) != 0);
-	    //require(edges[msg.sender][toUpdate] != 0);
+        require(address(tokenToUser[toUpdate]) != address(0));
+	    //require(edges[msg.sender][toUpdate] != address(0));
 	    edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
         emit UpdateTrustLimit(msg.sender, toUpdate, limit);	
     }
 
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
-    function transferThrough(address[] nodes, address[] tokens, uint wad) public {
+    function transferThrough(address[] memory nodes, address[] memory tokens, uint wad) public {
 
         uint tokenIndex = 0;
 
@@ -131,17 +131,17 @@ contract Hub {
 
         for (uint256 x = 0; x < nodes.length; x++) {
 
-            var node = nodes[x];
+            address node = nodes[x];
             // Cast token to a Token at tokenIndex
-            var token = Token(tokens[tokenIndex]);
+            Token token = Token(tokens[tokenIndex]);
 
             // If there exist a previous validator
-            if (prevValidator != 0) {
+            if (prevValidator != address(0)) {
                 prevNode = prevValidator;
-                prevValidator = 0;
+                prevValidator = address(0);
             }
             else {
-                prevNode = token;
+                prevNode = address(token);
             }
             // edges[node][prevNode]
             // assert that a valid trust relationship exists
@@ -149,8 +149,8 @@ contract Hub {
 
             // If the last time the relationship was touched is less than the limit epoch
             // add the current value of the edge to the transaction value and update the current value
-            edges[node][prevNode].value = time() - edges[node][prevNode].lastTouched < LIMIT_EPOCH
-                ? edges[node][prevNode].value + wad
+            edges[node][prevNode].value = time().sub(edges[node][prevNode].lastTouched) < LIMIT_EPOCH
+                ? edges[node][prevNode].value.add(wad)
                 : wad;
 
             // update lastTOuched to reflect this transaction
@@ -169,7 +169,7 @@ contract Hub {
                 // from the current node to the msg.sender
                 if (tokenIndex + 1 < tokens.length) {
 
-                    var nextToken = Token(tokens[tokenIndex + 1]);
+                    Token nextToken = Token(tokens[tokenIndex + 1]);
                     nextToken.transferFrom(node, msg.sender, wad);
                 }
                 tokenIndex++;
