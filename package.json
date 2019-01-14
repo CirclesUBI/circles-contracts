@@ -17,5 +17,9 @@
     "chai-bignumber": "^2.0.2",
     "ganache-cli": "^6.1.8",
     "truffle": "^4.1.14"
+  },
+  "dependencies": {
+    "openzeppelin-solidity": "^2.0.0",
+    "zeppelin-solidity": "^1.12.0"
   }
 }
