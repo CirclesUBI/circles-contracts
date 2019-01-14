@@ -1,10 +1,10 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "./HubI.sol";
 
-contract Token is StandardToken {
+contract Token is ERC20 {
     using SafeMath for uint256;
 
     string public name;
@@ -25,8 +25,8 @@ contract Token is StandardToken {
 	    _;
     }
 
-    constructor(address _owner, string _name) public {
-	    require(_owner != 0);
+    constructor(address _owner, string memory _name) public {
+	    require(_owner != address(0));
 	    name = _name;
 	    owner = _owner;
 	    hub = msg.sender;
@@ -34,22 +34,22 @@ contract Token is StandardToken {
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-	    require(_newOwner != 0);
+	    require(_newOwner != address(0));
 	    owner = _newOwner;
 	    return true;
     }
 
     function updateHub(address _hub) public onlyOwner returns (bool) {
-        require(_hub != 0);
+        require(_hub != address(0));
 	    hub = _hub;
 	    return true;
     }
 
-    function time() internal returns (uint) {
+    function time() internal view returns (uint) {
         return block.timestamp;
     }
 
-    function symbol() public view returns (string) {
+    function symbol() public view returns (string memory) {
         return HubI(hub).symbol();
     }
 
@@ -58,9 +58,9 @@ contract Token is StandardToken {
     }
 
     function look() public view returns (uint256) {
-        uint256 period = time() - lastTouched;
+        uint256 period = time().sub(lastTouched);
         uint256 issuance = HubI(hub).issuanceRate();
-        return issuance * period;
+        return issuance.mul(period);
     }
 
     // the universal basic income part
@@ -75,12 +75,7 @@ contract Token is StandardToken {
     function hubTransfer(
         address from, address to, uint256 amount
     ) public onlyHub returns (bool) {
-        require(balances[from] >= amount);
-        // maybe update() here?
-
-        balances[from] = balances[from] - amount;
-        balances[to] = balances[to] + amount;
-        emit Transfer(from, to, amount);
+        _transfer(from, to, amount);
     }
 
     function transfer(address dst, uint wad) public returns (bool) {
@@ -95,15 +90,15 @@ contract Token is StandardToken {
         return super.approve(guy, wad);
     }
 
-    function totalSupply() view returns (uint256) {
-        return super.totalSupply() + look();
+    function totalSupply() public view returns (uint256) {
+        return super.totalSupply().add(look());
     }
 
-    function balanceOf(address src) view returns (uint256) {
-        var balance = super.balanceOf(src);
+    function balanceOf(address src) public view returns (uint256) {
+        uint256 balance = super.balanceOf(src);
 
         if (src == owner) {
-            balance = balance + look();
+            balance = balance.add(look());
         }
 
         return balance;
