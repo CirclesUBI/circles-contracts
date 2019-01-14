@@ -95,11 +95,11 @@ contract Token is StandardToken {
         return super.approve(guy, wad);
     }
 
-    function totalSupply() constant returns (uint256) {
+    function totalSupply() view returns (uint256) {
         return super.totalSupply() + look();
     }
 
-    function balanceOf(address src) constant returns (uint256) {
+    function balanceOf(address src) view returns (uint256) {
         var balance = super.balanceOf(src);
 
         if (src == owner) {
