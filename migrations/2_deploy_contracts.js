@@ -1,5 +1,5 @@
-var PersonFactory = artifacts.require("./PersonFactory.sol");
+var HubFactory = artifacts.require("./HubFactory.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(PersonFactory);
+  deployer.deploy(HubFactory);
 };
