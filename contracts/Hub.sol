@@ -2,11 +2,17 @@ pragma solidity ^0.5.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Token.sol";
+import "./Organization.sol";
 
 //role of validators  
 //hubfactory?
 //finish update function in token
 //what should initial demurrage rate be? And initial issuance?
+//more events in Token
+//parallel transfer helper
+//organization can tranfer, and transitively transfer
+//abstract ownership utils?
+//organization signup
 
 contract Hub {
     using SafeMath for uint256;

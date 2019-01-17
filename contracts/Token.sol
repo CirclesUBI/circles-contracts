@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "./HubI.sol";
+import "./interfaces/HubI.sol";
 
 contract Token is ERC20 {
     using SafeMath for uint256;
