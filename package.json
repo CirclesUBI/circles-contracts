@@ -19,6 +19,8 @@
     "truffle": "^4.1.14"
   },
   "dependencies": {
+    "bignumber.js": "^8.0.2",
+    "chai-bn": "^0.1.1",
     "openzeppelin-solidity": "2.1.1"
   }
 }

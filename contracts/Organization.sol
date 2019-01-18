@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./interfaces/ERC20Interface";
+import "./interfaces/ERC20Interface.sol";
 import "./interfaces/HubI.sol";
 
 contract Organization {
