@@ -15,9 +15,10 @@ contract('Hub', ([_, systemOwner, attacker]) => {
   const _decimals = new BigNumber(18);
   const _symbol = 'CRC';
   const _limitEpoch = new BigNumber(3600);
+  const _initialPayout = new BigNumber(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch);
+    hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch, _initialPayout);
   });
 
   it('has the correct owner', async () => {
