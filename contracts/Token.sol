@@ -25,12 +25,13 @@ contract Token is ERC20 {
 	    _;
     }
 
-    constructor(address _owner, string memory _name) public {
+    constructor(address _owner, string memory _name, uint256 initialPayout) public {
 	    require(_owner != address(0));
 	    name = _name;
 	    owner = _owner;
 	    hub = msg.sender;
         lastTouched = time();
+        _mint(_owner, initialPayout);
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
