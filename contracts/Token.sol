@@ -92,7 +92,7 @@ contract Token is ERC20 {
     }
 
     function totalSupply() public view returns (uint256) {
-        return super.totalSupply().add(look());
+        return super.totalSupply();//.add(look());
     }
 
     function balanceOf(address src) public view returns (uint256) {
