@@ -87,7 +87,7 @@ contract Token is ERC20 {
     }
 
     function approve(address guy, uint wad) public returns (bool) {
-        update();
+        //update();
         return super.approve(guy, wad);
     }
 
