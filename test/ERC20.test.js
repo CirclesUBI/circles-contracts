@@ -33,161 +33,161 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch, _initialPayout);
     const signup = await hub.signup(_tokenName, { from: owner });// owner, 100);
-    //console.log(signup.logs[0].args.token);
     token = await Token.at(signup.logs[0].args.token);
   });
 
   describe('total supply', () => {
     it('returns the total amount of tokens', async () => {
-      //console.log(token);
       (await token.totalSupply()).should.be.bignumber.equal(new BigNumber(100));
     });
   });
 
-  // describe('balanceOf', function () {
-  //   describe('when the requested account has no tokens', function () {
-  //     it('returns zero', async function () {
-  //       (await this.token.balanceOf(anotherAccount)).should.be.bignumber.equal(0);
-  //     });
-  //   });
-
-  //   describe('when the requested account has some tokens', function () {
-  //     it('returns the total amount of tokens', async function () {
-  //       (await this.token.balanceOf(owner)).should.be.bignumber.equal(100);
-  //     });
-  //   });
-  // });
-
-  // describe('transfer', function () {
-  //   describe('when the recipient is not the zero address', function () {
-  //     const to = recipient;
-
-  //     describe('when the sender does not have enough balance', function () {
-  //       const amount = 101;
-
-  //       it('reverts', async function () {
-  //         await assertRevert(this.token.transfer(to, amount, { from: owner }));
-  //       });
-  //     });
-
-  //     describe('when the sender has enough balance', function () {
-  //       const amount = 100;
-
-  //       it('transfers the requested amount', async function () {
-  //         await this.token.transfer(to, amount, { from: owner });
-
-  //         (await this.token.balanceOf(owner)).should.be.bignumber.equal(0);
-
-  //         (await this.token.balanceOf(to)).should.be.bignumber.equal(amount);
-  //       });
-
-  //       it('emits a transfer event', async function () {
-  //         const { logs } = await this.token.transfer(to, amount, { from: owner });
-
-  //         const event = expectEvent.inLogs(logs, 'Transfer', {
-  //           _from: owner,
-  //           _to: to,
-  //         });
-
-  //         event.args._value.should.be.bignumber.equal(amount);
-  //       });
-  //     });
-  //   });
-
-    // describe('when the recipient is the zero address', function () {
-    //   const to = ZERO_ADDRESS;
-/* TODO? Not in the standard
-      it('reverts', async function () {
-        await assertRevert(this.token.transfer(to, 100, { from: owner }));
+  describe('balanceOf', () => {
+    describe('when the requested account has no tokens', () => {
+      it('returns zero', async () => {
+        (await token.balanceOf(anotherAccount)).should.be.bignumber.equal(new BigNumber(0));
       });
-*/
-  //   });
-  // });
+    });
 
-  // describe('approve', function () {
-  //   describe('when the spender is not the zero address', function () {
-  //     const spender = recipient;
-
-  //     describe('when the sender has enough balance', function () {
-  //       const amount = 100;
-
-  //       it('emits an approval event', async function () {
-  //         const { logs } = await this.token.approve(spender, amount, { from: owner });
-
-  //         logs.length.should.equal(1);
-  //         logs[0].event.should.equal('Approval');
-  //         logs[0].args._owner.should.equal(owner);
-  //         logs[0].args._spender.should.equal(spender);
-  //         logs[0].args._value.should.be.bignumber.equal(amount);
-  //       });
-
-  //       describe('when there was no approved amount before', function () {
-  //         it('approves the requested amount', async function () {
-  //           await this.token.approve(spender, amount, { from: owner });
-
-  //           (await this.token.allowance(owner, spender)).should.be.bignumber.equal(amount);
-  //         });
-  //       });
-
-  //       describe('when the spender had an approved amount', function () {
-  //         beforeEach(async function () {
-  //           await this.token.approve(spender, 1, { from: owner });
-  //         });
-
-  //         it('approves the requested amount and replaces the previous one', async function () {
-  //           await this.token.approve(spender, amount, { from: owner });
-
-  //           (await this.token.allowance(owner, spender)).should.be.bignumber.equal(amount);
-  //         });
-  //       });
-  //     });
-
-    //   describe('when the sender does not have enough balance', function () {
-    //     const amount = 101;
-
-    //     it('emits an approval event', async function () {
-    //       const { logs } = await this.token.approve(spender, amount, { from: owner });
-
-    //       logs.length.should.equal(1);
-    //       logs[0].event.should.equal('Approval');
-    //       logs[0].args._owner.should.equal(owner);
-    //       logs[0].args._spender.should.equal(spender);
-    //       logs[0].args._value.should.be.bignumber.equal(amount);
-    //     });
-
-    //     describe('when there was no approved amount before', function () {
-    //       it('approves the requested amount', async function () {
-    //         await this.token.approve(spender, amount, { from: owner });
-
-    //         (await this.token.allowance(owner, spender)).should.be.bignumber.equal(amount);
-    //       });
-    //     });
-
-    //     describe('when the spender had an approved amount', function () {
-    //       beforeEach(async function () {
-    //         await this.token.approve(spender, 1, { from: owner });
-    //       });
-
-    //       it('approves the requested amount and replaces the previous one', async function () {
-    //         await this.token.approve(spender, amount, { from: owner });
-
-    //         (await this.token.allowance(owner, spender)).should.be.bignumber.equal(amount);
-    //       });
-    //     });
-    //   });
-    // });
-
-    // describe('when the spender is the zero address', function () {
-    //   const amount = 100;
-    //   const spender = ZERO_ADDRESS;
-
-/* TODO? Not in the standard
-      it('reverts', async function () {
-        await assertRevert(this.token.approve(spender, amount, { from: owner }));
+    describe('when the requested account has some tokens', () => {
+      it('returns the total amount of tokens', async () => {
+        (await token.balanceOf(owner)).should.be.bignumber.equal(new BigNumber(100));
       });
-*/
-  //   });
-  // });
+    });
+  });
+
+  describe('transfer', () => {
+    describe('when the recipient is not the zero address', () => {
+      const to = recipient;
+
+      describe('when the sender does not have enough balance', () => {
+        const amount = new BigNumber(101);
+
+        it('reverts', async () => {
+          await assertRevert(token.transfer(to, amount, { from: owner }));
+        });
+      });
+
+      describe('when the sender has enough balance', () => {
+        const amount = new BigNumber(100);
+
+        it('transfers the requested amount', async () => {
+          await token.transfer(to, amount, { from: owner });
+
+          (await token.balanceOf(owner)).should.be.bignumber.equal(new BigNumber(0));
+
+          (await token.balanceOf(to)).should.be.bignumber.equal(amount);
+        });
+
+        it('emits a transfer event', async () => {
+          const { logs } = await token.transfer(to, amount, { from: owner });
+
+          const event = expectEvent.inLogs(logs, 'Transfer', {
+            from: owner,
+            to: to,
+          });
+
+          event.args.value.should.be.bignumber.equal(amount);
+        });
+      });
+    });
+
+    describe('when the recipient is the zero address', () => {
+      const to = ZERO_ADDRESS;
+ //TODO? Not in the standard
+      it('reverts', async () => {
+        await assertRevert(token.transfer(to, 100, { from: owner }));
+      });
+
+    });
+  });
+
+  describe('approve', () => {
+    describe('when the spender is not the zero address', () => {
+      const spender = recipient;
+
+      describe('when the sender has enough balance', () => {
+        const amount = new BigNumber(100);
+
+        it('emits an approval event', async () => {
+          const { logs } = await token.approve(spender, amount, { from: owner });
+
+          console.log(logs)
+ 
+          logs.length.should.equal(1);
+          logs[0].event.should.equal('Approval');
+          logs[0].args.owner.should.equal(owner);
+          logs[0].args.spender.should.equal(spender);
+          logs[0].args.value.should.be.bignumber.equal(amount);
+        });
+
+        describe('when there was no approved amount before', () => {
+          it('approves the requested amount', async () => {
+            await token.approve(spender, amount, { from: owner });
+
+            (await token.allowance(owner, spender)).should.be.bignumber.equal(amount);
+          });
+        });
+
+        describe('when the spender had an approved amount', () => {
+          beforeEach(async () => {
+            await token.approve(spender, 1, { from: owner });
+          });
+
+          it('approves the requested amount and replaces the previous one', async () => {
+            await token.approve(spender, amount, { from: owner });
+
+            (await token.allowance(owner, spender)).should.be.bignumber.equal(amount);
+          });
+        });
+      });
+
+      describe('when the sender does not have enough balance', () => {
+        const amount = new BigNumber(101);
+
+        it('emits an approval event', async () => {
+          const { logs } = await token.approve(spender, amount, { from: owner });
+
+          logs.length.should.equal(1);
+          logs[0].event.should.equal('Approval');
+          logs[0].args.owner.should.equal(owner);
+          logs[0].args.spender.should.equal(spender);
+          logs[0].args.value.should.be.bignumber.equal(amount);
+        });
+
+        describe('when there was no approved amount before', () => {
+          it('approves the requested amount', async () => {
+            await token.approve(spender, amount, { from: owner });
+
+            (await token.allowance(owner, spender)).should.be.bignumber.equal(amount);
+          });
+        });
+
+        describe('when the spender had an approved amount', () => {
+          beforeEach(async () => {
+            await token.approve(spender, 1, { from: owner });
+          });
+
+          it('approves the requested amount and replaces the previous one', async () => {
+            await token.approve(spender, amount, { from: owner });
+
+            (await token.allowance(owner, spender)).should.be.bignumber.equal(amount);
+          });
+        });
+      });
+    });
+
+    describe('when the spender is the zero address', () => {
+      const amount = new BigNumber(100);
+      const spender = ZERO_ADDRESS;
+
+//TODO? Not in the standard
+      it('reverts', async () => {
+        await assertRevert(token.approve(spender, amount, { from: owner }));
+      });
+
+    });
+  });
 
   // describe('transfer from', function () {
   //   const spender = recipient;
