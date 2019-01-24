@@ -189,92 +189,92 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
     });
   });
 
-  // describe('transfer from', function () {
-  //   const spender = recipient;
+  describe('transfer from', () => {
+    const spender = recipient;
 
-  //   describe('when the recipient is not the zero address', function () {
-  //     const to = anotherAccount;
+    describe('when the recipient is not the zero address', () => {
+      const to = anotherAccount;
 
-  //     describe('when the spender has enough approved balance', function () {
-  //       beforeEach(async function () {
-  //         await this.token.approve(spender, 100, { from: owner });
-  //       });
+      describe('when the spender has enough approved balance', () => {
+        beforeEach(async () => {
+          await token.approve(spender, 100, { from: owner });
+        });
 
-  //       describe('when the owner has enough balance', function () {
-  //         const amount = 100;
+        describe('when the owner has enough balance', () => {
+          const amount = 100;
 
-  //         it('transfers the requested amount', async function () {
-  //           await this.token.transferFrom(owner, to, amount, { from: spender });
+          it('transfers the requested amount', async () => {
+            await token.transferFrom(owner, to, amount, { from: spender });
 
-  //           (await this.token.balanceOf(owner)).should.be.bignumber.equal(0);
+            (await token.balanceOf(owner)).should.be.bignumber.equal(0);
 
-  //           (await this.token.balanceOf(to)).should.be.bignumber.equal(amount);
-  //         });
+            (await token.balanceOf(to)).should.be.bignumber.equal(amount);
+          });
 
-  //         it('decreases the spender allowance', async function () {
-  //           await this.token.transferFrom(owner, to, amount, { from: spender });
+          it('decreases the spender allowance', async () => {
+            await token.transferFrom(owner, to, amount, { from: spender });
 
-  //           (await this.token.allowance(owner, spender)).should.be.bignumber.equal(0);
-  //         });
+            (await token.allowance(owner, spender)).should.be.bignumber.equal(0);
+          });
 
-  //         it('emits a transfer event', async function () {
-  //           const { logs } = await this.token.transferFrom(owner, to, amount, { from: spender });
+          it('emits a transfer event', async () => {
+            const { logs } = await token.transferFrom(owner, to, amount, { from: spender });
 
-  //           logs.length.should.equal(1);
-  //           logs[0].event.should.equal('Transfer');
-  //           logs[0].args._from.should.equal(owner);
-  //           logs[0].args._to.should.equal(to);
-  //           logs[0].args._value.should.be.bignumber.equal(amount);
-  //         });
-  //       });
+            logs.length.should.equal(1);
+            logs[0].event.should.equal('Transfer');
+            logs[0].args._from.should.equal(owner);
+            logs[0].args._to.should.equal(to);
+            logs[0].args._value.should.be.bignumber.equal(amount);
+          });
+        });
 
-  //       describe('when the owner does not have enough balance', function () {
-  //         const amount = 101;
+        describe('when the owner does not have enough balance', () => {
+          const amount = 101;
 
-  //         it('reverts', async function () {
-  //           await assertRevert(this.token.transferFrom(owner, to, amount, { from: spender }));
-  //         });
-  //       });
-  //     });
+          it('reverts', async () => {
+            await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
+          });
+        });
+      });
 
-  //     describe('when the spender does not have enough approved balance', function () {
-  //       beforeEach(async function () {
-  //         await this.token.approve(spender, 99, { from: owner });
-  //       });
+      describe('when the spender does not have enough approved balance', () => {
+        beforeEach(async () => {
+          await token.approve(spender, 99, { from: owner });
+        });
 
-  //       describe('when the owner has enough balance', function () {
-  //         const amount = 100;
+        describe('when the owner has enough balance', () => {
+          const amount = 100;
 
-  //         it('reverts', async function () {
-  //           await assertRevert(this.token.transferFrom(owner, to, amount, { from: spender }));
-  //         });
-  //       });
+          it('reverts', async () => {
+            await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
+          });
+        });
 
-  //       describe('when the owner does not have enough balance', function () {
-  //         const amount = 101;
+        describe('when the owner does not have enough balance', () => {
+          const amount = 101;
 
-  //         it('reverts', async function () {
-  //           await assertRevert(this.token.transferFrom(owner, to, amount, { from: spender }));
-  //         });
-  //       });
-  //     });
-  //   });
+          it('reverts', async () => {
+            await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
+          });
+        });
+      });
+    });
 
-  //   describe('when the recipient is the zero address', function () {
-  //     const amount = 100;
-  //     const to = ZERO_ADDRESS;
+    describe('when the recipient is the zero address', () => {
+      const amount = 100;
+      const to = ZERO_ADDRESS;
 
-  //     beforeEach(async function () {
-  //       await this.token.approve(spender, amount, { from: owner });
-  //     });
+      beforeEach(async () => {
+        await token.approve(spender, amount, { from: owner });
+      });
 
 /* TODO? Not in standard
       it('reverts', async function () {
         await assertRevert(this.token.transferFrom(owner, to, amount, { from: spender }));
       });
 */
-   //  });
-   // });
+    });
+   });
 
 // TODO? Not in standard
   // describe('decrease allowance', function () {
