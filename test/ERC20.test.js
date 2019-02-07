@@ -201,12 +201,12 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
         });
 
         describe('when the owner has enough balance', () => {
-          const amount = 100;
+          const amount = new BigNumber(100);
 
           it('transfers the requested amount', async () => {
             await token.transferFrom(owner, to, amount, { from: spender });
 
-            (await token.balanceOf(owner)).should.be.bignumber.equal(0);
+            (await token.balanceOf(owner)).should.be.bignumber.equal(new BigNumber(0));
 
             (await token.balanceOf(to)).should.be.bignumber.equal(amount);
           });
@@ -214,22 +214,28 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
           it('decreases the spender allowance', async () => {
             await token.transferFrom(owner, to, amount, { from: spender });
 
-            (await token.allowance(owner, spender)).should.be.bignumber.equal(0);
+            (await token.allowance(owner, spender)).should.be.bignumber.equal(new BigNumber(0));
           });
 
           it('emits a transfer event', async () => {
             const { logs } = await token.transferFrom(owner, to, amount, { from: spender });
 
-            logs.length.should.equal(1);
+            console.log(logs)
+
+            logs.length.should.equal(2);
             logs[0].event.should.equal('Transfer');
-            logs[0].args._from.should.equal(owner);
-            logs[0].args._to.should.equal(to);
-            logs[0].args._value.should.be.bignumber.equal(amount);
+            logs[0].args.from.should.equal(owner);
+            logs[0].args.to.should.equal(to);
+            logs[0].args.value.should.be.bignumber.equal(amount);
+            logs[1].event.should.equal('Approval');
+            logs[1].args.owner.should.equal(owner);
+            logs[1].args.spender.should.equal(spender);
+            logs[1].args.value.should.be.bignumber.equal(new BigNumber(0));
           });
         });
 
         describe('when the owner does not have enough balance', () => {
-          const amount = 101;
+          const amount = new BigNumber(101);
 
           it('reverts', async () => {
             await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
@@ -243,7 +249,7 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
         });
 
         describe('when the owner has enough balance', () => {
-          const amount = 100;
+          const amount = new BigNumber(100);
 
           it('reverts', async () => {
             await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
@@ -251,7 +257,7 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
         });
 
         describe('when the owner does not have enough balance', () => {
-          const amount = 101;
+          const amount = new BigNumber(101);
 
           it('reverts', async () => {
             await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
@@ -261,7 +267,7 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
     });
 
     describe('when the recipient is the zero address', () => {
-      const amount = 100;
+      const amount = new BigNumber(100);
       const to = ZERO_ADDRESS;
 
       beforeEach(async () => {
@@ -277,73 +283,73 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
    });
 
 // TODO? Not in standard
-  // describe('decrease allowance', function () {
-  //   describe('when the spender is not the zero address', function () {
-  //     const spender = recipient;
+  describe('decrease allowance', () => {
+    describe('when the spender is not the zero address', () => {
+      const spender = recipient;
 
-  //     function shouldDecreaseApproval (amount) {
-  //       describe('when there was no approved amount before', function () {
-  //         it('reverts', async function () {
-  //           await assertRevert(this.token.decreaseAllowance(spender, amount, { from: owner }));
-  //         });
-  //       });
+      function shouldDecreaseApproval (amount) {
+        describe('when there was no approved amount before', () => {
+          it('reverts', async () => {
+            await assertRevert(token.decreaseAllowance(spender, amount, { from: owner }));
+          });
+        });
 
-  //       describe('when the spender had an approved amount', function () {
-  //         const approvedAmount = amount;
+        describe('when the spender had an approved amount', () => {
+          const approvedAmount = amount;
 
-  //         beforeEach(async function () {
-  //           ({ logs: this.logs } = await this.token.approve(spender, approvedAmount, { from: owner }));
-  //         });
+          beforeEach(async function () {
+            ({ logs: this.logs } = await token.approve(spender, approvedAmount, { from: owner }));
+          });
 
-  //         it('emits an approval event', async function () {
-  //           const { logs } = await this.token.decreaseAllowance(spender, approvedAmount, { from: owner });
+          it('emits an approval event', async () => {
+            const { logs } = await token.decreaseAllowance(spender, approvedAmount, { from: owner });
 
-  //           logs.length.should.equal(1);
-  //           logs[0].event.should.equal('Approval');
-  //           logs[0].args.owner.should.equal(owner);
-  //           logs[0].args.spender.should.equal(spender);
-  //           logs[0].args.value.should.be.bignumber.equal(0);
-  //         });
+            logs.length.should.equal(1);
+            logs[0].event.should.equal('Approval');
+            logs[0].args.owner.should.equal(owner);
+            logs[0].args.spender.should.equal(spender);
+            logs[0].args.value.should.be.bignumber.equal(new BigNumber(0));
+          });
 
-          // it('decreases the spender allowance subtracting the requested amount', async function () {
-          //   await this.token.decreaseAllowance(spender, approvedAmount - 1, { from: owner });
+          it('decreases the spender allowance subtracting the requested amount', async () => {
+            await token.decreaseAllowance(spender, approvedAmount - 1, { from: owner });
 
-          //   (await this.token.allowance(owner, spender)).should.be.bignumber.equal(1);
-          // });
+            (await token.allowance(owner, spender)).should.be.bignumber.equal(new BigNumber(1));
+          });
 
-          // it('sets the allowance to zero when all allowance is removed', async function () {
-          //   await this.token.decreaseAllowance(spender, approvedAmount, { from: owner });
-          //   (await this.token.allowance(owner, spender)).should.be.bignumber.equal(0);
-          // });
+          it('sets the allowance to zero when all allowance is removed', async () => {
+            await token.decreaseAllowance(spender, approvedAmount, { from: owner });
+            (await token.allowance(owner, spender)).should.be.bignumber.equal(new BigNumber(0));
+          });
 
-          // it('reverts when more than the full allowance is removed', async function () {
-          //   await assertRevert(this.token.decreaseAllowance(spender, approvedAmount + 1, { from: owner }));
-          // });
-      //   });
-      // }
+          it('reverts when more than the full allowance is removed', async function () {
+            await assertRevert(token.decreaseAllowance(spender, approvedAmount + 1, { from: owner }));
+          });
+        });
+      }
 
-    //   describe('when the sender has enough balance', function () {
-    //     const amount = 100;
+      describe('when the sender has enough balance', function () {
+        const amount = new BigNumber(100);
 
-    //     shouldDecreaseApproval(amount);
-    //   });
+        shouldDecreaseApproval(amount);
+      });
 
-    //   describe('when the sender does not have enough balance', function () {
-    //     const amount = 101;
+      describe('when the sender does not have enough balance', function () {
+        const amount = new BigNumber(101);
 
-    //     shouldDecreaseApproval(amount);
-    //   });
-    // });
+        shouldDecreaseApproval(amount);
+      });
+    });
 
-  //   describe('when the spender is the zero address', function () {
-  //     const amount = 100;
-  //     const spender = ZERO_ADDRESS;
+    describe('when the spender is the zero address', function () {
+      const amount = new BigNumber(100);
+      const spender = ZERO_ADDRESS;
 
-  //     it('reverts', async function () {
-  //       await assertRevert(this.token.decreaseAllowance(spender, amount, { from: owner }));
-  //     });
-  //   });
-  // });
+      it('reverts', async function () {
+        await assertRevert(token.decreaseAllowance(spender, amount, { from: owner }));
+      });
+    });
+  });
 
   // describe('increase allowance', function () {
   //   const amount = 100;
