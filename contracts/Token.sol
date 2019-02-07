@@ -98,9 +98,9 @@ contract Token is ERC20 {
     function balanceOf(address src) public view returns (uint256) {
         uint256 balance = super.balanceOf(src);
 
-        if (src == owner) {
-            balance = balance.add(look());
-        }
+        //if (src == owner) {
+        //    balance = balance.add(look());
+        //}
 
         return balance;
     }
