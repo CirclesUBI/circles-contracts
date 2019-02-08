@@ -4,13 +4,13 @@ import "./Hub.sol";
 
 contract HubFactory {
 
-    event Fork(address indexed newHub, address newHubOwner);
+    event Spawn(address indexed newHub, address newHubOwner);
 
-    function fork(
-        uint256 issuance, uint256 demurrage, uint8 decimals, string memory symbol, uint256 limitEpoch
+    function spawn(
+        uint256 issuance, uint256 demurrage, uint8 decimals, string memory symbol, uint256 limitEpoch, uint256 initialPayout
     ) public returns (bool) {
-        Hub newHub = new Hub(msg.sender, issuance, demurrage, decimals, symbol, limitEpoch);
-	    emit Fork(address(newHub), msg.sender);
+        Hub newHub = new Hub(msg.sender, issuance, demurrage, decimals, symbol, limitEpoch, initialPayout);
+	    emit Spawn(address(newHub), msg.sender);
 	    return true;
     }
 }

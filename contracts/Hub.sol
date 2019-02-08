@@ -2,11 +2,17 @@ pragma solidity ^0.5.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Token.sol";
+import "./Organization.sol";
 
 //role of validators  
 //hubfactory?
 //finish update function in token
 //what should initial demurrage rate be? And initial issuance?
+//more events in Token
+//parallel transfer helper
+//organization can transfer, and transitively transfer
+//abstract ownership utils?
+//organization signup
 
 contract Hub {
     using SafeMath for uint256;
@@ -17,6 +23,7 @@ contract Hub {
     uint256 public demurrageRate; // = 0;
     uint8 public decimals; // = 18;
     string public symbol; // = 'CRC';
+    uint256 initialPayout;
 
     uint256 public LIMIT_EPOCH; // = 3600;
 
@@ -32,7 +39,7 @@ contract Hub {
     mapping (address => bool) public isValidator;
     mapping (address => mapping (address => EdgeWeight)) public edges;
 
-    event Signup(address indexed user);
+    event Signup(address indexed user, address token);
     event Trust(address indexed from, address indexed to, uint256 limit);
     event RegisterValidator(address indexed validator);
     event UpdateTrustLimit(address indexed from, address indexed to, uint256 limit);
@@ -42,7 +49,7 @@ contract Hub {
 	    _;
     }
 
-    constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch) public {
+    constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
         require (_owner != address(0));
 	    owner = _owner;
 	    issuanceRate = _issuance;
@@ -50,6 +57,7 @@ contract Hub {
 	    decimals = _decimals;
 	    symbol = _symbol;
 	    LIMIT_EPOCH = _limitEpoch;
+        initialPayout = _initialPayout;
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
@@ -89,11 +97,11 @@ contract Hub {
         require(address(userToToken[msg.sender]) == address(0));
 	    require(!isOrganization[msg.sender]);
 
-        Token token = new Token(msg.sender, _name);
+        Token token = new Token(msg.sender, _name, initialPayout);
 	    userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
 
-        emit Signup(msg.sender);
+        emit Signup(msg.sender, address(token));
         return true;
     }
 
@@ -114,7 +122,6 @@ contract Hub {
 
     function updateTrustLimit(address toUpdate, uint256 limit) public {
         require(address(tokenToUser[toUpdate]) != address(0));
-	    //require(edges[msg.sender][toUpdate] != address(0));
 	    edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
         emit UpdateTrustLimit(msg.sender, toUpdate, limit);	
     }
@@ -153,7 +160,7 @@ contract Hub {
                 ? edges[node][prevNode].value.add(wad)
                 : wad;
 
-            // update lastTOuched to reflect this transaction
+            // update lastTouched to reflect this transaction
             edges[node][prevNode].lastTouched = time();
 
             // assert that the limit is greater than the proposed value

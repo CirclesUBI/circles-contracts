@@ -2,6 +2,7 @@
 const should = require('chai').should();
 
 function inLogs (logs, eventName, eventArgs = {}) {
+
   const event = logs.find(function (e) {
     if (e.event === eventName) {
       let matches = true;
