@@ -1,5 +1,6 @@
-pragma solidity 0.4.15;
+// Adapted from https://github.com/uport-project/uport-identity/blob/develop/contracts/TxRelay.sol
 
+pragma solidity ^0.5.0;
 
 // This contract is meant as a "singleton" forwarding contract.
 // Eventually, it will be able to forward any transaction to
@@ -30,25 +31,27 @@ contract TxRelay {
         bytes32 sigR,
         bytes32 sigS,
         address destination,
-        bytes data,
+        bytes memory data,
         address listOwner
     ) public {
 
         // only allow senders from the whitelist specified by the user,
         // 0x0 means no whitelist.
-        require(listOwner == 0x0 || whitelist[listOwner][msg.sender]);
+        require(listOwner == address(0x0) || whitelist[listOwner][msg.sender]);
 
         address claimedSender = getAddress(data);
         // use EIP 191
         // 0x19 :: version :: relay :: whitelistOwner :: nonce :: destination :: data
-        bytes32 h = keccak256(byte(0x19), byte(0), this, listOwner, nonce[claimedSender], destination, data);
+        bytes32 h = keccak256(abi.encodePacked(byte(0x19), byte(0), this, listOwner, nonce[claimedSender], destination, data));
         address addressFromSig = ecrecover(h, sigV, sigR, sigS);
 
         require(claimedSender == addressFromSig);
 
         nonce[claimedSender]++; //if we are going to do tx, update nonce
-
-        require(destination.call(data));
+        
+        (bool success, bytes memory callData) = destination.call(data);
+        callData;
+        require(success);
     }
 
     /*
@@ -57,7 +60,7 @@ contract TxRelay {
      * @returns a The address retrieved from the array
      (Optimization based on work by tjade273)
      */
-    function getAddress(bytes b) public constant returns (address a) {
+    function getAddress(bytes memory b) public pure returns (address a) {
         if (b.length < 36) return address(0);
         assembly {
             let mask := 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
@@ -72,7 +75,7 @@ contract TxRelay {
      * @param add The address to return the nonce for.
      * @return The specific-to-this-contract nonce of the address provided
      */
-    function getNonce(address add) public constant returns (uint) {
+    function getNonce(address add) public view returns (uint) {
         return nonce[add];
     }
 
@@ -81,7 +84,7 @@ contract TxRelay {
      * the owner of a whitelist can add to it.
      * @param sendersToUpdate the addresses to add to the whitelist
      */
-    function addToWhitelist(address[] sendersToUpdate) public {
+    function addToWhitelist(address[] memory sendersToUpdate) public {
         updateWhitelist(sendersToUpdate, true);
     }
 
@@ -90,7 +93,7 @@ contract TxRelay {
      * the owner of a whitelist can remove from it.
      * @param sendersToUpdate the addresses to add to the whitelist
      */
-    function removeFromWhitelist(address[] sendersToUpdate) public {
+    function removeFromWhitelist(address[] memory sendersToUpdate) public {
         updateWhitelist(sendersToUpdate, false);
     }
 
@@ -99,7 +102,7 @@ contract TxRelay {
      * @param sendersToUpdate the addresses to add to the whitelist
      * @param newStatus whether to add or remove addresses
      */
-    function updateWhitelist(address[] sendersToUpdate, bool newStatus) private {
+    function updateWhitelist(address[] memory sendersToUpdate, bool newStatus) private {
         for (uint i = 0; i < sendersToUpdate.length; i++) {
             whitelist[msg.sender][sendersToUpdate[i]] = newStatus;
         }
