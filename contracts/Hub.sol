@@ -93,15 +93,15 @@ contract Hub {
     function time() public view returns (uint) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function signup(string calldata _name) external returns (bool) {
-        require(address(userToToken[msg.sender]) == address(0));
-	    require(!isOrganization[msg.sender]);
+    function signup(address sender, string calldata _name) external returns (bool) {
+        require(address(userToToken[sender]) == address(0));
+	    require(!isOrganization[sender]);
 
-        Token token = new Token(msg.sender, _name, initialPayout);
-	    userToToken[msg.sender] = token;
-        tokenToUser[address(token)] = msg.sender;
+        Token token = new Token(sender, _name, initialPayout);
+	    userToToken[sender] = token;
+        tokenToUser[address(token)] = sender;
 
-        emit Signup(msg.sender, address(token));
+        emit Signup(sender, address(token));
         return true;
     }
 
