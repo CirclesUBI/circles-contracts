@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "preinstall": "nvm use -i 10.15.0 || echo nvm not found: check node version && pause",
   "scripts": {
-    "test": "scripts/test.sh"
+    "test": "scripts/test.sh",
+    "ganache": "ganache-cli -i 5777 -m 'enable depend figure right kit daughter job giraffe news window tonight more'"
   },
   "repository": {
     "type": "git",
