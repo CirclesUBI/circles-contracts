@@ -10,23 +10,40 @@ Circles is a blockchain-based Universal Basic Income implementation.
 
 ## Basic design
 
-In general the design philosophy here was to favor restriction of outside interference in token state. The separation of individual token logics into discrete contracts ensures invariants are maintained for the stakeholders (e.g. Circles can never mess with your individual token balance or issuance)
+In general the design philosophy here was to favor restriction of outside interference in token state. The separation of individual token logics into discrete contracts allows stakeholders to migrate their token to different circles-like systems.
 
-There are two components:
+There are several components:
 
-### CirclesToken
+### Token
 
-This is derived from standard ERC20 implementations, with two main differences: The balance for the "owner" (UBI reciever) is calculated based on the time elapsed since the contract was created, and there is an "exchange" function that allows trusted transitive exchanges.
+This is derived from standard ERC20 implementations, with two main differences: The balance for the "owner" (UBI reciever) is calculated based on the time elapsed since the contract was created, and there is an "hubTransfer" function that allows trusted transitive exchanges. Tokens belong to only one hub at a time, and can only transact transitively with tokens from the same hub. `Owner` can migrate their token to a new hub, but doing so will require rebuilding the trust graph.
 
-### CirclesPerson
+### Hub
 
-A CirclesPerson is a user proxy contract that receives UBI (by being attached to a CirclesToken). When queried, it responds as to whether or not an exchange between two tokens is permitted.
+This is the location of system-wide variables, and the trust graph. It has special permissions on all tokens that have authorized it to perform transitive exchanges. Hub has an owner, which should at least be a multisig, but can easily be another contract. 
+
+### Organization
+
+This is wallet that transacts in the circles system but does not receive a universal basic income. 
+
+### TxRelay
+
+A meta-transaction relayer to pay users' gas fees for the purposes of the circles pilot. Eventually, this functionality will be opened to other entities in the circles system.
+
+## Getting started
+
+Requires [node version 10](https://nodejs.org/en/download/) and [Truffle 5](https://github.com/trufflesuite/truffle) installed globally: `npm install -g truffle`
+
+Clone down this repo and `npm install`
+
+With ganache running (`npm run ganache`), in a new console window, `truffle compile` then `truffle migrate`
+
+**Note:** This is a work in progress and this should be done only for contribution and exploration purposes.
 
 ## Testing
 Please read the [Truffle "writing tests in javascript" page](https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript).
 
-Requires [node version 8](https://nodejs.org/en/download/)
-`npm install` should install all the dev dependencies you need for testing.
+Requires [node version 10](https://nodejs.org/en/download/)
 `npm test` will re-build the contracts / tests and run all of the tests in the [test](test) directory.
 
 Tests are executed with the help of [Truffle](https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript) and written in javascript using [Mocha](https://mochajs.org/) with the [Chai assertion library](https://www.chaijs.com/). (We are not currently using, and do not see a need to use Truffle's ability to define tests written in Solidity.)
@@ -37,27 +54,27 @@ Helper functions defined in [test/helpers](test/helpers) provides functionality 
 
 ### Anatomy of a simple test:
 ```javascript
-const BigNumber = web3.BigNumber;
+const BigNumber = web3.BN;
 ```
-BigNumber is needed to handle Solidity's `int` types
+BN is needed to handle Solidity's `int` types
 ```javascript
 require('chai')
-  .use(require('chai-bignumber')(BigNumber))
+  .use(require('chai-bn')(BigNumber))
   .should();
 ```
 We use the Chai assertion library
 ```javascript
-const ERC20DetailedMock = artifacts.require('ERC20DetailedMock');
+const ERC20 = artifacts.require('ERC20');
 ```
-Pull in the contract that you want to test, in this case: [`ERC20DetailedMock.sol`](contracts/mocks/ERC20DetailedMock.sol)
+Pull in the contract that you want to test, in this case: [`ERC20.sol`](contracts/mocks/ERC20.sol)
 ```javascript
-contract('ERC20Detailed', function () {
+contract('ERC20', function () {
 ```
 Don't know what `contract(` is, and confused about why we aren't using `describe(`? read this thing: [Truffle "writing tests in javascript" page](https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript)
 ```javascript
-  let detailedERC20 = null;
+  let ERC20 = null;
 
-  const _name = 'My Detailed ERC20';
+  const _name = 'My ERC20';
   const _symbol = 'MDT';
   const _decimals = 18;
 ```
