@@ -7,7 +7,7 @@ require('chai')
 
 const Hub = artifacts.require('Hub');
 
-contract('Hub', ([_, systemOwner, attacker]) => {
+contract('Hub', ([_, systemOwner, attacker, relayer]) => {
   let hub = null;
 
   const _issuance = new BigNumber(1736111111111111);
@@ -27,6 +27,15 @@ contract('Hub', ([_, systemOwner, attacker]) => {
 
   it('attacker cannot change owner', async () => {
     await assertRevert(hub.changeOwner(attacker, { from: attacker }))
+  });
+
+  it('owner can add relayer', async () => {
+    await hub.addRelayer(relayer, { from: systemOwner });
+    (await hub.relayers(relayer)).should.be.equal(true);
+  });
+
+  it('attacker cannot add relayer', async () => {
+    await assertRevert(hub.addRelayer(relayer, { from: attacker }))
   });
 
   it('has an issuance rate', async () => {
