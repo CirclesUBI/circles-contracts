@@ -33,6 +33,7 @@ contract Hub {
         uint256 lastTouched;
     }
 
+    mapping (address => bool) public relayers;
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
     mapping (address => bool) public isOrganization;
@@ -47,6 +48,11 @@ contract Hub {
     modifier onlyOwner() {
         require (msg.sender == owner);
 	    _;
+    }
+
+    modifier onlyRelayer() {
+        require (relayers[msg.sender]);
+        _;
     }
 
     constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
@@ -64,6 +70,18 @@ contract Hub {
         require(_newOwner != address(0));
 	    owner = _newOwner;
 	    return true;
+    }
+
+    function addRelayer(address _relayer) public onlyOwner returns (bool) {
+        require(_relayer != address(0));
+        relayers[_relayer] = true;
+        return true;
+    }
+
+    function removeRelayer(address _relayer) public onlyOwner returns (bool) {
+        require(_relayer != address(0));
+        relayers[_relayer] = false;
+        return true;
     }
     
     function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
@@ -93,12 +111,25 @@ contract Hub {
     function time() public view returns (uint) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function signup(address sender, string calldata _name) external returns (bool) {
+    function signup(string calldata _name) external returns (bool) {
+        require(address(userToToken[msg.sender]) == address(0));
+	    require(!isOrganization[msg.sender]);
+
+        Token token = new Token(msg.sender, _name, initialPayout);
+	    userToToken[msg.sender] = token;
+        tokenToUser[address(token)] = msg.sender;
+
+        emit Signup(msg.sender, address(token));
+        return true;
+    }
+
+    // No exit allowed. Once you create a personal token, you're in for good.
+    function relayerSignup(address sender, string calldata _name) external onlyRelayer returns (bool) {
         require(address(userToToken[sender]) == address(0));
-	    require(!isOrganization[sender]);
+        require(!isOrganization[sender]);
 
         Token token = new Token(sender, _name, initialPayout);
-	    userToToken[sender] = token;
+        userToToken[sender] = token;
         tokenToUser[address(token)] = sender;
 
         emit Signup(sender, address(token));
