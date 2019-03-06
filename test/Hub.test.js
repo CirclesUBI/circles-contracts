@@ -7,7 +7,7 @@ require('chai')
 
 const Hub = artifacts.require('Hub');
 
-contract('Hub', ([_, systemOwner, attacker, relayer]) => {
+contract('Hub', ([_, systemOwner, attacker, relayer, tokenQwner]) => {
   let hub = null;
 
   const _issuance = new BigNumber(1736111111111111);
@@ -75,12 +75,10 @@ contract('Hub', ([_, systemOwner, attacker, relayer]) => {
   });
 
   describe('owner can change system vars', async () => {
-    after(async () => { 
-      await hub.updateIssuance(_issuance, { from: systemOwner })
-      await hub.updateDemurrage(_demurrage, { from: systemOwner });
-      await hub.updateSymbol(_symbol, { from: systemOwner });
-      return hub.updateLimitEpoch(_limitEpoch, { from: systemOwner });
+    beforeEach(async () => {
+      hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch, _initialPayout);
     });
+
 
     it('owner can change issuance', async () => {
       await hub.updateIssuance(1, { from: systemOwner });
