@@ -12,31 +12,31 @@ contract Organization {
     address public hub;
 
     modifier onlyHub() {
-	    require(msg.sender == hub);
+        require(msg.sender == hub);
         _;
-    }     
+    }
 
     modifier onlyOwner() {
-	    require(msg.sender == owner);
-	    _;
+        require(msg.sender == owner);
+        _;
     }
 
     constructor(address _owner, string memory _name) public {
-	    require(_owner != address(0));
-	    name = _name;
-	    owner = _owner;
-	    hub = msg.sender;
+        require(_owner != address(0));
+        name = _name;
+        owner = _owner;
+        hub = msg.sender;
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-	    require(_newOwner != address(0));
-	    owner = _newOwner;
-	    return true;
+        require(_newOwner != address(0));
+        owner = _newOwner;
+        return true;
     }
 
     function updateHub(address _hub) public onlyOwner returns (bool) {
         require(_hub != address(0));
-	    hub = _hub;
-	    return true;
+        hub = _hub;
+        return true;
     }
 }

@@ -4,7 +4,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Token.sol";
 import "./Organization.sol";
 
-//role of validators  
+//role of validators
 //hubfactory?
 //finish update function in token
 //what should initial demurrage rate be? And initial issuance?
@@ -46,48 +46,48 @@ contract Hub {
 
     modifier onlyOwner() {
         require (msg.sender == owner);
-	    _;
+        _;
     }
 
     constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
         require (_owner != address(0));
-	    owner = _owner;
-	    issuanceRate = _issuance;
-	    demurrageRate = _demurrage;
-	    decimals = _decimals;
-	    symbol = _symbol;
-	    LIMIT_EPOCH = _limitEpoch;
+        owner = _owner;
+        issuanceRate = _issuance;
+        demurrageRate = _demurrage;
+        decimals = _decimals;
+        symbol = _symbol;
+        LIMIT_EPOCH = _limitEpoch;
         initialPayout = _initialPayout;
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
         require(_newOwner != address(0));
-	    owner = _newOwner;
-	    return true;
+        owner = _newOwner;
+        return true;
     }
-    
+
     function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
         // safety checks on issuance go here
-	    issuanceRate = _issuance;
-	    return true;
+        issuanceRate = _issuance;
+        return true;
     }
 
     function updateDemurrage(uint256 _demurrage) public onlyOwner returns (bool) {
         // safety checks on demurrage go here
-	    demurrageRate = _demurrage;
+        demurrageRate = _demurrage;
         return true;
     }
 
     function updateLimitEpoch(uint256 _limitEpoch) public onlyOwner returns (bool) {
         //safetyyyy
-	    LIMIT_EPOCH = _limitEpoch;
-	    return true;
+        LIMIT_EPOCH = _limitEpoch;
+        return true;
     }
 
     function updateSymbol(string memory _symbol) public onlyOwner returns (bool) {
-	    //maybe we don't need to validate this one?
-	    symbol = _symbol;
-	    return true;
+        //maybe we don't need to validate this one?
+        symbol = _symbol;
+        return true;
     }
 
     function time() public view returns (uint) { return block.timestamp; }
@@ -95,10 +95,10 @@ contract Hub {
     // No exit allowed. Once you create a personal token, you're in for good.
     function signup(address sender, string calldata _name) external returns (bool) {
         require(address(userToToken[sender]) == address(0));
-	    require(!isOrganization[sender]);
+        require(!isOrganization[sender]);
 
         Token token = new Token(sender, _name, initialPayout);
-	    userToToken[sender] = token;
+        userToToken[sender] = token;
         tokenToUser[address(token)] = sender;
 
         emit Signup(sender, address(token));
@@ -115,15 +115,15 @@ contract Hub {
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address toTrust, bool yes, uint limit) public {
         require(address(tokenToUser[toTrust]) != address(0) || isValidator[toTrust]);
-	    require(!isOrganization[toTrust]);
+        require(!isOrganization[toTrust]);
         edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(msg.sender, toTrust, limit);
     }
 
     function updateTrustLimit(address toUpdate, uint256 limit) public {
         require(address(tokenToUser[toUpdate]) != address(0));
-	    edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
-        emit UpdateTrustLimit(msg.sender, toUpdate, limit);	
+        edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
+        emit UpdateTrustLimit(msg.sender, toUpdate, limit);
     }
 
     // Starts with msg.sender then ,
@@ -183,4 +183,4 @@ contract Hub {
             }
         }
     }
-}	
+}
