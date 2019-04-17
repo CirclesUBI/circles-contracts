@@ -24,19 +24,13 @@ contract Hub {
     string public symbol; // = 'CRC';
     uint256 initialPayout;
 
-    uint256 public LIMIT_EPOCH; // = 3600;
-
-    struct EdgeWeight {
-        uint256 limit;
-        uint256 value;
-        uint256 lastTouched;
-    }
-
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
+
     mapping (address => bool) public isOrganization;
     mapping (address => bool) public isValidator;
-    mapping (address => mapping (address => EdgeWeight)) public edges;
+
+    mapping (address => mapping (address => uint)) public edges;
 
     event Signup(address indexed user, address token);
     event Trust(address indexed from, address indexed to, uint256 limit);
@@ -48,13 +42,12 @@ contract Hub {
         _;
     }
 
-    constructor(address _owner, uint256 _issuance, uint256 _demurrage, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
+    constructor(address _owner, uint256 _issuance, uint256 _demurrage, string memory _symbol, uint256 _initialPayout) public {
         require (_owner != address(0));
         owner = _owner;
         issuanceRate = _issuance;
         demurrageRate = _demurrage;
         symbol = _symbol;
-        LIMIT_EPOCH = _limitEpoch;
         initialPayout = _initialPayout;
     }
 
@@ -73,12 +66,6 @@ contract Hub {
     function updateDemurrage(uint256 _demurrage) public onlyOwner returns (bool) {
         // safety checks on demurrage go here
         demurrageRate = _demurrage;
-        return true;
-    }
-
-    function updateLimitEpoch(uint256 _limitEpoch) public onlyOwner returns (bool) {
-        //safetyyyy
-        LIMIT_EPOCH = _limitEpoch;
         return true;
     }
 
@@ -111,73 +98,49 @@ contract Hub {
 
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
-    function trust(address toTrust, bool yes, uint limit) public {
+    function trust(address toTrust, uint limit) public {
         require(address(tokenToUser[toTrust]) != address(0) || isValidator[toTrust]);
         require(!isOrganization[toTrust]);
-        edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
+        edges[msg.sender][toTrust] = limit;
         emit Trust(msg.sender, toTrust, limit);
     }
 
     function updateTrustLimit(address toUpdate, uint256 limit) public {
         require(address(tokenToUser[toUpdate]) != address(0));
-        edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
+        edges[msg.sender][toUpdate] = limit;
         emit UpdateTrustLimit(msg.sender, toUpdate, limit);
     }
 
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
-    function transferThrough(address[] memory nodes, address[] memory tokens, uint wad) public {
+    function transferThrough(address[] memory users, uint wad) public {
+        require(users.length <= 5);
 
-        uint tokenIndex = 0;
+        for (uint i = 0; i < users.length; i++) {
+            require(address(tokenToUser[users[i]]) != address(0) || isValidator[users[i]]);
+        }
 
-        address prevValidator;
+        address prev = msg.sender;
+        for (uint i = 0; i < users.length; i++) {
+            address curr = users[i];
 
-        address prevNode;
+            if (isValidator[curr]) {
 
-        for (uint256 x = 0; x < nodes.length; x++) {
+                address next = users[i+1];
+                require(edges[curr][prev] > 0, "validator does not trust sender");
+                require(userToToken[prev].balanceOf(next) + wad <= edges[next][curr], "trust limit exceeded");
 
-            address node = nodes[x];
-            // Cast token to a Token at tokenIndex
-            Token token = Token(tokens[tokenIndex]);
+                userToToken[prev].transferFrom(prev, next, wad);
+                prev = next;
+                i++;
 
-            // If there exist a previous validator
-            if (prevValidator != address(0)) {
-                prevNode = prevValidator;
-                prevValidator = address(0);
-            }
-            else {
-                prevNode = address(token);
-            }
-            // edges[node][prevNode]
-            // assert that a valid trust relationship exists
-            assert(edges[node][prevNode].lastTouched != 0);
-
-            // If the last time the relationship was touched is less than the limit epoch
-            // add the current value of the edge to the transaction value and update the current value
-            edges[node][prevNode].value = time().sub(edges[node][prevNode].lastTouched) < LIMIT_EPOCH
-                ? edges[node][prevNode].value.add(wad)
-                : wad;
-
-            // update lastTouched to reflect this transaction
-            edges[node][prevNode].lastTouched = time();
-
-            // assert that the limit is greater than the proposed value
-            assert(edges[node][prevNode].limit >= edges[node][prevNode].value);
-
-            if (isValidator[node]) {
-                prevValidator = node;
             } else {
-                // Transfer the current token from the msg.sender to the current node
-                token.transferFrom(msg.sender, node, wad);
 
-                // If this is not the last token in the list transfer the nextToken
-                // from the current node to the msg.sender
-                if (tokenIndex + 1 < tokens.length) {
+                require(userToToken[prev].balanceOf(curr) + wad <= edges[curr][prev], "trust limit exceeded");
 
-                    Token nextToken = Token(tokens[tokenIndex + 1]);
-                    nextToken.transferFrom(node, msg.sender, wad);
-                }
-                tokenIndex++;
+                userToToken[prev].transferFrom(prev, curr, wad);
+                prev = curr;
+
             }
         }
     }

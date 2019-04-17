@@ -13,11 +13,10 @@ contract('Hub', ([_, systemOwner, attacker]) => {
   const _issuance = new BigNumber(1736111111111111);
   const _demurrage = new BigNumber(0);
   const _symbol = 'CRC';
-  const _limitEpoch = new BigNumber(3600);
   const _initialPayout = new BigNumber(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _limitEpoch, _initialPayout);
+    hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _initialPayout);
   });
 
   it('has the correct owner', async () => {
@@ -52,20 +51,11 @@ contract('Hub', ([_, systemOwner, attacker]) => {
     await assertRevert(hub.updateSymbol('PLUM', { from: attacker }))
   });
 
-  it('has a limit epoch value', async () => {
-    (await hub.LIMIT_EPOCH()).should.be.bignumber.equal(_limitEpoch);
-  });
-
-  it('attacker cannot change limit epoch', async () => {
-    await assertRevert(hub.updateLimitEpoch(42, { from: attacker }))
-  });
-
   describe('owner can change system vars', async () => {
     after(async () => {
       await hub.updateIssuance(_issuance, { from: systemOwner })
       await hub.updateDemurrage(_demurrage, { from: systemOwner });
       await hub.updateSymbol(_symbol, { from: systemOwner });
-      return hub.updateLimitEpoch(_limitEpoch, { from: systemOwner });
     });
 
     it('owner can change issuance', async () => {
@@ -81,11 +71,6 @@ contract('Hub', ([_, systemOwner, attacker]) => {
     it('owner can change symbol', async () => {
       await hub.updateSymbol('PLUM', { from: systemOwner });
       (await hub.symbol()).should.be.equal('PLUM');
-    });
-
-    it('owner can change limit epoch', async () => {
-      await hub.updateLimitEpoch(1, { from: systemOwner });
-      (await hub.LIMIT_EPOCH()).should.be.bignumber.equal(new BigNumber(1));
     });
   })
 });

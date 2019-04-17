@@ -3,7 +3,6 @@
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 
-// const ERC20Mock = artifacts.require('ERC20Mock');
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
 
@@ -21,12 +20,11 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
   const _issuance = new BigNumber(1736111111111111);
   const _demurrage = new BigNumber(0);
   const _symbol = 'CRC';
-  const _limitEpoch = new BigNumber(3600);
   const _tokenName = 'MyCoin';
   const _initialPayout = new BigNumber(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _limitEpoch, _initialPayout);
+    hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _initialPayout);
     const signup = await hub.signup(owner, _tokenName, { from: owner });// owner, 100);
     token = await Token.at(signup.logs[0].args.token);
   });

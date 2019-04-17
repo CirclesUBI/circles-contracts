@@ -7,9 +7,9 @@ contract HubFactory {
     event Spawn(address indexed newHub, address newHubOwner);
 
     function spawn(
-        uint256 issuance, uint256 demurrage, string memory symbol, uint256 limitEpoch, uint256 initialPayout
+        uint256 issuance, uint256 demurrage, string memory symbol, uint256 initialPayout
     ) public returns (bool) {
-        Hub newHub = new Hub(msg.sender, issuance, demurrage, symbol, limitEpoch, initialPayout);
+        Hub newHub = new Hub(msg.sender, issuance, demurrage, symbol, initialPayout);
         emit Spawn(address(newHub), msg.sender);
         return true;
     }
