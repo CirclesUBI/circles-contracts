@@ -111,10 +111,10 @@ contract Hub {
     // No exit allowed. Once you create a personal token, you're in for good.
     function signup(string calldata _name) external returns (bool) {
         require(address(userToToken[msg.sender]) == address(0));
-    require(!isOrganization[msg.sender]);
+        require(!isOrganization[msg.sender]);
 
         Token token = new Token(msg.sender, _name, initialPayout);
-    userToToken[msg.sender] = token;
+        userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
 
         emit Signup(msg.sender, address(token));
@@ -155,6 +155,7 @@ contract Hub {
     }
 
     function updateTrustLimit(address toUpdate, uint256 limit) public {
+        require(trustable(toUpdate))
         require(address(tokenToUser[toUpdate]) != address(0));
         edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
         emit UpdateTrustLimit(msg.sender, toUpdate, limit);
