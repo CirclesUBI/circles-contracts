@@ -15,15 +15,16 @@
   },
   "homepage": "https://github.com/CirclesUBI/circles-contracts",
   "devDependencies": {
+    "bignumber.js": "^8.1.1",
     "chai": "^4.1.2",
-    "bignumber.js": "^8.0.2",
-    "chai-bn": "^0.1.1",
     "chai-bignumber": "^2.0.2",
+    "chai-bn": "^0.1.1",
+    "ganache-cli": "^6.4.1",
     "openzeppelin-solidity": "2.1.1",
-    "ganache-cli": "^6.1.8",
-    "truffle": "^5.0.2"
+    "truffle": "^5.0.10"
   },
   "dependencies": {
+    "metatx-server": "^1.0.4",
     "pify": "^4.0.1"
   }
 }
