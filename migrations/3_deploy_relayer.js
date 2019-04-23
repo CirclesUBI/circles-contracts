@@ -16,5 +16,5 @@ module.exports = async function(deployer) {
   const relayer = await TxRelay.deployed();
   const hubFactory = await HubFactory.deployed();
   const hub = await instantiateHub(hubFactory);
-  return hub.methods.addRelayer(relayer.address).call();
+  return hub.methods.toggleRelayer(relayer.address).call();
 };
