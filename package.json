@@ -4,7 +4,8 @@
   "preinstall": "nvm use -i 10.15.0 || echo nvm not found: check node version && pause",
   "scripts": {
     "test": "scripts/test.sh",
-    "ganache": "ganache-cli -i 5777 -m 'enable depend figure right kit daughter job giraffe news window tonight more'"
+    "ganache": "ganache-cli -i 5777 -m 'enable depend figure right kit daughter job giraffe news window tonight more'",
+    "ganache:detach": "ganache-cli -d -i 5777 -m 'enable depend figure right kit daughter job giraffe news window tonight more'"
   },
   "repository": {
     "type": "git",
@@ -20,11 +21,10 @@
     "chai-bignumber": "^2.0.2",
     "chai-bn": "^0.1.1",
     "ganache-cli": "^6.4.1",
+    "metatx-server": "^1.0.4",
     "openzeppelin-solidity": "2.1.1",
+    "pify": "^4.0.1",
     "truffle": "^5.0.10"
   },
-  "dependencies": {
-    "metatx-server": "^1.0.4",
-    "pify": "^4.0.1"
-  }
+  "dependencies": {}
 }

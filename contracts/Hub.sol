@@ -4,7 +4,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Token.sol";
 import "./Organization.sol";
 
-//role of validators  
+//role of validators
 //hubfactory?
 //finish update function in token
 //what should initial demurrage rate be? And initial issuance?
@@ -54,7 +54,6 @@ contract Hub {
     modifier onlyRelayer() {
         require (relayers[msg.sender]);
         _;
-    }
 
     constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
         require (_owner != address(0));
@@ -218,4 +217,5 @@ contract Hub {
             }
         }
     }
-}   
+}
+
