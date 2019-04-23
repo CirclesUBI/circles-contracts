@@ -108,21 +108,16 @@ contract Hub {
         return (address(userToToken[_address]) != address(0) || isValidator[_address]) && !isOrganization[_address];
     }
 
-    // No exit allowed. Once you create a personal token, you're in for good.
     function signup(string calldata _name) external returns (bool) {
-        require(address(userToToken[msg.sender]) == address(0));
-        require(!isOrganization[msg.sender]);
+        return signup(msg.sender, _name);
+    }
 
-        Token token = new Token(msg.sender, _name, initialPayout);
-        userToToken[msg.sender] = token;
-        tokenToUser[address(token)] = msg.sender;
-
-        emit Signup(msg.sender, address(token));
-        return true;
+    function relayerSignup(address sender, string calldata _name) external onlyRelayer returns (bool) {
+        return signup(sender, _name);
     }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function relayerSignup(address sender, string calldata _name) external onlyRelayer returns (bool) {
+    function _signup(address sender, string calldata _name) internal returns (bool) {
         require(address(userToToken[sender]) == address(0));
         require(!isOrganization[sender]);
 
