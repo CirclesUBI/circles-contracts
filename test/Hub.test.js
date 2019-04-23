@@ -19,43 +19,50 @@ contract('Hub', ([_, systemOwner, attacker]) => {
     hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _initialPayout);
   });
 
-  it('has the correct owner', async () => {
-    (await hub.owner()).should.be.equal(systemOwner);
-  });
+  describe('constructor', async () => {
+    it('sets the owner', async () => {
+      (await hub.owner()).should.be.equal(systemOwner);
+    });
 
-  it('attacker cannot change owner', async () => {
-    await assertRevert(hub.changeOwner(attacker, { from: attacker }))
-  });
+    it('sets the issuance rate', async () => {
+      (await hub.issuanceRate()).should.be.bignumber.equal(_issuance);
+    });
 
-  it('has an issuance rate', async () => {
-    (await hub.issuanceRate()).should.be.bignumber.equal(_issuance);
-  });
+    it('sets the demurrage rate', async () => {
+      (await hub.demurrageRate()).should.be.bignumber.equal(_demurrage);
+    });
 
-  it('attacker cannot change issuance', async () => {
-    await assertRevert(hub.updateIssuance(42, { from: attacker }))
-  });
+    it('sets the decimals setting', async () => {
+      (await hub.decimals()).should.be.bignumber.equal(_decimals);
+    });
 
-  it('has a demurrage rate', async () => {
-    (await hub.demurrageRate()).should.be.bignumber.equal(_demurrage);
-  });
+    it('sets the symbol', async () => {
+      (await hub.symbol()).should.be.equal(_symbol);
+    });
+  })
 
-  it('attacker cannot change demurrage', async () => {
-    await assertRevert(hub.updateDemurrage(42, { from: attacker }))
-  });
+  describe('attacker cannot change system vars', async () => {
+    it('attacker cannot change owner', async () => {
+      await assertRevert(hub.changeOwner(attacker, { from: attacker }))
+    });
 
-  it('has a symbol', async () => {
-    (await hub.symbol()).should.be.equal(_symbol);
-  });
+    it('attacker cannot change issuance', async () => {
+      await assertRevert(hub.updateIssuance(42, { from: attacker }))
+    });
 
-  it('attacker cannot change symbol', async () => {
-    await assertRevert(hub.updateSymbol('PLUM', { from: attacker }))
-  });
+    it('attacker cannot change demurrage', async () => {
+      await assertRevert(hub.updateDemurrage(42, { from: attacker }))
+    });
+
+    it('attacker cannot change symbol', async () => {
+      await assertRevert(hub.updateSymbol('PLUM', { from: attacker }))
+    });
+  })
 
   describe('owner can change system vars', async () => {
-    after(async () => {
-      await hub.updateIssuance(_issuance, { from: systemOwner })
-      await hub.updateDemurrage(_demurrage, { from: systemOwner });
-      await hub.updateSymbol(_symbol, { from: systemOwner });
+    it('owner can change owner', async () => {
+      await hub.changeOwner(attacker, { from: systemOwner });
+      (await hub.owner()).should.equal(attacker);
     });
 
     it('owner can change issuance', async () => {
