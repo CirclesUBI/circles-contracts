@@ -1,4 +1,5 @@
 const { assertRevert } = require('./helpers/assertRevert');
+const MetaTxHandler = require('metatx-server')
 const expectEvent = require('./helpers/expectEvent');
 
 const Hub = artifacts.require('Hub');
@@ -10,8 +11,7 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
-contract('Hub', ([_, systemOwner, attacker, relayer, tokenQwner]) => {
-  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+contract('Hub', ([_, systemOwner, attacker]) => {
   let hub = null;
   let relayer = null;
   let token = null;
@@ -24,16 +24,27 @@ contract('Hub', ([_, systemOwner, attacker, relayer, tokenQwner]) => {
   const _tokenName = 'MyCoin';
   const _initialPayout = new BigNumber(100);
 
+  const senderPrivKey = 'a19ebcbe905b1daa2a4294849f9e6e9c125b42fb6737cab6facd1253282eaeee'
+
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch, _initialPayout);
-    relayer = await Relayer.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch, _initialPayout);
-    // const signup = await hub.signup(_tokenName, { from: owner });
-    // token = await Token.at(signup.logs[0].args.token);
+    relayer = await Relayer.new();
   });
+
+  `signMetaTx (txParams, senderPrivKey, relayNonce, whitelist)`
 
   describe('correctly relays a signup', () => {
     before(async () => {
-      
+      const metatxHandler = MetaTxHandler
+      const senderKeyPair = MetaTxHandler.getSenderKeyPair(senderPrivKey);
+      const txParams = {
+        from: tokenQwner,
+        to: hub.deployed().address,
+        value: 0,
+        data: Hub.methods.methodName(senderKeyPair.address, 'test').encodeABI()
+      };
+      const relayNonce = await MetaTxHandler
+      MetaTxHandler.signMetaTx(txParams, senderPrivKey)
     })
 
     it('returns the total amount of tokens', async () => {

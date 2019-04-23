@@ -26,10 +26,6 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
   const _tokenName = 'MyCoin';
   const _initialPayout = new BigNumber(100);
 
-  // before(async () => {
-  //   hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch);
-  // })
-
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch, _initialPayout);
     const signup = await hub.signup(_tokenName, { from: owner });// owner, 100);
