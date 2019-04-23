@@ -39,7 +39,6 @@ contract Hub {
     mapping (address => bool) public isOrganization;
     mapping (address => bool) public isValidator;
     mapping (address => mapping (address => EdgeWeight)) public edges;
-    mapping (address => bool) public isRelayer;
 
     event Signup(address indexed user, address token);
     event Trust(address indexed from, address indexed to, uint256 limit);
@@ -141,12 +140,6 @@ contract Hub {
         require(trustable(toTrust));
         edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(msg.sender, toTrust, limit);
-    }
-
-    function relayerTrust(address sender, address toTrust, bool yes, uint limit) public {
-        require(trustable(toTrust));
-        edges[sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
-        emit Trust(sender, toTrust, limit);
     }
 
     function updateTrustLimit(address toUpdate, uint256 limit) public {
