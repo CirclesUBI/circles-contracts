@@ -63,6 +63,14 @@ fi
 
 truffle version
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BUILD_DIR=$SCRIPT_DIR/../build/
+
+if [ -d "$BUILD_DIR" ]; then
+  echo "clearing build folder"
+  rm -rf "$BUILD_DIR"
+fi
+
 if [ "$SOLIDITY_COVERAGE" = true ]; then
   node_modules/.bin/solidity-coverage
 
