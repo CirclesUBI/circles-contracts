@@ -12,13 +12,12 @@ contract('Hub', ([_, systemOwner, attacker]) => {
 
   const _issuance = new BigNumber(1736111111111111);
   const _demurrage = new BigNumber(0);
-  const _decimals = new BigNumber(18);
   const _symbol = 'CRC';
   const _limitEpoch = new BigNumber(3600);
   const _initialPayout = new BigNumber(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch, _initialPayout);
+    hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _limitEpoch, _initialPayout);
   });
 
   it('has the correct owner', async () => {
@@ -45,10 +44,6 @@ contract('Hub', ([_, systemOwner, attacker]) => {
     await assertRevert(hub.updateDemurrage(42, { from: attacker }))
   });
 
-  it('has a decimals setting', async () => {
-    (await hub.decimals()).should.be.bignumber.equal(_decimals);
-  });
-
   it('has a symbol', async () => {
     (await hub.symbol()).should.be.equal(_symbol);
   });
@@ -66,7 +61,7 @@ contract('Hub', ([_, systemOwner, attacker]) => {
   });
 
   describe('owner can change system vars', async () => {
-    after(async () => { 
+    after(async () => {
       await hub.updateIssuance(_issuance, { from: systemOwner })
       await hub.updateDemurrage(_demurrage, { from: systemOwner });
       await hub.updateSymbol(_symbol, { from: systemOwner });
