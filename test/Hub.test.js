@@ -6,8 +6,9 @@ require('chai')
   .should();
 
 const Hub = artifacts.require('Hub');
+const Token = artifacts.require('Token');
 
-contract('Hub', ([_, systemOwner, attacker]) => {
+contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, organisation]) => {
   let hub = null;
 
   const _issuance = new BigNumber(1736111111111111);
@@ -80,4 +81,32 @@ contract('Hub', ([_, systemOwner, attacker]) => {
       (await hub.symbol()).should.be.equal('PLUM');
     });
   })
+
+  describe('signup', async () => {
+    beforeEach(async () => {
+      await hub.signup(alice, "AliceCoin");
+    })
+
+    it('reverts if the user has already signed up', async () => {
+      await assertRevert(hub.signup(alice, 'AliceCoin'))
+    });
+
+    it('populates the user <-> token mappings', async () => {
+      const token = await hub.userToToken(alice)
+      token.should.not.be.equal('');
+      (await hub.tokenToUser(token)).should.be.equal(alice);
+    });
+
+    it('pays out the inital payment', async () => {
+      const token = await Token.at(await hub.userToToken(alice));
+      (await token.balanceOf(alice)).should.be.bignumber.equal(_initialPayout);
+    });
+
+    it('sets the token name', async () => {
+      const token = await Token.at(await hub.userToToken(alice));
+      (await token.name()).should.be.equal('AliceCoin');
+    });
+
+  })
+
 });
