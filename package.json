@@ -22,7 +22,7 @@
     "chai-bignumber": "^2.0.2",
     "openzeppelin-solidity": "2.1.1",
     "ganache-cli": "^6.1.8",
-    "truffle": "^5.0.2"
+    "truffle": "^5.0.13"
   },
   "dependencies": {
     "pify": "^4.0.1"
