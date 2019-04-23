@@ -54,6 +54,7 @@ contract Hub {
     modifier onlyRelayer() {
         require (relayers[msg.sender]);
         _;
+    }
 
     constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
         require (_owner != address(0));
@@ -74,7 +75,7 @@ contract Hub {
 
     function toggleRelayer(address _relayer) public onlyOwner {
         require(_relayer != address(0));
-        if (relayers[_relayer]) { relayer[_relayer] =  true; } else { relayer[_relayers] = false }
+        if (relayers[_relayer]) { relayers[_relayer] =  true; } else { relayers[_relayer] = false; }
     }
 
     function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
@@ -103,8 +104,8 @@ contract Hub {
 
     function time() public view returns (uint) { return block.timestamp; }
 
-    function trustable(address _address) returns (bool) {
-        return (userToToken[_address] || isValidator[_address]) && !isOrganization[_address]
+    function trustable(address _address) public returns (bool) {
+        return (address(userToToken[_address]) != address(0) || isValidator[_address]) && !isOrganization[_address];
     }
 
     // No exit allowed. Once you create a personal token, you're in for good.
@@ -142,19 +143,19 @@ contract Hub {
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address toTrust, bool yes, uint limit) public {
-        require(trustable(toTrust))
+        require(trustable(toTrust));
         edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(msg.sender, toTrust, limit);
     }
 
     function relayerTrust(address sender, address toTrust, bool yes, uint limit) public {
-        require(trustable(toTrust))
+        require(trustable(toTrust));
         edges[sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(sender, toTrust, limit);
     }
 
     function updateTrustLimit(address toUpdate, uint256 limit) public {
-        require(trustable(toUpdate))
+        require(trustable(toUpdate));
         require(address(tokenToUser[toUpdate]) != address(0));
         edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
         emit UpdateTrustLimit(msg.sender, toUpdate, limit);
