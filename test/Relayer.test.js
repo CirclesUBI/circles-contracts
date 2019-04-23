@@ -1,5 +1,5 @@
 const { assertRevert } = require('./helpers/assertRevert');
-const MetaTxHandler = require('metatx-server')
+const MetaTxHandler = require('metatx-server');
 const expectEvent = require('./helpers/expectEvent');
 
 const Hub = artifacts.require('Hub');
@@ -24,7 +24,9 @@ contract('Hub', ([_, systemOwner, attacker]) => {
   const _tokenName = 'MyCoin';
   const _initialPayout = new BigNumber(100);
 
-  const senderPrivKey = 'a19ebcbe905b1daa2a4294849f9e6e9c125b42fb6737cab6facd1253282eaeee'
+  const senderPrivKey = 'a19ebcbe905b1daa2a4294849f9e6e9c125b42fb6737cab6facd1253282eaeee';
+  const apiPrivKey = 'b2587855060cd44d40a62a01b14be2d399dd81e2eec4669c7ba56a6d135c11ee';
+  new Web3.providers.HttpProvider(rpcUrl)
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, _issuance, _demurrage, _decimals, _symbol, _limitEpoch, _initialPayout);
@@ -35,7 +37,12 @@ contract('Hub', ([_, systemOwner, attacker]) => {
 
   describe('correctly relays a signup', () => {
     before(async () => {
-      const metatxHandler = MetaTxHandler
+      const metatxHandler = new MetaTxHandler(
+        apiPrivKey,
+        web3.currentProvider,
+        relayer.deployed().address,,
+        Relayer.abi
+      )
       const senderKeyPair = MetaTxHandler.getSenderKeyPair(senderPrivKey);
       const txParams = {
         from: tokenQwner,
