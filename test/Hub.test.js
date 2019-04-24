@@ -8,7 +8,7 @@ require('chai')
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
 
-contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, organisation]) => {
+contract('Hub', ([_, systemOwner, attacker, alice, brian, carol, derek, validator, organisation]) => {
   let hub = null;
 
   const _issuance = new BigNumber(1736111111111111);
@@ -105,93 +105,82 @@ contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, 
   });
 
   describe('trust', async () => {
+    const limit = new BigNumber(100);
+
     beforeEach(async () => {
       await hub.signup(alice, "AliceCoin");
-      await hub.signup(bob, "BobCoin");
+      await hub.signup(brian, "BrianCoin");
       await hub.registerValidator(validator);
     })
 
     it('reverts if the trustee has not signed up', async () => {
-      await assertRevert(hub.trust(carol, 100, {from: alice}));
+      await assertRevert(hub.trust(carol, limit, {from: alice}));
     });
 
-    describe('updates limit in correct leaf on the trust graph', async () => {
-      it('for signed up users', async () => {
-        await hub.trust(bob, 100, {from: alice});
-        (await hub.edges(alice, bob)).should.be.bignumber.equal(new BigNumber(100));
-      });
-      it('for validators', async () => {
-        await hub.trust(validator, 100, {from: alice});
-        (await hub.edges(alice, validator)).should.be.bignumber.equal(new BigNumber(100));
-      });
+    it('signed up users can be trusted', async () => {
+      await hub.trust(brian, limit, {from: alice});
+      (await hub.edges(alice, brian)).should.be.bignumber.equal(limit);
+    });
+
+    it('validators can be trusted', async () => {
+      await hub.trust(validator, limit, {from: alice});
+      (await hub.edges(alice, validator)).should.be.bignumber.equal(limit);
     });
   });
 
   describe('transferThrough', async () => {
     beforeEach(async () => {
       await hub.signup(alice, "AliceCoin");
-      await hub.signup(bob, "BobCoin");
+      await hub.signup(brian, "BrianCoin");
       await hub.signup(carol, "CarolCoin");
-      await hub.signup(dave, "DaveCoin");
+      await hub.signup(derek, "DerekCoin");
       await hub.registerValidator(validator);
     });
 
-    it('single hop transfer between registered users', async () => {
-      await hub.trust(alice, 100, {from: bob});
-      await hub.trust(bob, 100, {from: alice});
+    // --- utils ---
 
+    // throw if dst has not recieved wad from src
+    const assertTransfered = async (src, dst, wad) => {
+      const srcCoin = await Token.at(await hub.userToToken(src));
+      const dstCoin = await Token.at(await hub.userToToken(dst));
+
+      (await srcCoin.balanceOf(src)).should.be.bignumber.equal(_initialPayout.sub(wad));
+      (await srcCoin.balanceOf(dst)).should.be.bignumber.equal(wad);
+    }
+
+    // throw if usr's coin has moved at all
+    const assertStationary = async (usr) => {
+      const coin = await Token.at(await hub.userToToken(usr));
+      (await coin.balanceOf(usr)).should.be.bignumber.equal(_initialPayout);
+    }
+
+    // --- tests ---
+
+    it('single hop transfer between registered users', async () => {
       const wad = new BigNumber(10);
 
-      await hub.transferThrough([bob], wad, {from: alice});
+      await hub.trust(alice, wad, {from: brian});
+      await hub.trust(brian, wad, {from: alice});
 
-      const aliceCoin = await Token.at(await hub.userToToken(alice));
-      const bobCoin = await Token.at(await hub.userToToken(bob));
+      await hub.transferThrough([brian], wad, {from: alice});
 
-      // alice has transfered 10 AliceCoin to bob
-      (await aliceCoin.balanceOf(alice)).should.be.bignumber.equal(_initialPayout.sub(wad));
-      (await aliceCoin.balanceOf(bob)).should.be.bignumber.equal(wad);
-
-      // bob has not moved any tokens
-      (await bobCoin.balanceOf(alice)).should.be.bignumber.equal(new BigNumber(0));
-      (await bobCoin.balanceOf(bob)).should.be.bignumber.equal(_initialPayout);
+      assertTransfered(alice, brian, wad);
+      assertStationary(brian);
     });
 
     it('multi hop transfer between registered users', async () => {
-      await hub.trust(alice, 100, {from: bob});
-      await hub.trust(bob, 100, {from: alice});
-
-      await hub.trust(bob, 100, {from: carol});
-      await hub.trust(carol, 100, {from: bob});
-
-      await hub.trust(carol, 100, {from: dave});
-      await hub.trust(dave, 100, {from: carol});
-
       const wad = new BigNumber(10);
 
-      await hub.transferThrough([bob, carol, dave], wad, {from: alice});
+      await hub.trust(alice, wad, {from: brian});
+      await hub.trust(brian, wad, {from: carol});
+      await hub.trust(carol, wad, {from: derek});
 
-      const aliceCoin = await Token.at(await hub.userToToken(alice));
-      const bobCoin = await Token.at(await hub.userToToken(bob));
-      const carolCoin = await Token.at(await hub.userToToken(carol));
-      const daveCoin = await Token.at(await hub.userToToken(dave));
+      await hub.transferThrough([brian, carol, derek], wad, {from: alice});
 
-      // alice has transfered 10 AliceCoin to bob
-      (await aliceCoin.balanceOf(alice)).should.be.bignumber.equal(_initialPayout.sub(wad));
-      (await aliceCoin.balanceOf(bob)).should.be.bignumber.equal(wad);
-
-      // bob has transfered 10 BobCoin to carol
-      (await bobCoin.balanceOf(bob)).should.be.bignumber.equal(_initialPayout.sub(wad));
-      (await bobCoin.balanceOf(carol)).should.be.bignumber.equal(wad);
-
-      //// carol has transfered 10 CarolCoin to dave
-      (await carolCoin.balanceOf(carol)).should.be.bignumber.equal(_initialPayout.sub(wad));
-      (await carolCoin.balanceOf(dave)).should.be.bignumber.equal(wad);
-
-      //// dave has not moved any tokens
-      (await daveCoin.balanceOf(alice)).should.be.bignumber.equal(new BigNumber(0));
-      (await daveCoin.balanceOf(bob)).should.be.bignumber.equal(new BigNumber(0));
-      (await daveCoin.balanceOf(carol)).should.be.bignumber.equal(new BigNumber(0));
-      (await daveCoin.balanceOf(dave)).should.be.bignumber.equal(_initialPayout);
+      assertTransfered(alice, brian, wad);
+      assertTransfered(brian, carol, wad);
+      assertTransfered(carol, derek, wad);
+      assertStationary(derek);
     });
   });
 });
