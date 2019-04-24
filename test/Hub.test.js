@@ -33,10 +33,6 @@ contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, 
       (await hub.demurrageRate()).should.be.bignumber.equal(_demurrage);
     });
 
-    it('sets the decimals setting', async () => {
-      (await hub.decimals()).should.be.bignumber.equal(_decimals);
-    });
-
     it('sets the symbol', async () => {
       (await hub.symbol()).should.be.equal(_symbol);
     });
