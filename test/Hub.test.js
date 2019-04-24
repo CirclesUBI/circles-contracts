@@ -129,6 +129,9 @@ contract('Hub', ([_, systemOwner, attacker, alice, brian, carol, derek, validato
   });
 
   describe('transferThrough', async () => {
+
+    // --- setup ---
+
     beforeEach(async () => {
       await hub.signup(alice, "AliceCoin");
       await hub.signup(brian, "BrianCoin");
@@ -154,11 +157,13 @@ contract('Hub', ([_, systemOwner, attacker, alice, brian, carol, derek, validato
       (await coin.balanceOf(usr)).should.be.bignumber.equal(_initialPayout);
     }
 
+    // --- data ---
+
+    const wad = new BigNumber(10);
+
     // --- tests ---
 
     it('single hop transfer between registered users', async () => {
-      const wad = new BigNumber(10);
-
       await hub.trust(alice, wad, {from: brian});
       await hub.trust(brian, wad, {from: alice});
 
@@ -168,19 +173,29 @@ contract('Hub', ([_, systemOwner, attacker, alice, brian, carol, derek, validato
       assertStationary(brian);
     });
 
-    it('multi hop transfer between registered users', async () => {
-      const wad = new BigNumber(10);
+    it('single hop transfer through a validator', async () => {
+      await hub.trust(alice, wad, {from: validator});
+      await hub.trust(validator, wad, {from: brian});
 
+      await hub.transferThrough([validator, brian], wad, {from: alice});
+
+      assertTransfered(alice, brian, wad);
+      assertStationary(brian);
+    });
+
+    it('multi hop transfer through registered users and validator', async () => {
       await hub.trust(alice, wad, {from: brian});
       await hub.trust(brian, wad, {from: carol});
-      await hub.trust(carol, wad, {from: derek});
+      await hub.trust(carol, wad, {from: validator});
+      await hub.trust(validator, wad, {from: derek});
 
-      await hub.transferThrough([brian, carol, derek], wad, {from: alice});
+      await hub.transferThrough([brian, carol, validator, derek], wad, {from: alice});
 
       assertTransfered(alice, brian, wad);
       assertTransfered(brian, carol, wad);
       assertTransfered(carol, derek, wad);
       assertStationary(derek);
     });
+
   });
 });
