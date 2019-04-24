@@ -126,4 +126,72 @@ contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, 
       });
     });
   });
+
+  describe('transferThrough', async () => {
+    beforeEach(async () => {
+      await hub.signup(alice, "AliceCoin");
+      await hub.signup(bob, "BobCoin");
+      await hub.signup(carol, "CarolCoin");
+      await hub.signup(dave, "DaveCoin");
+      await hub.registerValidator(validator);
+    });
+
+    it('single hop transfer between registered users', async () => {
+      await hub.trust(alice, 100, {from: bob});
+      await hub.trust(bob, 100, {from: alice});
+
+      const wad = new BigNumber(10);
+
+      await hub.transferThrough([bob], wad, {from: alice});
+
+      const aliceCoin = await Token.at(await hub.userToToken(alice));
+      const bobCoin = await Token.at(await hub.userToToken(bob));
+
+      // alice has transfered 10 AliceCoin to bob
+      (await aliceCoin.balanceOf(alice)).should.be.bignumber.equal(_initialPayout.sub(wad));
+      (await aliceCoin.balanceOf(bob)).should.be.bignumber.equal(wad);
+
+      // bob has not moved any tokens
+      (await bobCoin.balanceOf(alice)).should.be.bignumber.equal(new BigNumber(0));
+      (await bobCoin.balanceOf(bob)).should.be.bignumber.equal(_initialPayout);
+    });
+
+    it('multi hop transfer between registered users', async () => {
+      await hub.trust(alice, 100, {from: bob});
+      await hub.trust(bob, 100, {from: alice});
+
+      await hub.trust(bob, 100, {from: carol});
+      await hub.trust(carol, 100, {from: bob});
+
+      await hub.trust(carol, 100, {from: dave});
+      await hub.trust(dave, 100, {from: carol});
+
+      const wad = new BigNumber(10);
+
+      await hub.transferThrough([bob, carol, dave], wad, {from: alice});
+
+      const aliceCoin = await Token.at(await hub.userToToken(alice));
+      const bobCoin = await Token.at(await hub.userToToken(bob));
+      const carolCoin = await Token.at(await hub.userToToken(carol));
+      const daveCoin = await Token.at(await hub.userToToken(dave));
+
+      // alice has transfered 10 AliceCoin to bob
+      (await aliceCoin.balanceOf(alice)).should.be.bignumber.equal(_initialPayout.sub(wad));
+      (await aliceCoin.balanceOf(bob)).should.be.bignumber.equal(wad);
+
+      // bob has transfered 10 BobCoin to carol
+      (await bobCoin.balanceOf(bob)).should.be.bignumber.equal(_initialPayout.sub(wad));
+      (await bobCoin.balanceOf(carol)).should.be.bignumber.equal(wad);
+
+      //// carol has transfered 10 CarolCoin to dave
+      (await carolCoin.balanceOf(carol)).should.be.bignumber.equal(_initialPayout.sub(wad));
+      (await carolCoin.balanceOf(dave)).should.be.bignumber.equal(wad);
+
+      //// dave has not moved any tokens
+      (await daveCoin.balanceOf(alice)).should.be.bignumber.equal(new BigNumber(0));
+      (await daveCoin.balanceOf(bob)).should.be.bignumber.equal(new BigNumber(0));
+      (await daveCoin.balanceOf(carol)).should.be.bignumber.equal(new BigNumber(0));
+      (await daveCoin.balanceOf(dave)).should.be.bignumber.equal(_initialPayout);
+    });
+  });
 });
