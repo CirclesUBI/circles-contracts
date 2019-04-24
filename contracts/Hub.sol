@@ -103,12 +103,6 @@ contract Hub {
         emit Trust(msg.sender, toTrust, limit);
     }
 
-    function updateTrustLimit(address toUpdate, uint256 limit) public {
-        require(address(tokenToUser[toUpdate]) != address(0));
-        edges[msg.sender][toUpdate] = limit;
-        emit UpdateTrustLimit(msg.sender, toUpdate, limit);
-    }
-
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
     function transferThrough(address[] memory users, uint wad) public {
