@@ -31,7 +31,10 @@ contract Token is ERC20 {
         require(_owner != address(0));
         name = _name;
         owner = _owner;
+
         hub = msg.sender;
+        _approve(owner, hub, uint(-1));
+
         lastTouched = time();
         _mint(_owner, initialPayout);
     }
