@@ -109,7 +109,7 @@ contract Hub {
         require(users.length <= 5);
 
         for (uint i = 0; i < users.length; i++) {
-            require(address(tokenToUser[users[i]]) != address(0) || isValidator[users[i]]);
+            require(address(userToToken[users[i]]) != address(0) || isValidator[users[i]]);
         }
 
         address prev = msg.sender;
