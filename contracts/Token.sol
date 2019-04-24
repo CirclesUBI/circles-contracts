@@ -18,34 +18,34 @@ contract Token is ERC20 {
     event TokenIssuance(uint256 amount);
 
     modifier onlyHub() {
-	    require(msg.sender == hub);
+        require(msg.sender == hub);
         _;
     }
 
     modifier onlyOwner() {
-	    require(msg.sender == owner);
-	    _;
+        require(msg.sender == owner);
+        _;
     }
 
     constructor(address _owner, string memory _name, uint256 initialPayout) public {
-	    require(_owner != address(0));
-	    name = _name;
-	    owner = _owner;
-	    hub = msg.sender;
+        require(_owner != address(0));
+        name = _name;
+        owner = _owner;
+        hub = msg.sender;
         lastTouched = time();
         _mint(_owner, initialPayout);
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-	    require(_newOwner != address(0));
-	    owner = _newOwner;
-	    return true;
+        require(_newOwner != address(0));
+        owner = _newOwner;
+        return true;
     }
 
     function updateHub(address _hub) public onlyOwner returns (bool) {
         require(_hub != address(0));
-	    hub = _hub;
-	    return true;
+        hub = _hub;
+        return true;
     }
 
     function time() internal view returns (uint) {
