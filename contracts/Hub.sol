@@ -75,8 +75,6 @@ contract Hub {
         return true;
     }
 
-    function time() public view returns (uint) { return block.timestamp; }
-
     // No exit allowed. Once you create a personal token, you're in for good.
     function signup(address sender, string calldata _name) external returns (bool) {
         require(address(userToToken[sender]) == address(0));
