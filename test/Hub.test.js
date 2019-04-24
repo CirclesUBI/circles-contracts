@@ -36,7 +36,7 @@ contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, 
     it('sets the symbol', async () => {
       (await hub.symbol()).should.be.equal(_symbol);
     });
-  })
+  });
 
   describe('attacker cannot change system vars', async () => {
     it('attacker cannot change owner', async () => {
@@ -54,7 +54,7 @@ contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, 
     it('attacker cannot change symbol', async () => {
       await assertRevert(hub.updateSymbol('PLUM', { from: attacker }))
     });
-  })
+  });
 
   describe('owner can change system vars', async () => {
     it('owner can change owner', async () => {
@@ -76,7 +76,7 @@ contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, 
       await hub.updateSymbol('PLUM', { from: systemOwner });
       (await hub.symbol()).should.be.equal('PLUM');
     });
-  })
+  });
 
   describe('signup', async () => {
     beforeEach(async () => {
@@ -102,7 +102,28 @@ contract('Hub', ([_, systemOwner, attacker, alice, bob, carol, dave, validator, 
       const token = await Token.at(await hub.userToToken(alice));
       (await token.name()).should.be.equal('AliceCoin');
     });
+  });
 
-  })
+  describe('trust', async () => {
+    beforeEach(async () => {
+      await hub.signup(alice, "AliceCoin");
+      await hub.signup(bob, "BobCoin");
+      await hub.registerValidator(validator);
+    })
 
+    it('reverts if the trustee has not signed up', async () => {
+      await assertRevert(hub.trust(carol, 100, {from: alice}));
+    });
+
+    describe('updates limit in correct leaf on the trust graph', async () => {
+      it('for signed up users', async () => {
+        await hub.trust(bob, 100, {from: alice});
+        (await hub.edges(alice, bob)).should.be.bignumber.equal(new BigNumber(100));
+      });
+      it('for validators', async () => {
+        await hub.trust(validator, 100, {from: alice});
+        (await hub.edges(alice, validator)).should.be.bignumber.equal(new BigNumber(100));
+      });
+    });
+  });
 });

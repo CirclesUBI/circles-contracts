@@ -97,7 +97,7 @@ contract Hub {
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address toTrust, uint limit) public {
-        require(address(tokenToUser[toTrust]) != address(0) || isValidator[toTrust]);
+        require(address(userToToken[toTrust]) != address(0) || isValidator[toTrust]);
         require(!isOrganization[toTrust]);
         edges[msg.sender][toTrust] = limit;
         emit Trust(msg.sender, toTrust, limit);
