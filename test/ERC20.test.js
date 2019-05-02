@@ -10,7 +10,7 @@ const Token = artifacts.require('Token');
 const BigNumber = web3.utils.BN;
 
 require('chai')
-  .use(require('chai-bignumber')(BigNumber))
+  .use(require('chai-bn')(BigNumber))
   .should();
 
 contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) {

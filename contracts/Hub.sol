@@ -72,9 +72,10 @@ contract Hub {
         return true;
     }
 
-    function toggleRelayer(address _relayer) public onlyOwner {
+    function updateRelayer(address _relayer, bool isRelayer) public onlyOwner returns (bool) {
         require(_relayer != address(0));
-        if (relayers[_relayer]) { relayers[_relayer] =  true; } else { relayers[_relayer] = false; }
+        relayers[_relayer] = isRelayer;
+        return true;
     }
 
     function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
@@ -108,15 +109,15 @@ contract Hub {
     }
 
     function signup(string calldata _name) external returns (bool) {
-        return signup(msg.sender, _name);
+        return _signup(msg.sender, _name);
     }
 
     function relayerSignup(address sender, string calldata _name) external onlyRelayer returns (bool) {
-        return signup(sender, _name);
+        return _signup(sender, _name);
     }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function _signup(address sender, string calldata _name) internal returns (bool) {
+    function _signup(address sender, string memory _name) internal returns (bool) {
         require(address(userToToken[sender]) == address(0));
         require(!isOrganization[sender]);
 
