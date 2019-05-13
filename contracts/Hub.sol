@@ -21,7 +21,6 @@ contract Hub {
 
     uint256 public issuanceRate; // = 1736111111111111; // ~1050 tokens per week
     uint256 public demurrageRate; // = 0;
-    uint8 public decimals; // = 18;
     string public symbol; // = 'CRC';
     uint256 initialPayout;
 
@@ -50,17 +49,20 @@ contract Hub {
         _;
     }
 
+<<<<<<< HEAD
     modifier onlyRelayer() {
         require (relayers[msg.sender]);
         _;
     }
 
     constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
+=======
+    constructor(address _owner, uint256 _issuance, uint256 _demurrage, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
+>>>>>>> origin/master
         require (_owner != address(0));
         owner = _owner;
         issuanceRate = _issuance;
         demurrageRate = _demurrage;
-        decimals = _decimals;
         symbol = _symbol;
         LIMIT_EPOCH = _limitEpoch;
         initialPayout = _initialPayout;

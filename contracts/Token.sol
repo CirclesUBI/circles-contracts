@@ -7,6 +7,8 @@ import "./interfaces/HubI.sol";
 contract Token is ERC20 {
     using SafeMath for uint256;
 
+    uint8 public decimals = 18;
+
     string public name;
     uint public lastTouched;
     address public hub;
@@ -16,34 +18,34 @@ contract Token is ERC20 {
     event TokenIssuance(uint256 amount);
 
     modifier onlyHub() {
-	    require(msg.sender == hub);
+        require(msg.sender == hub);
         _;
-    }     
+    }
 
     modifier onlyOwner() {
-	    require(msg.sender == owner);
-	    _;
+        require(msg.sender == owner);
+        _;
     }
 
     constructor(address _owner, string memory _name, uint256 initialPayout) public {
-	    require(_owner != address(0));
-	    name = _name;
-	    owner = _owner;
-	    hub = msg.sender;
+        require(_owner != address(0));
+        name = _name;
+        owner = _owner;
+        hub = msg.sender;
         lastTouched = time();
         _mint(_owner, initialPayout);
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-	    require(_newOwner != address(0));
-	    owner = _newOwner;
-	    return true;
+        require(_newOwner != address(0));
+        owner = _newOwner;
+        return true;
     }
 
     function updateHub(address _hub) public onlyOwner returns (bool) {
         require(_hub != address(0));
-	    hub = _hub;
-	    return true;
+        hub = _hub;
+        return true;
     }
 
     function time() internal view returns (uint) {
@@ -52,10 +54,6 @@ contract Token is ERC20 {
 
     function symbol() public view returns (string memory) {
         return HubI(hub).symbol();
-    }
-
-    function decimals() public view returns (uint8) {
-        return HubI(hub).decimals();
     }
 
     function look() public view returns (uint256) {
