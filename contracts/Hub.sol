@@ -49,16 +49,12 @@ contract Hub {
         _;
     }
 
-<<<<<<< HEAD
     modifier onlyRelayer() {
         require (relayers[msg.sender]);
         _;
     }
 
-    constructor(address _owner, uint256 _issuance, uint256 _demurrage, uint8 _decimals, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
-=======
     constructor(address _owner, uint256 _issuance, uint256 _demurrage, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
->>>>>>> origin/master
         require (_owner != address(0));
         owner = _owner;
         issuanceRate = _issuance;
