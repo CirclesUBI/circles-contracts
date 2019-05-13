@@ -27,7 +27,7 @@ contract('ERC20', function ([_, owner, recipient, anotherAccount, systemOwner]) 
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _limitEpoch, _initialPayout);
-    const signup = await hub.signup(owner, _tokenName, { from: owner });// owner, 100);
+    const signup = await hub.signup(_tokenName, { from: owner });
     token = await Token.at(signup.logs[0].args.token);
   });
 
