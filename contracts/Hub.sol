@@ -32,6 +32,7 @@ contract Hub {
         uint256 lastTouched;
     }
 
+    mapping (address => bool) public relayers;
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
     mapping (address => bool) public isOrganization;
@@ -48,6 +49,11 @@ contract Hub {
         _;
     }
 
+    modifier onlyRelayer() {
+        require (relayers[msg.sender]);
+        _;
+    }
+
     constructor(address _owner, uint256 _issuance, uint256 _demurrage, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
         require (_owner != address(0));
         owner = _owner;
@@ -61,6 +67,12 @@ contract Hub {
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
         require(_newOwner != address(0));
         owner = _newOwner;
+        return true;
+    }
+
+    function updateRelayer(address _relayer, bool isRelayer) public onlyOwner returns (bool) {
+        require(_relayer != address(0));
+        relayers[_relayer] = isRelayer;
         return true;
     }
 
@@ -90,8 +102,20 @@ contract Hub {
 
     function time() public view returns (uint) { return block.timestamp; }
 
+    function trustable(address _address) public returns (bool) {
+        return (address(userToToken[_address]) != address(0) || isValidator[_address]) && !isOrganization[_address];
+    }
+
+    function signup(string calldata _name) external returns (bool) {
+        return _signup(msg.sender, _name);
+    }
+
+    function relayerSignup(address sender, string calldata _name) external onlyRelayer returns (bool) {
+        return _signup(sender, _name);
+    }
+
     // No exit allowed. Once you create a personal token, you're in for good.
-    function signup(address sender, string calldata _name) external returns (bool) {
+    function _signup(address sender, string memory _name) internal returns (bool) {
         require(address(userToToken[sender]) == address(0));
         require(!isOrganization[sender]);
 
@@ -112,13 +136,13 @@ contract Hub {
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address toTrust, bool yes, uint limit) public {
-        require(address(tokenToUser[toTrust]) != address(0) || isValidator[toTrust]);
-        require(!isOrganization[toTrust]);
+        require(trustable(toTrust));
         edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
         emit Trust(msg.sender, toTrust, limit);
     }
 
     function updateTrustLimit(address toUpdate, uint256 limit) public {
+        require(trustable(toUpdate));
         require(address(tokenToUser[toUpdate]) != address(0));
         edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
         emit UpdateTrustLimit(msg.sender, toUpdate, limit);
@@ -182,3 +206,4 @@ contract Hub {
         }
     }
 }
+
