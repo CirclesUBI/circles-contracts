@@ -7,7 +7,7 @@ require('chai')
 
 const Hub = artifacts.require('Hub');
 
-contract('Hub', ([_, systemOwner, attacker]) => {
+contract('Hub', ([_, systemOwner, attacker, relayer, tokenQwner]) => {
   let hub = null;
 
   const _issuance = new BigNumber(1736111111111111);
@@ -26,6 +26,15 @@ contract('Hub', ([_, systemOwner, attacker]) => {
 
   it('attacker cannot change owner', async () => {
     await assertRevert(hub.changeOwner(attacker, { from: attacker }))
+  });
+
+  it('owner can add relayer', async () => {
+    await hub.updateRelayer(relayer, true, { from: systemOwner });
+    (await hub.relayers(relayer)).should.be.equal(true);
+  });
+
+  it('attacker cannot add relayer', async () => {
+    await assertRevert(hub.updateRelayer(relayer, true, { from: attacker }))
   });
 
   it('has an issuance rate', async () => {
@@ -61,12 +70,14 @@ contract('Hub', ([_, systemOwner, attacker]) => {
   });
 
   describe('owner can change system vars', async () => {
+
     after(async () => {
       await hub.updateIssuance(_issuance, { from: systemOwner })
       await hub.updateDemurrage(_demurrage, { from: systemOwner });
       await hub.updateSymbol(_symbol, { from: systemOwner });
       return hub.updateLimitEpoch(_limitEpoch, { from: systemOwner });
     });
+
 
     it('owner can change issuance', async () => {
       await hub.updateIssuance(1, { from: systemOwner });
