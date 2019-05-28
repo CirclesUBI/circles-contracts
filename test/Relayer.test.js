@@ -67,7 +67,6 @@ contract('Relayer', ([_, systemOwner, sender, api]) => {
           user: sender,
         });
 
-        tokenAddress = event.args.token;
         return event.args.user.should.equal(sender);
       });
 
