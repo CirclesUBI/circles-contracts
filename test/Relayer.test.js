@@ -12,25 +12,24 @@ require('chai')
   .use(require('chai-bn')(BigNumber))
   .should();
 
-contract('Relayer', ([_, systemOwner, sender, api]) => {
+contract('Relayer', ([_, systemOwner, sender, api, attacker]) => {
+  let hub;
+  let relayer;
+  let token;
+  let metatxHandler;
+
+  const _issuance = new BigNumber(1736111111111111);
+  const _demurrage = new BigNumber(0);
+  const _symbol = 'CRC';
+  const _limitEpoch = new BigNumber(3600);
+  const _tokenName = 'MyCoin';
+  const _initialPayout = new BigNumber(100);
+
+  const senderPrivKey = '2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202';
+  const apiPrivKey = '2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501203';
+  let senderKeyPair;
 
   describe('relays a signup', () => {
-    let hub;
-    let relayer;
-    let token;
-    let metatxHandler;
-
-    const _issuance = new BigNumber(1736111111111111);
-    const _demurrage = new BigNumber(0);
-    const _symbol = 'CRC';
-    const _limitEpoch = new BigNumber(3600);
-    const _tokenName = 'MyCoin';
-    const _initialPayout = new BigNumber(100);
-
-    const senderPrivKey = '2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202';
-    const apiPrivKey = '2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501203';
-    let senderKeyPair;
-
     beforeEach(async () => {
       hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _limitEpoch, _initialPayout);
       relayer = await Relayer.new();
@@ -103,8 +102,42 @@ contract('Relayer', ([_, systemOwner, sender, api]) => {
       //write me
     })
 
-    describe('when the signature is invalid', async () => {
-      //write me
+    describe('when claiming the wrong address', async () => {
+      it('should throw', async () => {
+        const data = await hub.contract.methods.relayerSignup(attacker, _tokenName).encodeABI();
+        const txParams = {
+          from: sender,
+          to: hub.contract.options.address,
+          value: 0,
+          data,
+        };
+        const relayNonce = await metatxHandler.getRelayNonce(sender);
+        const signedMetaTx = await metatxHandler.signMetaTx(txParams, senderPrivKey, relayNonce);
+        return assertRevert(metatxHandler.signRelayerTx(signedMetaTx.metaSignedTx));
+      })
+    })
+
+    describe('when signature is invalid', async () => {
+      it('should throw', async () => {
+        const data = await hub.contract.methods.relayerSignup(sender, _tokenName).encodeABI();
+        const txParams = {
+          //from: attacker,
+          to: hub.contract.options.address,
+          value: 0,
+          data,
+        };
+
+        const relayNonce = await metatxHandler.getRelayNonce(sender);
+        const signedMetaTx = await metatxHandler.signMetaTx(txParams, senderPrivKey, relayNonce);
+        let signedRawTx = await metatxHandler.signRelayerTx(signedMetaTx.metaSignedTx);
+        console.log(signedRawTx)
+        console.log(attacker)
+
+        signedRawTx = signedRawTx.slice(0, 566) + attacker.slice(2, 42) + signedRawTx.slice(606, 668) + '0' + signedRawTx.slice(669)
+        console.log(signedRawTx)
+
+        return assertRevert(metatxHandler.sendRawTransaction(signedRawTx));
+      })
     })
   });
 });
