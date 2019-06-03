@@ -133,6 +133,13 @@ contract('Relayer', ([_, systemOwner, sender, api, attacker]) => {
     })
 
     describe('when claiming the wrong address', async () => {
+      // this is actually testing contract logic, though it may not look like it
+      // signRelayerTx calls estimate gas, which attempts to run the transaction virtually 
+      // and triggers the contract address-checking. Nice extension would be to try and run the
+      // transaction non-virtually, but might have to bypass web3 to do that
+      // simply putting the attacker's address into the serialized raw transaction won't work
+      // because web3 validates the signature before sending raw and changing the signed data makes
+      // ecrecover return an incorrect address (one with no funds)
       it('should throw', async () => {
         const data = await hub.contract.methods.relayerSignup(attacker, _tokenName).encodeABI();
         const txParams = {
