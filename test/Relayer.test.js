@@ -102,9 +102,10 @@ contract('Relayer', ([_, systemOwner, sender, api, attacker]) => {
       //write me
     })
 
-    describe('when claiming the wrong address', async () => {
+    describe('when not sent by a valid relayer', async () => {
       it('should throw', async () => {
-        const data = await hub.contract.methods.relayerSignup(attacker, _tokenName).encodeABI();
+        const setRelayer = hub.updateRelayer(relayer.contract.options.address, false, { from: systemOwner });
+        const data = await hub.contract.methods.relayerSignup(sender, _tokenName).encodeABI();
         const txParams = {
           from: sender,
           to: hub.contract.options.address,
@@ -117,26 +118,18 @@ contract('Relayer', ([_, systemOwner, sender, api, attacker]) => {
       })
     })
 
-    describe('when signature is invalid', async () => {
+    describe('when claiming the wrong address', async () => {
       it('should throw', async () => {
-        const data = await hub.contract.methods.relayerSignup(sender, _tokenName).encodeABI();
+        const data = await hub.contract.methods.relayerSignup(attacker, _tokenName).encodeABI();
         const txParams = {
-          //from: attacker,
+          from: sender,
           to: hub.contract.options.address,
           value: 0,
           data,
         };
-
         const relayNonce = await metatxHandler.getRelayNonce(sender);
         const signedMetaTx = await metatxHandler.signMetaTx(txParams, senderPrivKey, relayNonce);
-        let signedRawTx = await metatxHandler.signRelayerTx(signedMetaTx.metaSignedTx);
-        console.log(signedRawTx)
-        console.log(attacker)
-
-        signedRawTx = signedRawTx.slice(0, 566) + attacker.slice(2, 42) + signedRawTx.slice(606, 668) + '0' + signedRawTx.slice(669)
-        console.log(signedRawTx)
-
-        return assertRevert(metatxHandler.sendRawTransaction(signedRawTx));
+        return assertRevert(metatxHandler.signRelayerTx(signedMetaTx.metaSignedTx));
       })
     })
   });
