@@ -27,6 +27,7 @@ contract('Relayer', ([_, systemOwner, sender, api, attacker]) => {
 
   const senderPrivKey = '2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202';
   const apiPrivKey = '2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501203';
+  const attackerPrivKey = '2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501204';
   let senderKeyPair;
 
   describe('relays a signup', () => {
@@ -99,7 +100,20 @@ contract('Relayer', ([_, systemOwner, sender, api, attacker]) => {
     });
 
     describe('when the sender is an organization', async () => {
-      //write me
+      it('should throw', async () => {
+        const organizationSignup = await hub.organizationSignup({ from: attacker });
+
+        const data = await hub.contract.methods.relayerSignup(attacker, _tokenName).encodeABI();
+        const txParams = {
+          from: attacker,
+          to: hub.contract.options.address,
+          value: 0,
+          data,
+        };
+        const relayNonce = await metatxHandler.getRelayNonce(attacker);
+        const signedMetaTx = await metatxHandler.signMetaTx(txParams, attackerPrivKey, relayNonce);
+        return assertRevert(metatxHandler.signRelayerTx(signedMetaTx.metaSignedTx));
+      })
     })
 
     describe('when not sent by a valid relayer', async () => {
