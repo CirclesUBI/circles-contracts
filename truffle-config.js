@@ -5,7 +5,7 @@ module.exports = {
       port: 8545,
       network_id: '*',
     },
-    production: {
+    staging: {
       host: 'ganache',
       port: 8545,
       network_id: '*',
