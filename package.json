@@ -5,7 +5,8 @@
   "scripts": {
     "test": "scripts/test.sh",
     "ganache": "ganache-cli -i 5777 -m 'enable depend figure right kit daughter job giraffe news window tonight more'",
-    "ganache:detach": "ganache-cli -d -i 5777 -m 'enable depend figure right kit daughter job giraffe news window tonight more'"
+    "ganache:detach": "ganache-cli -d -i 5777 -m 'enable depend figure right kit daughter job giraffe news window tonight more'",
+    "ganache:ci": "nohup ganache-cli -i 5777 -m 'enable depend figure right kit daughter job giraffe news window tonight more' &"
   },
   "repository": {
     "type": "git",
