@@ -6,7 +6,7 @@ module.exports = {
       network_id: '*',
     },
     staging: {
-      host: 'ganache',
+      host: 'api.joincircles.net',
       port: 8545,
       network_id: '*',
     },
