@@ -11,10 +11,10 @@ const instantiateHub = async (hubFactory) => {
   return hubContract
 };
 
-module.exports = async function(deployer) {
+module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(TxRelay);
   const relayer = await TxRelay.deployed();
   const hubFactory = await HubFactory.deployed();
   const hub = await instantiateHub(hubFactory);
-  return hub.methods.updateRelayer(relayer.address, true).call();
+  return hub.methods.updateRelayer(relayer.address, true).send();
 };
