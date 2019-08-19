@@ -2,17 +2,12 @@ pragma solidity ^0.5.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Token.sol";
-import "./Organization.sol";
 
-//role of validators
-//hubfactory?
 //finish update function in token
 //what should initial demurrage rate be? And initial issuance?
 //more events in Token
 //parallel transfer helper
-//organization can transfer, and transitively transfer
 //abstract ownership utils?
-//organization signup
 
 contract Hub {
     using SafeMath for uint256;
@@ -35,23 +30,14 @@ contract Hub {
     mapping (address => bool) public relayers;
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
-    mapping (address => bool) public isOrganization;
-    mapping (address => bool) public isValidator;
     mapping (address => mapping (address => EdgeWeight)) public edges;
 
     event Signup(address indexed user, address token);
-    event OrganizationSignup(address indexed organization);
     event Trust(address indexed from, address indexed to, uint256 limit);
-    event RegisterValidator(address indexed validator);
     event UpdateTrustLimit(address indexed from, address indexed to, uint256 limit);
 
     modifier onlyOwner() {
         require (msg.sender == owner);
-        _;
-    }
-
-    modifier onlyRelayer() {
-        require (relayers[msg.sender]);
         _;
     }
 
@@ -103,51 +89,20 @@ contract Hub {
 
     function time() public view returns (uint) { return block.timestamp; }
 
-    function trustable(address _address) public returns (bool) {
-        return (address(userToToken[_address]) != address(0) || isValidator[_address]) && !isOrganization[_address];
-    }
-
-    function organizationSignup() external returns (bool) {
-        return _organizationSignup(msg.sender);
-    }
-
-    function relayerOrganizationSignup(address sender) external onlyRelayer returns (bool) {
-        return _organizationSignup(msg.sender);
-    }
-
-    function _organizationSignup(address sender) internal returns (bool) {
-        require(address(userToToken[sender]) == address(0));
-        require(!isOrganization[sender]);
-        isOrganization[sender] = true;
-        emit OrganizationSignup(sender);
-        return true;
-    }
-
-    function signup(string calldata _name) external returns (bool) {
-        return _signup(msg.sender, _name);
-    }
-
-    function relayerSignup(address sender, string calldata _name) external onlyRelayer returns (bool) {
-        return _signup(sender, _name);
+    function trustable(address _address) public view returns (bool) {
+        return (address(userToToken[_address]) != address(0));
     }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function _signup(address sender, string memory _name) internal returns (bool) {
-        require(address(userToToken[sender]) == address(0));
-        require(!isOrganization[sender]);
+    function signup(string memory _name) public returns (bool) {
+        require(address(userToToken[msg.sender]) == address(0));
 
-        Token token = new Token(sender, _name, initialPayout);
-        userToToken[sender] = token;
-        tokenToUser[address(token)] = sender;
+        Token token = new Token(msg.sender, _name, initialPayout);
+        userToToken[msg.sender] = token;
+        tokenToUser[address(token)] = msg.sender;
 
-        emit Signup(sender, address(token));
+        emit Signup(msg.sender, address(token));
         return true;
-    }
-
-    // no validation on the registering of validators
-    function registerValidator(address validator) external {
-        isValidator[validator] = true;
-        emit RegisterValidator(validator);
     }
 
     // Trust does not have to be reciprocated.
@@ -205,21 +160,17 @@ contract Hub {
             // assert that the limit is greater than the proposed value
             assert(edges[node][prevNode].limit >= edges[node][prevNode].value);
 
-            if (isValidator[node]) {
-                prevValidator = node;
-            } else {
-                // Transfer the current token from the msg.sender to the current node
-                token.transferFrom(msg.sender, node, wad);
+            // Transfer the current token from the msg.sender to the current node
+            token.transferFrom(msg.sender, node, wad);
 
-                // If this is not the last token in the list transfer the nextToken
-                // from the current node to the msg.sender
-                if (tokenIndex + 1 < tokens.length) {
+            // If this is not the last token in the list transfer the nextToken
+            // from the current node to the msg.sender
+            if (tokenIndex + 1 < tokens.length) {
 
-                    Token nextToken = Token(tokens[tokenIndex + 1]);
-                    nextToken.transferFrom(node, msg.sender, wad);
-                }
-                tokenIndex++;
+                Token nextToken = Token(tokens[tokenIndex + 1]);
+                nextToken.transferFrom(node, msg.sender, wad);
             }
+            tokenIndex++;
         }
     }
 }

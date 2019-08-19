@@ -28,15 +28,6 @@ contract('Hub', ([_, systemOwner, attacker, relayer, tokenQwner]) => {
     await assertRevert(hub.changeOwner(attacker, { from: attacker }))
   });
 
-  it('owner can add relayer', async () => {
-    await hub.updateRelayer(relayer, true, { from: systemOwner });
-    (await hub.relayers(relayer)).should.be.equal(true);
-  });
-
-  it('attacker cannot add relayer', async () => {
-    await assertRevert(hub.updateRelayer(relayer, true, { from: attacker }))
-  });
-
   it('has an issuance rate', async () => {
     (await hub.issuanceRate()).should.be.bignumber.equal(_issuance);
   });
