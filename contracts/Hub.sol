@@ -40,6 +40,7 @@ contract Hub {
     mapping (address => mapping (address => EdgeWeight)) public edges;
 
     event Signup(address indexed user, address token);
+    event OrganizationSignup(address indexed organization);
     event Trust(address indexed from, address indexed to, uint256 limit);
     event RegisterValidator(address indexed validator);
     event UpdateTrustLimit(address indexed from, address indexed to, uint256 limit);
@@ -104,6 +105,22 @@ contract Hub {
 
     function trustable(address _address) public returns (bool) {
         return (address(userToToken[_address]) != address(0) || isValidator[_address]) && !isOrganization[_address];
+    }
+
+    function organizationSignup() external returns (bool) {
+        return _organizationSignup(msg.sender);
+    }
+
+    function relayerOrganizationSignup(address sender) external onlyRelayer returns (bool) {
+        return _organizationSignup(msg.sender);
+    }
+
+    function _organizationSignup(address sender) internal returns (bool) {
+        require(address(userToToken[sender]) == address(0));
+        require(!isOrganization[sender]);
+        isOrganization[sender] = true;
+        emit OrganizationSignup(sender);
+        return true;
     }
 
     function signup(string calldata _name) external returns (bool) {
