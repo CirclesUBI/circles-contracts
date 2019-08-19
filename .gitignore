@@ -6,3 +6,5 @@ build
 
 *.swp
 *.txt
+
+.zos.session
