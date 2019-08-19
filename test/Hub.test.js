@@ -1,14 +1,19 @@
+const truffleContract = require("truffle-contract");
 const BigNumber = web3.utils.BN;
 const { assertRevert } = require('./helpers/assertRevert');
+const safeArtifacts = require('gnosis-safe/build/contracts/GnosisSafe.json');
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
   .should();
 
 const Hub = artifacts.require('Hub');
+const GnosisSafe = truffleContract(safeArtifacts);
+GnosisSafe.setProvider(web3.currentProvider)
 
-contract('Hub', ([_, systemOwner, attacker, relayer, tokenQwner]) => {
+contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
   let hub = null;
+  let safe = null;
 
   const _issuance = new BigNumber(1736111111111111);
   const _demurrage = new BigNumber(0);
@@ -18,6 +23,8 @@ contract('Hub', ([_, systemOwner, attacker, relayer, tokenQwner]) => {
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _limitEpoch, _initialPayout);
+    safe = await GnosisSafe.new({ from: safeOwner })
+    await safe.setup([safeOwner], 1, safeOwner, '0x0', { from: safeOwner });
   });
 
   it('has the correct owner', async () => {
