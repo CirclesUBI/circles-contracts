@@ -5,6 +5,11 @@ module.exports = {
       port: 8545,
       network_id: '*',
     },
+    staging: {
+      host: 'api.joincircles.net',
+      port: 8545,
+      network_id: '*',
+    },
     coverage: {
       host: 'localhost',
       network_id: '*',
