@@ -1,6 +1,7 @@
 const truffleContract = require("truffle-contract");
 const BigNumber = web3.utils.BN;
 const { assertRevert } = require('./helpers/assertRevert');
+const { signTypedData } = require('./helpers/signTypedData');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('gnosis-safe/build/contracts/GnosisSafe.json');
 
@@ -14,6 +15,7 @@ const GnosisSafe = truffleContract(safeArtifacts);
 GnosisSafe.setProvider(web3.currentProvider)
 
 contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
   let hub = null;
   let safe = null;
 
@@ -105,6 +107,97 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
   describe('new user can signup, when user is an external account', async () => {
     beforeEach(async () => {
       await hub.signup(_tokenName, { from: safeOwner })
+    });
+
+    it('signup emits an event with correct sender', async () => {
+        const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+        const event = expectEvent.inLogs(logs, 'Signup', {
+          user: safeOwner,
+        });
+
+        return event.args.user.should.equal(safeOwner);
+    });
+
+    it('token is owned by correct sender', async () => {
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+
+      const event = expectEvent.inLogs(logs, 'Signup', {
+        user: safeOwner,
+      });
+
+      tokenAddress = event.args.token;
+      token = await Token.at(tokenAddress);
+      (await token.owner()).should.be.equal(safeOwner);
+    })
+
+    it('token has the correct name', async () => {
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+
+      const event = expectEvent.inLogs(logs, 'Signup', {
+        user: safeOwner,
+      });
+
+      tokenAddress = event.args.token;
+      token = await Token.at(tokenAddress);
+      (await token.name()).should.be.equal(_tokenName);
+    })
+
+    it('throws if sender tries to sign up twice', async () => {
+      await assertRevert(hub.signup(_tokenName, { from: safeOwner }));
+    })
+  })
+
+  describe('new user can signup, when user is a safe', async () => {
+    beforeEach(async () => {
+      const to = hub.address
+      const value = 0
+      const data = await hub.contract.methods.signup(_tokenName).encodeABI();
+      const operation = 0
+      const safeTxGas = 6721975
+      const dataGas = 6721975
+      const gasPrice = 20000000000
+      const gasToken = ZERO_ADDRESS
+      const refundReceiver = ZERO_ADDRESS
+      const nonce = (await safe.nonce()).toNumber()
+      const typedData = {
+        types: {
+          EIP712Domain: [
+            { type: "address", name: "verifyingContract" }
+          ],
+          // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
+          SafeTx: [
+            { type: "address", name: "to" },
+            { type: "uint256", name: "value" },
+            { type: "bytes", name: "data" },
+            { type: "uint8", name: "operation" },
+            { type: "uint256", name: "safeTxGas" },
+            { type: "uint256", name: "dataGas" },
+            { type: "uint256", name: "gasPrice" },
+            { type: "address", name: "gasToken" },
+            { type: "address", name: "refundReceiver" },
+            { type: "uint256", name: "nonce" },
+            ]
+          },
+          domain: {
+            verifyingContract: safe.address
+          },
+          primaryType: "SafeTx",
+          message: {
+            to,
+            value,
+            data,
+            operation,
+            safeTxGas,
+            dataGas,
+            gasPrice,
+            gasToken,
+            refundReceiver,
+            nonce
+          }
+        }
+        const signatureBytes = await signTypedData(safeOwner, typedData, web3)
+        await safe.execTransaction(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, signatureBytes,
+          { from: safeOwner })
     });
 
     it('signup emits an event with correct sender', async () => {
