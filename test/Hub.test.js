@@ -153,18 +153,18 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
       const value = 0
       const data = await hub.contract.methods.signup(_tokenName).encodeABI();
       const operation = 0
-      const safeTxGas = 6721975
-      const dataGas = 6721975
-      const gasPrice = 20000000000
+      const safeTxGas = 0
+      const dataGas = 0
+      const gasPrice = 0
       const gasToken = ZERO_ADDRESS
       const refundReceiver = ZERO_ADDRESS
       const nonce = (await safe.nonce()).toNumber()
+      
       const typedData = {
         types: {
           EIP712Domain: [
             { type: "address", name: "verifyingContract" }
           ],
-          // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
           SafeTx: [
             { type: "address", name: "to" },
             { type: "uint256", name: "value" },
@@ -197,35 +197,36 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
         }
         const signatureBytes = await signTypedData(safeOwner, typedData, web3)
         await safe.execTransaction(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, signatureBytes,
-          { from: safeOwner })
+          { from: safeOwner, gas: 17592186044415 })
     });
 
     it('signup emits an event with correct sender', async () => {
-        const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+        const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
+
         const event = expectEvent.inLogs(logs, 'Signup', {
-          user: safeOwner,
+          user: safe.address,
         });
 
-        return event.args.user.should.equal(safeOwner);
+        return event.args.user.should.equal(safe.address);
     });
 
     it('token is owned by correct sender', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
 
       const event = expectEvent.inLogs(logs, 'Signup', {
-        user: safeOwner,
+        user: safe.address,
       });
 
       tokenAddress = event.args.token;
       token = await Token.at(tokenAddress);
-      (await token.owner()).should.be.equal(safeOwner);
+      (await token.owner()).should.be.equal(safe.address);
     })
 
     it('token has the correct name', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
 
       const event = expectEvent.inLogs(logs, 'Signup', {
-        user: safeOwner,
+        user: safe.address,
       });
 
       tokenAddress = event.args.token;
@@ -234,7 +235,59 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
     })
 
     it('throws if sender tries to sign up twice', async () => {
-      await assertRevert(hub.signup(_tokenName, { from: safeOwner }));
+      const to = hub.address
+      const value = 0
+      const data = await hub.contract.methods.signup(_tokenName).encodeABI();
+      const operation = 0
+      const safeTxGas = 0
+      const dataGas = 0
+      const gasPrice = 0
+      const gasToken = ZERO_ADDRESS
+      const refundReceiver = ZERO_ADDRESS
+      const nonce = (await safe.nonce()).toNumber()
+      
+      const typedData = {
+        types: {
+          EIP712Domain: [
+            { type: "address", name: "verifyingContract" }
+          ],
+          SafeTx: [
+            { type: "address", name: "to" },
+            { type: "uint256", name: "value" },
+            { type: "bytes", name: "data" },
+            { type: "uint8", name: "operation" },
+            { type: "uint256", name: "safeTxGas" },
+            { type: "uint256", name: "dataGas" },
+            { type: "uint256", name: "gasPrice" },
+            { type: "address", name: "gasToken" },
+            { type: "address", name: "refundReceiver" },
+            { type: "uint256", name: "nonce" },
+            ]
+          },
+          domain: {
+            verifyingContract: safe.address
+          },
+          primaryType: "SafeTx",
+          message: {
+            to,
+            value,
+            data,
+            operation,
+            safeTxGas,
+            dataGas,
+            gasPrice,
+            gasToken,
+            refundReceiver,
+            nonce
+          }
+        }
+        const signatureBytes = await signTypedData(safeOwner, typedData, web3)
+      await safe.execTransaction(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, signatureBytes,
+          { from: safeOwner, gas: 17592186044415 })
+
+      const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
+
+      return expect(logs).to.have.lengthOf(1);
     })
 
   })
