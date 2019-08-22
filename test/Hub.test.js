@@ -2,6 +2,7 @@ const truffleContract = require("truffle-contract");
 const BigNumber = web3.utils.BN;
 const { assertRevert } = require('./helpers/assertRevert');
 const { signTypedData } = require('./helpers/signTypedData');
+const { formatTypedData } = require('./helpers/formatTypedData');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('gnosis-safe/build/contracts/GnosisSafe.json');
 
@@ -159,45 +160,12 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
       const gasToken = ZERO_ADDRESS
       const refundReceiver = ZERO_ADDRESS
       const nonce = (await safe.nonce()).toNumber()
+
+      const typedData = formatTypedData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, nonce, safe.address)
       
-      const typedData = {
-        types: {
-          EIP712Domain: [
-            { type: "address", name: "verifyingContract" }
-          ],
-          SafeTx: [
-            { type: "address", name: "to" },
-            { type: "uint256", name: "value" },
-            { type: "bytes", name: "data" },
-            { type: "uint8", name: "operation" },
-            { type: "uint256", name: "safeTxGas" },
-            { type: "uint256", name: "dataGas" },
-            { type: "uint256", name: "gasPrice" },
-            { type: "address", name: "gasToken" },
-            { type: "address", name: "refundReceiver" },
-            { type: "uint256", name: "nonce" },
-            ]
-          },
-          domain: {
-            verifyingContract: safe.address
-          },
-          primaryType: "SafeTx",
-          message: {
-            to,
-            value,
-            data,
-            operation,
-            safeTxGas,
-            dataGas,
-            gasPrice,
-            gasToken,
-            refundReceiver,
-            nonce
-          }
-        }
-        const signatureBytes = await signTypedData(safeOwner, typedData, web3)
-        await safe.execTransaction(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, signatureBytes,
-          { from: safeOwner, gas: 17592186044415 })
+      const signatureBytes = await signTypedData(safeOwner, typedData, web3)
+      await safe.execTransaction(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, signatureBytes,
+        { from: safeOwner, gas: 17592186044415 })
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -246,42 +214,9 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
       const refundReceiver = ZERO_ADDRESS
       const nonce = (await safe.nonce()).toNumber()
       
-      const typedData = {
-        types: {
-          EIP712Domain: [
-            { type: "address", name: "verifyingContract" }
-          ],
-          SafeTx: [
-            { type: "address", name: "to" },
-            { type: "uint256", name: "value" },
-            { type: "bytes", name: "data" },
-            { type: "uint8", name: "operation" },
-            { type: "uint256", name: "safeTxGas" },
-            { type: "uint256", name: "dataGas" },
-            { type: "uint256", name: "gasPrice" },
-            { type: "address", name: "gasToken" },
-            { type: "address", name: "refundReceiver" },
-            { type: "uint256", name: "nonce" },
-            ]
-          },
-          domain: {
-            verifyingContract: safe.address
-          },
-          primaryType: "SafeTx",
-          message: {
-            to,
-            value,
-            data,
-            operation,
-            safeTxGas,
-            dataGas,
-            gasPrice,
-            gasToken,
-            refundReceiver,
-            nonce
-          }
-        }
-        const signatureBytes = await signTypedData(safeOwner, typedData, web3)
+      const typedData = formatTypedData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, nonce, safe.address)
+
+      const signatureBytes = await signTypedData(safeOwner, typedData, web3)
       await safe.execTransaction(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, signatureBytes,
           { from: safeOwner, gas: 17592186044415 })
 
