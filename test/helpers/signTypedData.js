@@ -1,4 +1,4 @@
-async function signTypedData(account, data, web3) {
+const signTypedData = async (account, data, web3) => {
   return new Promise(function (resolve, reject) {
     web3.currentProvider.send({
       jsonrpc: "2.0", 
