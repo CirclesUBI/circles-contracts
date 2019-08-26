@@ -3,7 +3,7 @@
 const should = require('chai')
   .should();
 
-async function assertRevert (promise) {
+const assertRevert = async (promise) => {
   try {
     await promise;
   } catch (error) {
@@ -11,7 +11,7 @@ async function assertRevert (promise) {
     return;
   }
   should.fail('Expected revert not received');
-}
+};
 
 module.exports = {
   assertRevert,
