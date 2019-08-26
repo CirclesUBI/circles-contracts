@@ -15,7 +15,7 @@ const Token = artifacts.require('Token');
 const GnosisSafe = truffleContract(safeArtifacts);
 GnosisSafe.setProvider(web3.currentProvider)
 
-contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
+contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => {
   const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
   let hub = null;
   let safe = null;
@@ -210,5 +210,68 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
       return expect(logs).to.have.lengthOf(1);
     })
 
+  })
+
+  describe('user can set trust limits', async () => {
+    const trustLimit = 50;
+
+    describe('when trust destination is not a circles token', async () => {
+
+      beforeEach(async () => {
+        await hub.signup(_tokenName, { from: safeOwner });
+      });
+
+      it('should throw', async () => {
+          return assertRevert(hub.trust(normalUser, trustLimit));
+      });
+    });
+
+    describe('when trust destination is a circles token', async () => {
+      beforeEach(async () => {
+        await hub.signup(_tokenName, { from: safeOwner });
+        await hub.signup(_tokenName, { from: normalUser });
+        await hub.trust(normalUser, trustLimit, { from: safeOwner });
+      });
+
+      it('creates a trust event', async () => {
+          const logs = await hub.getPastEvents('Trust', { fromBlock: 0, toBlock: 'latest'});
+
+          return expectEvent.inLogs(logs, 'Trust', {
+            from: safeOwner,
+            to: normalUser
+          });
+
+          return event.args.limit.should.equal(new BigNumber(trustLimit));
+      });
+    })
+
+
+    // it('token is owned by correct sender', async () => {
+    //   const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+
+    //   const event = expectEvent.inLogs(logs, 'Signup', {
+    //     user: safeOwner,
+    //   });
+
+    //   tokenAddress = event.args.token;
+    //   token = await Token.at(tokenAddress);
+    //   (await token.owner()).should.be.equal(safeOwner);
+    // })
+
+    // it('token has the correct name', async () => {
+    //   const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+
+    //   const event = expectEvent.inLogs(logs, 'Signup', {
+    //     user: safeOwner,
+    //   });
+
+    //   tokenAddress = event.args.token;
+    //   token = await Token.at(tokenAddress);
+    //   (await token.name()).should.be.equal(_tokenName);
+    // })
+
+    // it('throws if sender tries to sign up twice', async () => {
+    //   await assertRevert(hub.signup(_tokenName, { from: safeOwner }));
+    // })
   })
 });

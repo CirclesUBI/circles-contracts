@@ -97,6 +97,11 @@ contract Hub {
         emit Trust(msg.sender, toTrust, limit);
     }
 
+    function checkTrustLimit(address from, address to) public view returns (uint256) {
+        uint256 max = (userToToken[to].totalSupply().mul(limits[to][from])).div(1000000000000000000);
+        return max.sub(userToToken[from].balanceOf(to));
+    }
+
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
     function transferThrough(address[] memory users, uint wad) public {
@@ -104,8 +109,9 @@ contract Hub {
         address prev = msg.sender;
         for (uint i = 0; i < users.length; i++) {
             address curr = users[i];
+            uint256 max = (userToToken[curr].totalSupply().mul(limits[curr][prev])).div(1000000000000000000);
 
-            require(userToToken[prev].balanceOf(curr) + wad <= limits[curr][prev], "Trust limit exceeded");
+            require(userToToken[prev].balanceOf(curr) + wad <= max, "Trust limit exceeded");
 
             userToToken[prev].hubTransfer(prev, curr, wad);
             prev = curr;
