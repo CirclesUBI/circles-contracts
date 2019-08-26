@@ -1,10 +1,11 @@
-const truffleContract = require("truffle-contract");
-const BigNumber = web3.utils.BN;
+const truffleContract = require('truffle-contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const { signTypedData } = require('./helpers/signTypedData');
 const { formatTypedData } = require('./helpers/formatTypedData');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('gnosis-safe/build/contracts/GnosisSafe.json');
+
+const BigNumber = web3.utils.BN;
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
@@ -13,23 +14,24 @@ require('chai')
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
 const GnosisSafe = truffleContract(safeArtifacts);
-GnosisSafe.setProvider(web3.currentProvider)
+GnosisSafe.setProvider(web3.currentProvider);
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
-  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+contract('Hub', ([_, systemOwner, attacker, safeOwner]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
 
-  const _issuance = new BigNumber(1736111111111111);
-  const _demurrage = new BigNumber(0);
-  const _symbol = 'CRC';
-  const _limitEpoch = new BigNumber(3600);
-  const _initialPayout = new BigNumber(100);
-  const _tokenName = 'testToken'
+  const issuance = new BigNumber(1736111111111111);
+  const demurrage = new BigNumber(0);
+  const symbol = 'CRC';
+  const limitEpoch = new BigNumber(3600);
+  const initialPayout = new BigNumber(100);
+  const tokenName = 'testToken';
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, _issuance, _demurrage, _symbol, _limitEpoch, _initialPayout);
-    safe = await GnosisSafe.new({ from: safeOwner })
+    hub = await Hub.new(systemOwner, issuance, demurrage, symbol, limitEpoch, initialPayout);
+    safe = await GnosisSafe.new({ from: safeOwner });
     await safe.setup([safeOwner], 1, safeOwner, '0x0', { from: safeOwner });
   });
 
@@ -38,48 +40,47 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
   });
 
   it('attacker cannot change owner', async () => {
-    await assertRevert(hub.changeOwner(attacker, { from: attacker }))
+    await assertRevert(hub.changeOwner(attacker, { from: attacker }));
   });
 
   it('has an issuance rate', async () => {
-    (await hub.issuanceRate()).should.be.bignumber.equal(_issuance);
+    (await hub.issuanceRate()).should.be.bignumber.equal(issuance);
   });
 
   it('attacker cannot change issuance', async () => {
-    await assertRevert(hub.updateIssuance(42, { from: attacker }))
+    await assertRevert(hub.updateIssuance(42, { from: attacker }));
   });
 
   it('has a demurrage rate', async () => {
-    (await hub.demurrageRate()).should.be.bignumber.equal(_demurrage);
+    (await hub.demurrageRate()).should.be.bignumber.equal(demurrage);
   });
 
   it('attacker cannot change demurrage', async () => {
-    await assertRevert(hub.updateDemurrage(42, { from: attacker }))
+    await assertRevert(hub.updateDemurrage(42, { from: attacker }));
   });
 
   it('has a symbol', async () => {
-    (await hub.symbol()).should.be.equal(_symbol);
+    (await hub.symbol()).should.be.equal(symbol);
   });
 
   it('attacker cannot change symbol', async () => {
-    await assertRevert(hub.updateSymbol('PLUM', { from: attacker }))
+    await assertRevert(hub.updateSymbol('PLUM', { from: attacker }));
   });
 
   it('has a limit epoch value', async () => {
-    (await hub.LIMIT_EPOCH()).should.be.bignumber.equal(_limitEpoch);
+    (await hub.LIMIT_EPOCH()).should.be.bignumber.equal(limitEpoch);
   });
 
   it('attacker cannot change limit epoch', async () => {
-    await assertRevert(hub.updateLimitEpoch(42, { from: attacker }))
+    await assertRevert(hub.updateLimitEpoch(42, { from: attacker }));
   });
 
   describe('owner can change system vars', async () => {
-
     after(async () => {
-      await hub.updateIssuance(_issuance, { from: systemOwner })
-      await hub.updateDemurrage(_demurrage, { from: systemOwner });
-      await hub.updateSymbol(_symbol, { from: systemOwner });
-      return hub.updateLimitEpoch(_limitEpoch, { from: systemOwner });
+      await hub.updateIssuance(issuance, { from: systemOwner });
+      await hub.updateDemurrage(demurrage, { from: systemOwner });
+      await hub.updateSymbol(symbol, { from: systemOwner });
+      return hub.updateLimitEpoch(limitEpoch, { from: systemOwner });
     });
 
 
@@ -102,25 +103,24 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
       await hub.updateLimitEpoch(1, { from: systemOwner });
       (await hub.LIMIT_EPOCH()).should.be.bignumber.equal(new BigNumber(1));
     });
-
-  })
+  });
 
   describe('new user can signup, when user is an external account', async () => {
     beforeEach(async () => {
-      await hub.signup(_tokenName, { from: safeOwner })
+      await hub.signup(tokenName, { from: safeOwner });
     });
 
     it('signup emits an event with correct sender', async () => {
-        const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
-        const event = expectEvent.inLogs(logs, 'Signup', {
-          user: safeOwner,
-        });
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
+      const event = expectEvent.inLogs(logs, 'Signup', {
+        user: safeOwner,
+      });
 
-        return event.args.user.should.equal(safeOwner);
+      return event.args.user.should.equal(safeOwner);
     });
 
     it('token is owned by correct sender', async () => {
-      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
 
       const event = expectEvent.inLogs(logs, 'Signup', {
         user: safeOwner,
@@ -129,10 +129,10 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
       tokenAddress = event.args.token;
       token = await Token.at(tokenAddress);
       (await token.owner()).should.be.equal(safeOwner);
-    })
+    });
 
     it('token has the correct name', async () => {
-      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
 
       const event = expectEvent.inLogs(logs, 'Signup', {
         user: safeOwner,
@@ -140,46 +140,50 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
 
       tokenAddress = event.args.token;
       token = await Token.at(tokenAddress);
-      (await token.name()).should.be.equal(_tokenName);
-    })
+      (await token.name()).should.be.equal(tokenName);
+    });
 
     it('throws if sender tries to sign up twice', async () => {
-      await assertRevert(hub.signup(_tokenName, { from: safeOwner }));
-    })
-  })
+      await assertRevert(hub.signup(tokenName, { from: safeOwner }));
+    });
+  });
 
   describe('new user can signup, when user is a safe', async () => {
     beforeEach(async () => {
-      const to = hub.address
-      const value = 0
-      const data = await hub.contract.methods.signup(_tokenName).encodeABI();
-      const operation = 0
-      const safeTxGas = 0
-      const dataGas = 0
-      const gasPrice = 0
-      const gasToken = ZERO_ADDRESS
-      const refundReceiver = ZERO_ADDRESS
-      const nonce = (await safe.nonce()).toNumber()
+      const to = hub.address;
+      const value = 0;
+      const data = await hub.contract.methods.signup(tokenName).encodeABI();
+      const operation = 0;
+      const safeTxGas = 0;
+      const dataGas = 0;
+      const gasPrice = 0;
+      const gasToken = ZERO_ADDRESS;
+      const refundReceiver = ZERO_ADDRESS;
+      const nonce = (await safe.nonce()).toNumber();
 
-      const typedData = formatTypedData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, nonce, safe.address)
-      
-      const signatureBytes = await signTypedData(safeOwner, typedData, web3)
-      await safe.execTransaction(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, signatureBytes,
-        { from: safeOwner, gas: 17592186044415 })
+      const typedData = formatTypedData(
+        to, value, data, operation, safeTxGas, dataGas, gasPrice,
+        gasToken, refundReceiver, nonce, safe.address);
+
+      const signatureBytes = await signTypedData(safeOwner, typedData, web3);
+      await safe.execTransaction(
+        to, value, data, operation, safeTxGas, dataGas, gasPrice,
+        gasToken, refundReceiver, signatureBytes,
+        { from: safeOwner, gas: 17592186044415 });
     });
 
     it('signup emits an event with correct sender', async () => {
-        const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
 
-        const event = expectEvent.inLogs(logs, 'Signup', {
-          user: safe.address,
-        });
+      const event = expectEvent.inLogs(logs, 'Signup', {
+        user: safe.address,
+      });
 
-        return event.args.user.should.equal(safe.address);
+      return event.args.user.should.equal(safe.address);
     });
 
     it('token is owned by correct sender', async () => {
-      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
 
       const event = expectEvent.inLogs(logs, 'Signup', {
         user: safe.address,
@@ -188,10 +192,10 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
       tokenAddress = event.args.token;
       token = await Token.at(tokenAddress);
       (await token.owner()).should.be.equal(safe.address);
-    })
+    });
 
     it('token has the correct name', async () => {
-      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest'});
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
 
       const event = expectEvent.inLogs(logs, 'Signup', {
         user: safe.address,
@@ -199,31 +203,34 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => {
 
       tokenAddress = event.args.token;
       token = await Token.at(tokenAddress);
-      (await token.name()).should.be.equal(_tokenName);
-    })
+      (await token.name()).should.be.equal(tokenName);
+    });
 
     it('throws if sender tries to sign up twice', async () => {
-      const to = hub.address
-      const value = 0
-      const data = await hub.contract.methods.signup(_tokenName).encodeABI();
-      const operation = 0
-      const safeTxGas = 0
-      const dataGas = 0
-      const gasPrice = 0
-      const gasToken = ZERO_ADDRESS
-      const refundReceiver = ZERO_ADDRESS
-      const nonce = (await safe.nonce()).toNumber()
-      
-      const typedData = formatTypedData(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, nonce, safe.address)
+      const to = hub.address;
+      const value = 0;
+      const data = await hub.contract.methods.signup(tokenName).encodeABI();
+      const operation = 0;
+      const safeTxGas = 0;
+      const dataGas = 0;
+      const gasPrice = 0;
+      const gasToken = ZERO_ADDRESS;
+      const refundReceiver = ZERO_ADDRESS;
+      const nonce = (await safe.nonce()).toNumber();
 
-      const signatureBytes = await signTypedData(safeOwner, typedData, web3)
-      await safe.execTransaction(to, value, data, operation, safeTxGas, dataGas, gasPrice, gasToken, refundReceiver, signatureBytes,
-          { from: safeOwner, gas: 17592186044415 })
+      const typedData = formatTypedData(
+        to, value, data, operation, safeTxGas, dataGas, gasPrice,
+        gasToken, refundReceiver, nonce, safe.address);
+
+      const signatureBytes = await signTypedData(safeOwner, typedData, web3);
+      await safe.execTransaction(
+        to, value, data, operation, safeTxGas, dataGas, gasPrice,
+        gasToken, refundReceiver, signatureBytes,
+        { from: safeOwner, gas: 17592186044415 });
 
       const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
 
       return expect(logs).to.have.lengthOf(1);
-    })
-
-  })
+    });
+  });
 });
