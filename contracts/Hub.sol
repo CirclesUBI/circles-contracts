@@ -97,9 +97,9 @@ contract Hub {
         emit Trust(msg.sender, toTrust, limit);
     }
 
-    function checkTrustLimit(address from, address to) public view returns (uint256) {
-        uint256 max = (userToToken[to].totalSupply().mul(limits[to][from])).div(1000000000000000000);
-        return max.sub(userToToken[from].balanceOf(to));
+    function checkSendLimit(address from, address to) public view returns (uint256) {
+        uint256 max = (userToToken[to].totalSupply().mul(limits[to][from])).div(100);
+        return max.sub(userToToken[to].balanceOf(from));
     }
 
     // Starts with msg.sender then ,
