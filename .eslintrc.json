@@ -1,0 +1,7 @@
+{
+    "extends": "airbnb-base",
+    "rules": {
+    	"no-undef": "off",
+    	"no-extraneous-dependencies": "off"
+    }
+}
