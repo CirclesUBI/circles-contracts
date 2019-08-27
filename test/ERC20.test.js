@@ -70,6 +70,8 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       });
 
       describe('when the sender has enough balance', () => {
+        const amount = new BigNumber(100);
+
         it('transfers the requested amount', async () => {
           await token.transfer(to, amount, { from: owner });
 
