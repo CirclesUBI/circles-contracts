@@ -3,8 +3,9 @@ const should = require('chai').should();
 
 const inLogs = (logs, eventName, eventArgs = {}) => {
   const event = logs.find((e) => {
+    let matches = false;
     if (e.event === eventName) {
-      let matches = true;
+      matches = true;
 
       for (const [k, v] of Object.entries(eventArgs)) { // eslint-disable-line no-restricted-syntax
         if (e.args[k] !== v) {
@@ -16,7 +17,7 @@ const inLogs = (logs, eventName, eventArgs = {}) => {
         return matches;
       }
     }
-    return e;
+    return matches;
   });
 
   should.exist(event);
