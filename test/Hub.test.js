@@ -17,20 +17,18 @@ const GnosisSafe = truffleContract(safeArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-
-contract('Hub', ([_, systemOwner, attacker, safeOwner]) => { // eslint-disable-line no-unused-vars
+contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
 
   const issuance = new BigNumber(1736111111111111);
   const demurrage = new BigNumber(0);
   const symbol = 'CRC';
-  const limitEpoch = new BigNumber(3600);
   const initialPayout = new BigNumber(100);
   const tokenName = 'testToken';
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, issuance, demurrage, symbol, limitEpoch, initialPayout);
+    hub = await Hub.new(systemOwner, issuance, demurrage, symbol, initialPayout);
     safe = await GnosisSafe.new({ from: safeOwner });
     await safe.setup([safeOwner], 1, safeOwner, '0x0', { from: safeOwner });
   });
@@ -67,20 +65,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => { // eslint-disable-l
     await assertRevert(hub.updateSymbol('PLUM', { from: attacker }));
   });
 
-  it('has a limit epoch value', async () => {
-    (await hub.LIMIT_EPOCH()).should.be.bignumber.equal(limitEpoch);
-  });
-
-  it('attacker cannot change limit epoch', async () => {
-    await assertRevert(hub.updateLimitEpoch(42, { from: attacker }));
-  });
-
   describe('owner can change system vars', async () => {
     after(async () => {
       await hub.updateIssuance(issuance, { from: systemOwner });
       await hub.updateDemurrage(demurrage, { from: systemOwner });
       await hub.updateSymbol(symbol, { from: systemOwner });
-      return hub.updateLimitEpoch(limitEpoch, { from: systemOwner });
     });
 
 
@@ -97,11 +86,6 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => { // eslint-disable-l
     it('owner can change symbol', async () => {
       await hub.updateSymbol('PLUM', { from: systemOwner });
       (await hub.symbol()).should.be.equal('PLUM');
-    });
-
-    it('owner can change limit epoch', async () => {
-      await hub.updateLimitEpoch(1, { from: systemOwner });
-      (await hub.LIMIT_EPOCH()).should.be.bignumber.equal(new BigNumber(1));
     });
   });
 
@@ -231,6 +215,136 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner]) => { // eslint-disable-l
       const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
 
       return expect(logs).to.have.lengthOf(1);
+    });
+  });
+
+  describe('user can set trust limits', async () => {
+    const trustLimit = 50;
+
+    describe('when trust destination is not a circles token', async () => {
+      beforeEach(async () => {
+        await hub.signup(tokenName, { from: safeOwner });
+      });
+
+      it('should throw', async () => assertRevert(hub.trust(normalUser, trustLimit)));
+    });
+
+    describe('when trust destination is a circles token', async () => {
+      beforeEach(async () => {
+        await hub.signup(tokenName, { from: safeOwner });
+        await hub.signup(tokenName, { from: normalUser });
+        await hub.trust(normalUser, trustLimit, { from: safeOwner });
+      });
+
+      it('creates a trust event', async () => {
+        const logs = await hub.getPastEvents('Trust', { fromBlock: 0, toBlock: 'latest' });
+
+        const event = expectEvent.inLogs(logs, 'Trust', {
+          from: safeOwner,
+          to: normalUser,
+        });
+
+        return event.args.limit.should.be.bignumber.equal(new BigNumber(trustLimit));
+      });
+
+      it('correctly sets the trust limit', async () => {
+        (await hub.limits(safeOwner, normalUser))
+          .should.be.bignumber.equal(new BigNumber(trustLimit));
+      });
+
+      describe('calculates the tradeable amount', async () => {
+        it('returns correct amount when no tokens have been traded', async () => {
+          const tokenAddress = await hub.userToToken(safeOwner);
+          const token = await Token.at(tokenAddress);
+          const totalSupply = await token.totalSupply();
+          const allowable = totalSupply * (trustLimit / 100);
+          (await hub.checkSendLimit(normalUser, safeOwner))
+            .should.be.bignumber.equal(new BigNumber(allowable));
+        });
+
+        it('returns correct amount when tokens have been traded', async () => {
+          const amount = new BigNumber(25);
+          const tokenAddress = await hub.userToToken(safeOwner);
+          const token = await Token.at(tokenAddress);
+          await token.transfer(normalUser, amount, { from: safeOwner });
+          const totalSupply = await token.totalSupply();
+          const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
+          (await hub.checkSendLimit(normalUser, safeOwner))
+            .should.be.bignumber.equal(allowable);
+        });
+
+        it('returns correct amount when no tokens are tradeable', async () => {
+          const amount = new BigNumber(50);
+          const tokenAddress = await hub.userToToken(safeOwner);
+          const token = await Token.at(tokenAddress);
+          await token.transfer(normalUser, amount, { from: safeOwner });
+          const totalSupply = await token.totalSupply();
+          const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
+          (await hub.checkSendLimit(normalUser, safeOwner))
+            .should.be.bignumber.equal(allowable);
+        });
+
+        it('returns correct amount when there is not trust connection', async () => {
+          const amount = new BigNumber(0);
+          (await hub.checkSendLimit(safeOwner, normalUser))
+            .should.be.bignumber.equal(amount);
+        });
+
+        describe('user can update trust limits', async () => {
+          const newTrustLimit = 75;
+          let txHash;
+
+          beforeEach(async () => {
+            txHash = await hub.trust(normalUser, newTrustLimit, { from: safeOwner });
+          });
+
+          it('creates a trust event', async () => {
+            const { logs } = txHash
+
+            const event = expectEvent.inLogs(logs, 'Trust', {
+              from: safeOwner,
+              to: normalUser,
+            });
+
+            return event.args.limit.should.be.bignumber.equal(new BigNumber(newTrustLimit));
+          });
+
+          it('correctly sets the trust limit', async () => {
+            (await hub.limits(safeOwner, normalUser))
+              .should.be.bignumber.equal(new BigNumber(newTrustLimit));
+          });
+
+          it('returns correct amount when no tokens have been traded', async () => {
+            const tokenAddress = await hub.userToToken(safeOwner);
+            const token = await Token.at(tokenAddress);
+            const totalSupply = await token.totalSupply();
+            const allowable = totalSupply * (newTrustLimit / 100);
+            (await hub.checkSendLimit(normalUser, safeOwner))
+              .should.be.bignumber.equal(new BigNumber(allowable));
+          });
+
+          it('returns correct amount when tokens have been traded', async () => {
+            const amount = new BigNumber(25);
+            const tokenAddress = await hub.userToToken(safeOwner);
+            const token = await Token.at(tokenAddress);
+            await token.transfer(normalUser, amount, { from: safeOwner });
+            const totalSupply = await token.totalSupply();
+            const allowable = new BigNumber(totalSupply * (newTrustLimit / 100)).sub(amount);
+            (await hub.checkSendLimit(normalUser, safeOwner))
+              .should.be.bignumber.equal(allowable);
+          });
+
+          it('returns correct amount when no tokens are tradeable', async () => {
+            const amount = new BigNumber(50);
+            const tokenAddress = await hub.userToToken(safeOwner);
+            const token = await Token.at(tokenAddress);
+            await token.transfer(normalUser, amount, { from: safeOwner });
+            const totalSupply = await token.totalSupply();
+            const allowable = new BigNumber(totalSupply * (newTrustLimit / 100)).sub(amount);
+            (await hub.checkSendLimit(normalUser, safeOwner)).should.be.bignumber.equal(allowable);
+          });
+        });
+      });
     });
   });
 });

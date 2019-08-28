@@ -21,12 +21,11 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   const issuance = new BigNumber(1736111111111111);
   const demurrage = new BigNumber(0);
   const symbol = 'CRC';
-  const limitEpoch = new BigNumber(3600);
   const tokenName = 'MyCoin';
   const initialPayout = new BigNumber(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, issuance, demurrage, symbol, limitEpoch, initialPayout);
+    hub = await Hub.new(systemOwner, issuance, demurrage, symbol, initialPayout);
     const signup = await hub.signup(tokenName, { from: owner });
     token = await Token.at(signup.logs[0].args.token);
   });
