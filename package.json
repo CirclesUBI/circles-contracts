@@ -1,6 +1,8 @@
 {
   "name": "circles-contracts",
   "version": "1.0.0",
+  "author": "Sarah Friend (http://isthisa.com)",
+  "license": "AGPL",
   "preinstall": "nvm use -i 10.15.0 || echo nvm not found: check node version && pause",
   "scripts": {
     "test": "scripts/test.sh",
