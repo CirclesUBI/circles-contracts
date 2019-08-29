@@ -1,9 +1,6 @@
 # Dependency directory
 node_modules
 
-# truffle build directory
-build
-
 *.swp
 *.txt
 

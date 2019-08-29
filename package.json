@@ -31,6 +31,6 @@
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
-    "gnosis-safe": "^0.1.0"
+    "@gnosis.pm/safe-contracts": "^1.0.0"
   }
 }
