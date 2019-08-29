@@ -3,7 +3,7 @@ const { assertRevert } = require('./helpers/assertRevert');
 const { signTypedData } = require('./helpers/signTypedData');
 const { formatTypedData } = require('./helpers/formatTypedData');
 const expectEvent = require('./helpers/expectEvent');
-const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
+const safeArtifacts = require('gnosis-safe/build/contracts/GnosisSafe.json');
 
 const BigNumber = web3.utils.BN;
 
