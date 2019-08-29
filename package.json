@@ -1,6 +1,6 @@
 {
   "name": "circles-contracts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Sarah Friend (http://isthisa.com)",
   "license": "AGPL",
   "preinstall": "nvm use -i 10.15.0 || echo nvm not found: check node version && pause",
@@ -33,6 +33,7 @@
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
-    "@gnosis.pm/safe-contracts": "^1.0.0"
+    "@gnosis.pm/safe-contracts": "^1.0.0",
+    "gnosis-safe": "^0.1.0"
   }
 }
