@@ -1,7 +1,15 @@
 {
   "name": "circles-contracts",
-  "version": "1.0.0",
-  "preinstall": "nvm use -i 10.15.0 || echo nvm not found: check node version && pause",
+  "version": "1.0.3",
+  "contributors": [
+    "Sarah Friend (https://github.com/ana0)",
+    "Jake Gillberg (https://github.com/Jake-Gillberg)",
+    "David Terry (https://github.com/xwvvvvwx)",
+    "Ed Murphy (https://github.com/edzillion)",
+    "Ashoka Finley (https://github.com/shkfnly)",
+    "Martin Lundfall (https://github.com/MrChico)"
+  ],
+  "license": "AGPL",
   "scripts": {
     "test": "scripts/test.sh",
     "ganache": "ganache-cli -d -i 5777 -m \"enable depend figure right kit daughter job giraffe news window tonight more\"",
@@ -27,7 +35,6 @@
     "metatx-server": "^1.0.8",
     "openzeppelin-solidity": "2.1.1",
     "pify": "^4.0.1",
-    "truffle": "^5.0.14",
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
