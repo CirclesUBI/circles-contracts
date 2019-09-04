@@ -31,7 +31,7 @@ There are several components:
 
 ### Token
 
-This is derived from standard ERC20 implementations, with two main differences: The balance for the "owner" (UBI receiver) is calculated based on the time elapsed since the contract was created, and there is an "hubTransfer" function that allows trusted transitive exchanges. Tokens belong to the hub that deployed them, and can only transact transitively with tokens from the same hub. Tokens have owners, which can be an external account or any kind of contract - in our deployment, they will [gnosis safes](https://github.com/gnosis/safe-contracts).
+This is derived from standard ERC20 implementations, with two main differences: The balance for the "owner" (UBI receiver) is calculated based on the time elapsed since the contract was created, and there is an "hubTransfer" function that allows trusted transitive exchanges. Tokens belong to the hub that deployed them, and can only transact transitively with tokens from the same hub. Tokens have owners, which can be an external account or any kind of contract - in our deployment, they will be [gnosis safes](https://github.com/gnosis/safe-contracts).
 
 ### Hub
 
