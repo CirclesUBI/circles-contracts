@@ -35,9 +35,10 @@
     "metatx-server": "^1.0.8",
     "openzeppelin-solidity": "2.1.1",
     "pify": "^4.0.1",
+    "truffle": "^5.0.34",
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
-    "gnosis-safe": "^0.1.0"
+    "@gnosis.pm/safe-contracts": "^1.0.0"
   }
 }
