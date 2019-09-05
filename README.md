@@ -31,7 +31,7 @@ There are several components:
 
 ### Token
 
-This is derived from standard ERC20 implementations, with two main differences: The balance for the "owner" (UBI receiver) is calculated based on the time elapsed since the contract was created, and there is an "hubTransfer" function that allows trusted transitive exchanges. Tokens belong to the hub that deployed them, and can only transact transitively with tokens from the same hub. Tokens have owners, which can be an external account or any kind of contract - in our deployment, they will [gnosis safes](https://github.com/gnosis/safe-contracts).
+This is derived from standard ERC20 implementations, with two main differences: The balance for the "owner" (UBI receiver) is calculated based on the time elapsed since the contract was created, and there is an "hubTransfer" function that allows trusted transitive exchanges. Tokens belong to the hub that deployed them, and can only transact transitively with tokens from the same hub. Tokens have owners, which can be an external account or any kind of contract - in our deployment, they will be [gnosis safes](https://github.com/gnosis/safe-contracts).
 
 ### Hub
 
@@ -47,11 +47,11 @@ Illustrated here are some of the main available calls:
 
 ## Getting started
 
-Requires [node version 10](https://nodejs.org/en/download/) and [Truffle 5](https://github.com/trufflesuite/truffle) installed globally: `npm install -g truffle`
+Requires [node version 10](https://nodejs.org/en/download/)
 
 Clone down this repo and `npm install`
 
-With ganache running (`npm run ganache`), in a new console window, `truffle compile` then `truffle migrate`
+With ganache running (`npm run ganache`), in a new console window, `node_modules/.bin/truffle compile` then `node_modules/.bin/truffle migrate`
 
 **Note:** This is a work in progress and this should be done only for contribution and exploration purposes.
 
