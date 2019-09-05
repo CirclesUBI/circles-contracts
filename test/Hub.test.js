@@ -4,6 +4,8 @@ const { signTypedData } = require('./helpers/signTypedData');
 const { formatTypedData } = require('./helpers/formatTypedData');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
+const proxyArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/ProxyFactory.json');
+
 
 const BigNumber = web3.utils.BN;
 
@@ -14,12 +16,16 @@ require('chai')
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
 const GnosisSafe = truffleContract(safeArtifacts);
+const ProxyFactory = truffleContract(proxyArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
+ProxyFactory.setProvider(web3.currentProvider);
+
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
+  let proxyFactory = null;
 
   const issuance = new BigNumber(1736111111111111);
   const demurrage = new BigNumber(0);
@@ -29,8 +35,9 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, issuance, demurrage, symbol, initialPayout);
-    safe = await GnosisSafe.new({ from: safeOwner });
-    await safe.setup([safeOwner], 1, safeOwner, '0x0', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: safeOwner });
+    safe = await GnosisSafe.new({ from: systemOwner });
+    proxyFactory = await ProxyFactory.new({ from: systemOwner });
+    await safe.setup([systemOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
   });
 
   it('has the correct owner', async () => {
@@ -149,12 +156,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
         to, value, data, operation, safeTxGas, baseGas, gasPrice,
         gasToken, refundReceiver, nonce, safe.address);
 
-      const signatureBytes = await signTypedData(safeOwner, typedData, web3);
+      const signatureBytes = await signTypedData(systemOwner, typedData, web3);
       const tx = await safe.execTransaction(
         to, value, data, operation, safeTxGas, baseGas, gasPrice,
         gasToken, refundReceiver, signatureBytes,
-        { from: safeOwner, gas: 6721975 });
-      console.log(tx)
+        { from: systemOwner, gas: 6721975 });
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -207,13 +213,115 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
         to, value, data, operation, safeTxGas, dataGas, gasPrice,
         gasToken, refundReceiver, nonce, safe.address);
 
-      const signatureBytes = await signTypedData(safeOwner, typedData, web3);
+      const signatureBytes = await signTypedData(systemOwner, typedData, web3);
       await safe.execTransaction(
+        to, value, data, operation, safeTxGas, dataGas, gasPrice,
+        gasToken, refundReceiver, signatureBytes,
+        { from: systemOwner, gas: 6721975 });
+
+      const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
+
+      return expect(logs).to.have.lengthOf(1);
+    });
+  });
+
+  describe('new user can signup, when user is a safe proxy', async () => {
+    let userSafe = null;
+    let token = null;
+
+    beforeEach(async () => {
+      const to = hub.address;
+      const value = 0;
+      const data = await hub.contract.methods.signup(tokenName).encodeABI();
+      const operation = 0;
+      const safeTxGas = 0;
+      const baseGas = 0;
+      const gasPrice = 0;
+      const gasToken = ZERO_ADDRESS;
+      const refundReceiver = ZERO_ADDRESS;
+      const nonce = (await safe.nonce()).toNumber();
+
+      const proxyData = safe.contract
+        .methods.setup([safeOwner], 1, ZERO_ADDRESS, "0x", ZERO_ADDRESS, 0, ZERO_ADDRESS)
+        .encodeABI();
+
+      const tx = await proxyFactory.createProxy(safe.address, proxyData, { from: safeOwner, gas: 330000, })
+
+      const { logs } = tx;
+
+      const userSafeAddress = logs[0].args.proxy;
+
+      userSafe = await GnosisSafe.at(userSafeAddress);
+
+      const typedData = formatTypedData(
+        to, value, data, operation, safeTxGas, baseGas, gasPrice,
+        gasToken, refundReceiver, nonce, userSafe.address);
+
+      const signatureBytes = await signTypedData(safeOwner, typedData, web3);
+      const tx2 = await userSafe.execTransaction(
+        to, value, data, operation, safeTxGas, baseGas, gasPrice,
+        gasToken, refundReceiver, signatureBytes,
+        { from: safeOwner, gas: 6721975 });
+    });
+
+    it('signup emits an event with correct sender', async () => {
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
+
+      const event = expectEvent.inLogs(logs, 'Signup', {
+        user: userSafe.address,
+      });
+
+      return event.args.user.should.equal(userSafe.address);
+    });
+
+    it('token is owned by correct sender', async () => {
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
+
+      const event = expectEvent.inLogs(logs, 'Signup', {
+        user: userSafe.address,
+      });
+
+      tokenAddress = event.args.token;
+      token = await Token.at(tokenAddress);
+        user: userSafe.address,
+      (await token.owner()).should.be.equal(userSafe.address);
+    });
+
+    it('token has the correct name', async () => {
+      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
+
+      const event = expectEvent.inLogs(logs, 'Signup', {
+        user: userSafe.address,
+      });
+
+      tokenAddress = event.args.token;
+      token = await Token.at(tokenAddress);
+      (await token.name()).should.be.equal(tokenName);
+    });
+
+    it('throws if sender tries to sign up twice', async () => {
+      const to = hub.address;
+      const value = 0;
+      const data = await hub.contract.methods.signup(tokenName).encodeABI();
+      const operation = 0;
+      const safeTxGas = 0;
+      const dataGas = 0;
+      const gasPrice = 0;
+      const gasToken = ZERO_ADDRESS;
+      const refundReceiver = ZERO_ADDRESS;
+      const nonce = (await userSafe.nonce()).toNumber();
+
+      const typedData = formatTypedData(
+        to, value, data, operation, safeTxGas, dataGas, gasPrice,
+        gasToken, refundReceiver, nonce, userSafe.address);
+
+      const signatureBytes = await signTypedData(safeOwner, typedData, web3);
+      await userSafe.execTransaction(
         to, value, data, operation, safeTxGas, dataGas, gasPrice,
         gasToken, refundReceiver, signatureBytes,
         { from: safeOwner, gas: 6721975 });
 
-      const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
+      const logs = await userSafe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
 
       return expect(logs).to.have.lengthOf(1);
     });
