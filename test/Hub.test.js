@@ -157,7 +157,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
         gasToken, refundReceiver, nonce, safe.address);
 
       const signatureBytes = await signTypedData(systemOwner, typedData, web3);
-      const tx = await safe.execTransaction(
+      return safe.execTransaction(
         to, value, data, operation, safeTxGas, baseGas, gasPrice,
         gasToken, refundReceiver, signatureBytes,
         { from: systemOwner, gas: 6721975 });
@@ -242,10 +242,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
       const nonce = (await safe.nonce()).toNumber();
 
       const proxyData = safe.contract
-        .methods.setup([safeOwner], 1, ZERO_ADDRESS, "0x", ZERO_ADDRESS, 0, ZERO_ADDRESS)
+        .methods.setup([safeOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS)
         .encodeABI();
 
-      const tx = await proxyFactory.createProxy(safe.address, proxyData, { from: safeOwner, gas: 330000, })
+      const tx = await proxyFactory
+        .createProxy(safe.address, proxyData, { from: safeOwner, gas: 330000 });
 
       const { logs } = tx;
 
@@ -258,7 +259,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
         gasToken, refundReceiver, nonce, userSafe.address);
 
       const signatureBytes = await signTypedData(safeOwner, typedData, web3);
-      const tx2 = await userSafe.execTransaction(
+      return userSafe.execTransaction(
         to, value, data, operation, safeTxGas, baseGas, gasPrice,
         gasToken, refundReceiver, signatureBytes,
         { from: safeOwner, gas: 6721975 });
@@ -283,7 +284,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
       tokenAddress = event.args.token;
       token = await Token.at(tokenAddress);
-        user: userSafe.address,
+
       (await token.owner()).should.be.equal(userSafe.address);
     });
 
@@ -408,7 +409,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
           });
 
           it('creates a trust event', async () => {
-            const { logs } = txHash
+            const { logs } = txHash;
 
             const event = expectEvent.inLogs(logs, 'Trust', {
               from: safeOwner,
