@@ -6,7 +6,6 @@ const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
 const proxyArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/ProxyFactory.json');
 
-
 const BigNumber = web3.utils.BN;
 
 require('chai')

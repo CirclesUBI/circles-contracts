@@ -1,11 +1,17 @@
 // https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/test/token/ERC20/ERC20.test.js
+const truffleContract = require('truffle-contract');
 
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
+const { signTypedData } = require('./helpers/signTypedData');
+const { formatTypedData } = require('./helpers/formatTypedData');
 
-// const ERC20Mock = artifacts.require('ERC20Mock');
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
+const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
+
+const GnosisSafe = truffleContract(safeArtifacts);
+GnosisSafe.setProvider(web3.currentProvider);
 
 const BigNumber = web3.utils.BN;
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -16,6 +22,7 @@ require('chai')
 
 contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // eslint-disable-line no-unused-vars
   let hub = null;
+  let safe = null;
   let token = null;
 
   const issuance = new BigNumber(1736111111111111);
@@ -26,23 +33,36 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, issuance, demurrage, symbol, initialPayout);
-    const signup = await hub.signup(tokenName, { from: owner });
-    token = await Token.at(signup.logs[0].args.token);
   });
 
   describe('total supply', () => {
+    beforeEach(async () => {
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[0].args.token);
+    });
+
     it('returns the total amount of tokens', async () => {
       (await token.totalSupply()).should.be.bignumber.equal(new BigNumber(100));
     });
   });
 
   describe('decimals', () => {
+    beforeEach(async () => {
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[0].args.token);
+    });
+
     it('tokens always have 18 decimals', async () => {
       (await token.decimals()).should.be.bignumber.equal(new BigNumber(18));
     });
   });
 
   describe('balanceOf', () => {
+    beforeEach(async () => {
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[0].args.token);
+    });
+
     describe('when the requested account has no tokens', () => {
       it('returns zero', async () => {
         (await token.balanceOf(anotherAccount)).should.be.bignumber.equal(new BigNumber(0));
@@ -57,6 +77,11 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   });
 
   describe('transfer', () => {
+    beforeEach(async () => {
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[0].args.token);
+    });
+
     describe('when the recipient is not the zero address', () => {
       const to = recipient;
 
@@ -100,7 +125,136 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     });
   });
 
+  describe('transfer when owner is a safe', () => {
+    const operation = 0;
+    const safeTxGas = 0;
+    const baseGas = 0;
+    const gasPrice = 0;
+    const gasToken = ZERO_ADDRESS;
+    const refundReceiver = ZERO_ADDRESS;
+    const value = 0;
+
+    beforeEach(async () => {
+      safe = await GnosisSafe.new({ from: owner });
+      await safe.setup([owner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
+
+      const to = hub.address;
+      const data = await hub.contract.methods.signup(tokenName).encodeABI();
+      const nonce = (await safe.nonce()).toNumber();
+
+      const typedData = formatTypedData(
+        to, value, data, operation, safeTxGas, baseGas, gasPrice,
+        gasToken, refundReceiver, nonce, safe.address);
+
+      const signatureBytes = await signTypedData(owner, typedData, web3);
+      await safe.execTransaction(
+        to, value, data, operation, safeTxGas, baseGas, gasPrice,
+        gasToken, refundReceiver, signatureBytes,
+        { from: owner, gas: 10721975 });
+
+      const blockNumber = await web3.eth.getBlockNumber();
+      const logs = await hub.getPastEvents('Signup', { fromBlock: blockNumber - 1, toBlock: 'latest' });
+
+      token = await Token.at(logs[0].args.token);
+    });
+
+    describe('when the recipient is not the zero address', () => {
+      describe('when the sender does not have enough balance', () => {
+        it('reverts', async () => {
+          const amount = new BigNumber(101);
+          const to = token.address;
+          const data = await token.contract.methods
+            .transfer(recipient, amount.toNumber())
+            .encodeABI();
+          const nonce = (await safe.nonce()).toNumber();
+
+          const typedData = formatTypedData(
+            to, value, data, operation, safeTxGas, baseGas, gasPrice,
+            gasToken, refundReceiver, nonce, safe.address);
+
+          const signatureBytes = await signTypedData(owner, typedData, web3);
+          await safe.execTransaction(
+            to, value, data, operation, safeTxGas, baseGas, gasPrice,
+            gasToken, refundReceiver, signatureBytes,
+            { from: owner, gas: 10721975 });
+
+          const blockNumber = await web3.eth.getBlockNumber();
+          const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: blockNumber - 1, toBlock: 'latest' });
+
+          return expect(logs).to.have.lengthOf(1);
+        });
+      });
+
+      describe('when the sender has enough balance', () => {
+        const amount = new BigNumber(100);
+
+        it('transfers the requested amount', async () => {
+          const to = token.address;
+          const data = await token.contract.methods
+            .transfer(recipient, amount.toNumber())
+            .encodeABI();
+          const nonce = (await safe.nonce()).toNumber();
+
+          const typedData = formatTypedData(
+            to, value, data, operation, safeTxGas, baseGas, gasPrice,
+            gasToken, refundReceiver, nonce, safe.address);
+
+          const signatureBytes = await signTypedData(owner, typedData, web3);
+          await safe.execTransaction(
+            to, value, data, operation, safeTxGas, baseGas, gasPrice,
+            gasToken, refundReceiver, signatureBytes,
+            { from: owner, gas: 10721975 });
+
+          (await token.balanceOf(safe.address))
+            .should.be.bignumber.equal(new BigNumber(0));
+
+          (await token.balanceOf(recipient)).should.be.bignumber.equal(amount);
+        });
+
+        it('emits a transfer event', async () => {
+          const to = token.address;
+          const data = await token.contract.methods
+            .transfer(recipient, amount.toNumber())
+            .encodeABI();
+          const nonce = (await safe.nonce()).toNumber();
+
+          const typedData = formatTypedData(
+            to, value, data, operation, safeTxGas, baseGas, gasPrice,
+            gasToken, refundReceiver, nonce, safe.address);
+
+          const signatureBytes = await signTypedData(owner, typedData, web3);
+          await safe.execTransaction(
+            to, value, data, operation, safeTxGas, baseGas, gasPrice,
+            gasToken, refundReceiver, signatureBytes,
+            { from: owner, gas: 10721975 });
+
+          const blockNumber = await web3.eth.getBlockNumber();
+          const logs = await token.getPastEvents('Transfer', { fromBlock: blockNumber - 1, toBlock: 'latest' });
+
+          const event = expectEvent.inLogs(logs, 'Transfer', {
+            from: safe.address,
+            to: recipient,
+          });
+
+          event.args.value.should.be.bignumber.equal(amount);
+        });
+      });
+    });
+
+    describe('when the recipient is the zero address', () => {
+      const to = ZERO_ADDRESS;
+      it('reverts', async () => {
+        await assertRevert(token.transfer(to, 100, { from: owner }));
+      });
+    });
+  });
+
   describe('approve', () => {
+    beforeEach(async () => {
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[0].args.token);
+    });
+
     describe('when the spender is not the zero address', () => {
       const spender = recipient;
 
@@ -186,6 +340,11 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   describe('transfer from', () => {
     const spender = recipient;
 
+    beforeEach(async () => {
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[0].args.token);
+    });
+
     describe('when the recipient is not the zero address', () => {
       const to = anotherAccount;
 
@@ -268,6 +427,11 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   });
 
   describe('decrease allowance', () => {
+    beforeEach(async () => {
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[0].args.token);
+    });
+
     describe('when the spender is not the zero address', () => {
       const spender = recipient;
 
@@ -339,6 +503,11 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   describe('increase allowance', () => {
     let amount = new BigNumber(100);
+
+    beforeEach(async () => {
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[0].args.token);
+    });
 
     describe('when the spender is not the zero address', () => {
       const spender = recipient;
