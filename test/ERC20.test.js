@@ -269,7 +269,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
         operation = 0;
         safeTxGas = 0;
         baseGas = 0;
-        gasPrice = 1;
+        gasPrice = 0;
         gasToken = token.address;
         refundReceiver = ZERO_ADDRESS;
 
@@ -285,8 +285,12 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       });
 
       it('should transfer tokens', async () => {
-        // console.log(await token.balanceOf(owner))
-        // console.log(await token.balanceOf(recipient))
+        const ownerBal = await token.balanceOf(owner);
+        const recipientBal = await token.balanceOf(recipient);
+        const safeBal = await token.balanceOf(safe.address);
+        console.log('owner: ' + ownerBal.toString());
+        console.log('recipient: ' + recipientBal.toString());
+        console.log('safe: ' + safeBal.toString());
         (await token.balanceOf(safe.address))
           .should.be.bignumber.equal(bn(0));
 
