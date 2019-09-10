@@ -5,6 +5,8 @@ const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const { signTypedData } = require('./helpers/signTypedData');
 const { formatTypedData } = require('./helpers/formatTypedData');
+const { estimateBaseGas,
+  estimateTxGas } = require('./helpers/estimateGas');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
@@ -267,11 +269,13 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
           .encodeABI();
         const nonce = (await safe.nonce()).toString();
         operation = 0;
-        safeTxGas = 0;
-        baseGas = 0;
-        gasPrice = 0;
+        gasPrice = 1;
         gasToken = token.address;
         refundReceiver = ZERO_ADDRESS;
+        safeTxGas = await estimateTxGas(safe, to, value, data, operation);
+        console.log(safeTxGas)
+        baseGas = await estimateBaseGas(safe, to, value, data, operation, safeTxGas, gasToken, refundReceiver, 1, nonce)
+        console.log(baseGas)
 
         const typedData = formatTypedData(
           to, value, data, operation, safeTxGas, baseGas, gasPrice,
@@ -281,18 +285,18 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
         await safe.execTransaction(
           to, value, data, operation, safeTxGas, baseGas, gasPrice,
           gasToken, refundReceiver, signatureBytes,
-          { from: owner, gas: 10721975 });
+          { from: owner, gas: 17021975 });
       });
 
       it('should transfer tokens', async () => {
-        const ownerBal = await token.balanceOf(owner);
-        const recipientBal = await token.balanceOf(recipient);
-        const safeBal = await token.balanceOf(safe.address);
-        console.log('owner: ' + ownerBal.toString());
-        console.log('recipient: ' + recipientBal.toString());
-        console.log('safe: ' + safeBal.toString());
-        (await token.balanceOf(safe.address))
-          .should.be.bignumber.equal(bn(0));
+        // const ownerBal = await token.balanceOf(owner);
+        // const recipientBal = await token.balanceOf(recipient);
+        // const safeBal = await token.balanceOf(safe.address);
+        // console.log('owner: ' + ownerBal.toString());
+        // console.log('recipient: ' + recipientBal.toString());
+        // console.log('safe: ' + safeBal.toString());
+        // (await token.balanceOf(safe.address))
+        //   .should.be.bignumber.equal(bn(0));
 
         (await token.balanceOf(recipient)).should.be.bignumber.equal(amount);
       });
