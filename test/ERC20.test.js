@@ -160,12 +160,14 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       await safe.execTransaction(
         to, value, data, operation, safeTxGas, baseGas, gasPrice,
         gasToken, refundReceiver, signatureBytes,
-        { from: owner, gas: 10721975 });
+        { from: owner, gas: 17721975 });
 
       const blockNumber = await web3.eth.getBlockNumber();
       const logs = await hub.getPastEvents('Signup', { fromBlock: blockNumber - 1, toBlock: 'latest' });
 
       token = await Token.at(logs[0].args.token);
+      console.log('safe deploy before each')
+      return
     });
 
     describe('when the recipient is not the zero address', () => {
@@ -262,7 +264,8 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     describe('user can use their token as payment token', async () => {
       const amount = convert(50);
 
-      beforeEach(async () => {
+      it('should transfer tokens', async () => {
+        console.log('calling it')
         const to = token.address;
         const data = await token.contract.methods
           .transfer(recipient, amount.toString())
@@ -282,23 +285,16 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
           gasToken, refundReceiver, nonce, safe.address);
 
         const signatureBytes = await signTypedData(owner, typedData, web3);
-        await safe.execTransaction(
+        const tx = await safe.execTransaction(
           to, value, data, operation, safeTxGas, baseGas, gasPrice,
           gasToken, refundReceiver, signatureBytes,
-          { from: owner, gas: 17021975 });
-      });
-
-      it('should transfer tokens', async () => {
-        // const ownerBal = await token.balanceOf(owner);
-        // const recipientBal = await token.balanceOf(recipient);
-        // const safeBal = await token.balanceOf(safe.address);
-        // console.log('owner: ' + ownerBal.toString());
-        // console.log('recipient: ' + recipientBal.toString());
-        // console.log('safe: ' + safeBal.toString());
-        // (await token.balanceOf(safe.address))
-        //   .should.be.bignumber.equal(bn(0));
+          { from: anotherAccount, gas: 17021975 });
 
         (await token.balanceOf(recipient)).should.be.bignumber.equal(amount);
+      });
+
+      it('should transfer tokens 2', async () => {
+         return true;
       });
     });
   });
