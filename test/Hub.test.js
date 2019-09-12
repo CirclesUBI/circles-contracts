@@ -1,7 +1,6 @@
 const truffleContract = require('truffle-contract');
 const { assertRevert } = require('./helpers/assertRevert');
-const { signTypedData } = require('./helpers/signTypedData');
-const { formatTypedData } = require('./helpers/formatTypedData');
+const { executeSafeTx } = require('./helpers/executeSafeTx');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
 const proxyArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/ProxyFactory.json');
@@ -138,26 +137,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
   describe('new user can signup, when user is a safe', async () => {
     beforeEach(async () => {
-      const to = hub.address;
-      const value = 0;
-      const data = await hub.contract.methods.signup(tokenName).encodeABI();
-      const operation = 0;
-      const safeTxGas = 0;
-      const baseGas = 0;
-      const gasPrice = 0;
-      const gasToken = ZERO_ADDRESS;
-      const refundReceiver = ZERO_ADDRESS;
-      const nonce = (await safe.nonce()).toNumber();
-
-      const typedData = formatTypedData(
-        to, value, data, operation, safeTxGas, baseGas, gasPrice,
-        gasToken, refundReceiver, nonce, safe.address);
-
-      const signatureBytes = await signTypedData(systemOwner, typedData, web3);
-      return safe.execTransaction(
-        to, value, data, operation, safeTxGas, baseGas, gasPrice,
-        gasToken, refundReceiver, signatureBytes,
-        { from: systemOwner, gas: 6721975 });
+      const txParams = {
+        to: hub.address,
+        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+      };
+      await executeSafeTx(safe, txParams, systemOwner, 6721975, systemOwner, web3);
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -195,26 +179,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
     });
 
     it('throws if sender tries to sign up twice', async () => {
-      const to = hub.address;
-      const value = 0;
-      const data = await hub.contract.methods.signup(tokenName).encodeABI();
-      const operation = 0;
-      const safeTxGas = 0;
-      const dataGas = 0;
-      const gasPrice = 0;
-      const gasToken = ZERO_ADDRESS;
-      const refundReceiver = ZERO_ADDRESS;
-      const nonce = (await safe.nonce()).toNumber();
-
-      const typedData = formatTypedData(
-        to, value, data, operation, safeTxGas, dataGas, gasPrice,
-        gasToken, refundReceiver, nonce, safe.address);
-
-      const signatureBytes = await signTypedData(systemOwner, typedData, web3);
-      await safe.execTransaction(
-        to, value, data, operation, safeTxGas, dataGas, gasPrice,
-        gasToken, refundReceiver, signatureBytes,
-        { from: systemOwner, gas: 6721975 });
+      const txParams = {
+        to: hub.address,
+        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+      };
+      await executeSafeTx(safe, txParams, systemOwner, 6721975, systemOwner, web3);
 
       const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
 
@@ -227,17 +196,6 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
     let token = null;
 
     beforeEach(async () => {
-      const to = hub.address;
-      const value = 0;
-      const data = await hub.contract.methods.signup(tokenName).encodeABI();
-      const operation = 0;
-      const safeTxGas = 0;
-      const baseGas = 0;
-      const gasPrice = 0;
-      const gasToken = ZERO_ADDRESS;
-      const refundReceiver = ZERO_ADDRESS;
-      const nonce = (await safe.nonce()).toNumber();
-
       const proxyData = safe.contract
         .methods.setup([safeOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS)
         .encodeABI();
@@ -251,15 +209,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
       userSafe = await GnosisSafe.at(userSafeAddress);
 
-      const typedData = formatTypedData(
-        to, value, data, operation, safeTxGas, baseGas, gasPrice,
-        gasToken, refundReceiver, nonce, userSafe.address);
-
-      const signatureBytes = await signTypedData(safeOwner, typedData, web3);
-      return userSafe.execTransaction(
-        to, value, data, operation, safeTxGas, baseGas, gasPrice,
-        gasToken, refundReceiver, signatureBytes,
-        { from: safeOwner, gas: 6721975 });
+      const txParams = {
+        to: hub.address,
+        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+      };
+      await executeSafeTx(userSafe, txParams, safeOwner, 6721975, safeOwner, web3);
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -298,26 +252,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
     });
 
     it('throws if sender tries to sign up twice', async () => {
-      const to = hub.address;
-      const value = 0;
-      const data = await hub.contract.methods.signup(tokenName).encodeABI();
-      const operation = 0;
-      const safeTxGas = 0;
-      const dataGas = 0;
-      const gasPrice = 0;
-      const gasToken = ZERO_ADDRESS;
-      const refundReceiver = ZERO_ADDRESS;
-      const nonce = (await userSafe.nonce()).toNumber();
-
-      const typedData = formatTypedData(
-        to, value, data, operation, safeTxGas, dataGas, gasPrice,
-        gasToken, refundReceiver, nonce, userSafe.address);
-
-      const signatureBytes = await signTypedData(safeOwner, typedData, web3);
-      await userSafe.execTransaction(
-        to, value, data, operation, safeTxGas, dataGas, gasPrice,
-        gasToken, refundReceiver, signatureBytes,
-        { from: safeOwner, gas: 6721975 });
+      const txParams = {
+        to: hub.address,
+        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+      };
+      await executeSafeTx(userSafe, txParams, safeOwner, 6721975, safeOwner, web3);
 
       const logs = await userSafe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
 

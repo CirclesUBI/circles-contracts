@@ -6,5 +6,5 @@ const bn = number => new BigNumber(number);
 
 module.exports = {
   convert,
-  bn
-}
+  bn,
+};
