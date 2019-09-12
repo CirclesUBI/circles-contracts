@@ -5,8 +5,8 @@ const { formatTypedData } = require('./helpers/formatTypedData');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
 const proxyArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/ProxyFactory.json');
-
-const BigNumber = web3.utils.BN;
+const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
+const { bn } = require('./helpers/math');
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
@@ -19,17 +19,15 @@ const ProxyFactory = truffleContract(proxyArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 ProxyFactory.setProvider(web3.currentProvider);
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
 contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
   let proxyFactory = null;
 
-  const issuance = new BigNumber(1736111111111111);
-  const demurrage = new BigNumber(0);
+  const issuance = bn(1736111111111111);
+  const demurrage = bn(0);
   const symbol = 'CRC';
-  const initialPayout = new BigNumber(100);
+  const initialPayout = bn(100);
   const tokenName = 'testToken';
 
   beforeEach(async () => {
@@ -81,12 +79,12 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
     it('owner can change issuance', async () => {
       await hub.updateIssuance(1, { from: systemOwner });
-      (await hub.issuanceRate()).should.be.bignumber.equal(new BigNumber(1));
+      (await hub.issuanceRate()).should.be.bignumber.equal(bn(1));
     });
 
     it('owner can change demurrage', async () => {
       await hub.updateDemurrage(1, { from: systemOwner });
-      (await hub.demurrageRate()).should.be.bignumber.equal(new BigNumber(1));
+      (await hub.demurrageRate()).should.be.bignumber.equal(bn(1));
     });
 
     it('owner can change symbol', async () => {
@@ -372,7 +370,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
         });
 
         it('returns correct amount when tokens have been traded', async () => {
-          const amount = new BigNumber(25);
+          const amount = bn(25);
           const tokenAddress = await hub.userToToken(safeOwner);
           const token = await Token.at(tokenAddress);
           await token.transfer(normalUser, amount, { from: safeOwner });
@@ -383,7 +381,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
         });
 
         it('returns correct amount when no tokens are tradeable', async () => {
-          const amount = new BigNumber(50);
+          const amount = bn(50);
           const tokenAddress = await hub.userToToken(safeOwner);
           const token = await Token.at(tokenAddress);
           await token.transfer(normalUser, amount, { from: safeOwner });
@@ -394,7 +392,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
         });
 
         it('returns correct amount when there is not trust connection', async () => {
-          const amount = new BigNumber(0);
+          const amount = bn(0);
           (await hub.checkSendLimit(safeOwner, normalUser))
             .should.be.bignumber.equal(amount);
         });
@@ -415,12 +413,12 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
               to: normalUser,
             });
 
-            return event.args.limit.should.be.bignumber.equal(new BigNumber(newTrustLimit));
+            return event.args.limit.should.be.bignumber.equal(bn(newTrustLimit));
           });
 
           it('correctly sets the trust limit', async () => {
             (await hub.limits(safeOwner, normalUser))
-              .should.be.bignumber.equal(new BigNumber(newTrustLimit));
+              .should.be.bignumber.equal(bn(newTrustLimit));
           });
 
           it('returns correct amount when no tokens have been traded', async () => {
@@ -429,27 +427,27 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
             const totalSupply = await token.totalSupply();
             const allowable = totalSupply * (newTrustLimit / 100);
             (await hub.checkSendLimit(normalUser, safeOwner))
-              .should.be.bignumber.equal(new BigNumber(allowable));
+              .should.be.bignumber.equal(bn(allowable));
           });
 
           it('returns correct amount when tokens have been traded', async () => {
-            const amount = new BigNumber(25);
+            const amount = bn(25);
             const tokenAddress = await hub.userToToken(safeOwner);
             const token = await Token.at(tokenAddress);
             await token.transfer(normalUser, amount, { from: safeOwner });
             const totalSupply = await token.totalSupply();
-            const allowable = new BigNumber(totalSupply * (newTrustLimit / 100)).sub(amount);
+            const allowable = bn(totalSupply * (newTrustLimit / 100)).sub(amount);
             (await hub.checkSendLimit(normalUser, safeOwner))
               .should.be.bignumber.equal(allowable);
           });
 
           it('returns correct amount when no tokens are tradeable', async () => {
-            const amount = new BigNumber(50);
+            const amount = bn(50);
             const tokenAddress = await hub.userToToken(safeOwner);
             const token = await Token.at(tokenAddress);
             await token.transfer(normalUser, amount, { from: safeOwner });
             const totalSupply = await token.totalSupply();
-            const allowable = new BigNumber(totalSupply * (newTrustLimit / 100)).sub(amount);
+            const allowable = bn(totalSupply * (newTrustLimit / 100)).sub(amount);
             (await hub.checkSendLimit(normalUser, safeOwner)).should.be.bignumber.equal(allowable);
           });
         });
