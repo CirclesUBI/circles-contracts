@@ -40,10 +40,12 @@ const estimateTxGas = async (safe, to, value, data, operation) => {
   } catch (err) {
     // requiredTxRevert returns the gas estimate in the revert message
     txGasEstimate = parseRevert(err.message)
+    txGasEstimate = txGasEstimate.toNumber() + 10000
+    return txGasEstimate
   }
   // Add 10k else we will fail in case of nested calls
-  txGasEstimate = txGasEstimate.toNumber() + 10000
-  return txGasEstimate
+  // txGasEstimate = txGasEstimate.toNumber() + 10000
+  // return txGasEstimate
 }
 
 module.exports = {
