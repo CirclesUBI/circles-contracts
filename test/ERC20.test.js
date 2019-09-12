@@ -5,8 +5,6 @@ const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const { signTypedData } = require('./helpers/signTypedData');
 const { formatTypedData } = require('./helpers/formatTypedData');
-const { estimateBaseGas,
-  estimateTxGas } = require('./helpers/estimateGas');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
@@ -19,8 +17,8 @@ const BigNumber = web3.utils.BN;
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const decimals = new BigNumber(18);
 const decimalsMultiplier = (new BigNumber(10)).pow(decimals);
-const convert = (number) => (new BigNumber(number)).mul(decimalsMultiplier)
-const bn = (number) => (new BigNumber(number))
+const convert = number => (new BigNumber(number)).mul(decimalsMultiplier);
+const bn = number => new BigNumber(number);
 
 
 require('chai')
@@ -136,12 +134,12 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   });
 
   describe('transfer when owner is a safe', () => {
-    let operation = 0;
-    let safeTxGas = 0;
-    let baseGas = 0;
-    let gasPrice = 0;
-    let gasToken = ZERO_ADDRESS;
-    let refundReceiver = ZERO_ADDRESS;
+    const operation = 0;
+    const safeTxGas = 0;
+    const baseGas = 0;
+    const gasPrice = 0;
+    const gasToken = ZERO_ADDRESS;
+    const refundReceiver = ZERO_ADDRESS;
     const value = 0;
 
     beforeEach(async () => {
@@ -166,8 +164,6 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       const logs = await hub.getPastEvents('Signup', { fromBlock: blockNumber - 1, toBlock: 'latest' });
 
       token = await Token.at(logs[0].args.token);
-      console.log('safe deploy before each')
-      return
     });
 
     describe('when the recipient is not the zero address', () => {
@@ -258,43 +254,6 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       it('reverts', async () => {
         const balance = convert(100);
         await assertRevert(token.transfer(to, balance, { from: owner }));
-      });
-    });
-
-    describe('user can use their token as payment token', async () => {
-      const amount = convert(50);
-
-      it('should transfer tokens', async () => {
-        console.log('calling it')
-        const to = token.address;
-        const data = await token.contract.methods
-          .transfer(recipient, amount.toString())
-          .encodeABI();
-        const nonce = (await safe.nonce()).toString();
-        operation = 0;
-        gasPrice = 1;
-        gasToken = token.address;
-        refundReceiver = ZERO_ADDRESS;
-        safeTxGas = await estimateTxGas(safe, to, value, data, operation);
-        console.log(safeTxGas)
-        baseGas = await estimateBaseGas(safe, to, value, data, operation, safeTxGas, gasToken, refundReceiver, 1, nonce)
-        console.log(baseGas)
-
-        const typedData = formatTypedData(
-          to, value, data, operation, safeTxGas, baseGas, gasPrice,
-          gasToken, refundReceiver, nonce, safe.address);
-
-        const signatureBytes = await signTypedData(owner, typedData, web3);
-        const tx = await safe.execTransaction(
-          to, value, data, operation, safeTxGas, baseGas, gasPrice,
-          gasToken, refundReceiver, signatureBytes,
-          { from: anotherAccount, gas: 17021975 });
-
-        (await token.balanceOf(recipient)).should.be.bignumber.equal(amount);
-      });
-
-      it('should transfer tokens 2', async () => {
-         return true;
       });
     });
   });
@@ -513,7 +472,8 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
           });
 
           it('decreases the spender allowance subtracting the requested amount', async () => {
-            await token.decreaseAllowance(spender, (bn(approvedAmount)).sub(bn(1)), { from: owner });
+            await token.decreaseAllowance(spender, (bn(approvedAmount)).sub(bn(1)),
+              { from: owner });
 
             (await token.allowance(owner, spender)).should.be.bignumber.equal(bn(1));
           });
