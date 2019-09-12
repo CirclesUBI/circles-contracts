@@ -3,8 +3,7 @@ const truffleContract = require('truffle-contract');
 
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
-const { signTypedData } = require('./helpers/signTypedData');
-const { formatTypedData } = require('./helpers/formatTypedData');
+const { executeSafeTx } = require('./helpers/executeSafeTx');
 const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
 const { bn, convert } = require('./helpers/math');
 
@@ -128,31 +127,15 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   });
 
   describe('transfer when owner is a safe', () => {
-    const operation = 0;
-    const safeTxGas = 0;
-    const baseGas = 0;
-    const gasPrice = 0;
-    const gasToken = ZERO_ADDRESS;
-    const refundReceiver = ZERO_ADDRESS;
-    const value = 0;
-
     beforeEach(async () => {
       safe = await GnosisSafe.new({ from: owner });
       await safe.setup([owner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
 
-      const to = hub.address;
-      const data = await hub.contract.methods.signup(tokenName).encodeABI();
-      const nonce = (await safe.nonce()).toString();
-
-      const typedData = formatTypedData(
-        to, value, data, operation, safeTxGas, baseGas, gasPrice,
-        gasToken, refundReceiver, nonce, safe.address);
-
-      const signatureBytes = await signTypedData(owner, typedData, web3);
-      await safe.execTransaction(
-        to, value, data, operation, safeTxGas, baseGas, gasPrice,
-        gasToken, refundReceiver, signatureBytes,
-        { from: owner, gas: 17721975 });
+      const txParams = {
+        to: hub.address,
+        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+      };
+      await executeSafeTx(safe, txParams, owner, 17721975, owner, web3);
 
       const blockNumber = await web3.eth.getBlockNumber();
       const logs = await hub.getPastEvents('Signup', { fromBlock: blockNumber - 1, toBlock: 'latest' });
@@ -164,21 +147,14 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       describe('when the sender does not have enough balance', () => {
         it('reverts', async () => {
           const amount = convert(101);
-          const to = token.address;
-          const data = await token.contract.methods
-            .transfer(recipient, amount.toString())
-            .encodeABI();
-          const nonce = (await safe.nonce()).toString();
 
-          const typedData = formatTypedData(
-            to, value, data, operation, safeTxGas, baseGas, gasPrice,
-            gasToken, refundReceiver, nonce, safe.address);
-
-          const signatureBytes = await signTypedData(owner, typedData, web3);
-          await safe.execTransaction(
-            to, value, data, operation, safeTxGas, baseGas, gasPrice,
-            gasToken, refundReceiver, signatureBytes,
-            { from: owner, gas: 10721975 });
+          const txParams = {
+            to: token.address,
+            data: await token.contract.methods
+              .transfer(recipient, amount.toString())
+              .encodeABI(),
+          };
+          await executeSafeTx(safe, txParams, owner, 17721975, owner, web3);
 
           const blockNumber = await web3.eth.getBlockNumber();
           const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: blockNumber - 1, toBlock: 'latest' });
@@ -191,21 +167,13 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
         const amount = convert(100);
 
         it('transfers the requested amount', async () => {
-          const to = token.address;
-          const data = await token.contract.methods
-            .transfer(recipient, amount.toString())
-            .encodeABI();
-          const nonce = (await safe.nonce()).toString();
-
-          const typedData = formatTypedData(
-            to, value, data, operation, safeTxGas, baseGas, gasPrice,
-            gasToken, refundReceiver, nonce, safe.address);
-
-          const signatureBytes = await signTypedData(owner, typedData, web3);
-          await safe.execTransaction(
-            to, value, data, operation, safeTxGas, baseGas, gasPrice,
-            gasToken, refundReceiver, signatureBytes,
-            { from: owner, gas: 10721975 });
+          const txParams = {
+            to: token.address,
+            data: await token.contract.methods
+              .transfer(recipient, amount.toString())
+              .encodeABI(),
+          };
+          await executeSafeTx(safe, txParams, owner, 17721975, owner, web3);
 
           (await token.balanceOf(safe.address))
             .should.be.bignumber.equal(new BigNumber(0));
@@ -214,21 +182,13 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
         });
 
         it('emits a transfer event', async () => {
-          const to = token.address;
-          const data = await token.contract.methods
-            .transfer(recipient, amount.toString())
-            .encodeABI();
-          const nonce = (await safe.nonce()).toString();
-
-          const typedData = formatTypedData(
-            to, value, data, operation, safeTxGas, baseGas, gasPrice,
-            gasToken, refundReceiver, nonce, safe.address);
-
-          const signatureBytes = await signTypedData(owner, typedData, web3);
-          await safe.execTransaction(
-            to, value, data, operation, safeTxGas, baseGas, gasPrice,
-            gasToken, refundReceiver, signatureBytes,
-            { from: owner, gas: 10721975 });
+          const txParams = {
+            to: token.address,
+            data: await token.contract.methods
+              .transfer(recipient, amount.toString())
+              .encodeABI(),
+          };
+          await executeSafeTx(safe, txParams, owner, 17721975, owner, web3);
 
           const blockNumber = await web3.eth.getBlockNumber();
           const logs = await token.getPastEvents('Transfer', { fromBlock: blockNumber - 1, toBlock: 'latest' });
