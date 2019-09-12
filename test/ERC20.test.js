@@ -5,6 +5,8 @@ const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const { signTypedData } = require('./helpers/signTypedData');
 const { formatTypedData } = require('./helpers/formatTypedData');
+const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
+const { bn, convert } = require('./helpers/math');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
@@ -12,14 +14,6 @@ const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisS
 
 const GnosisSafe = truffleContract(safeArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
-
-const BigNumber = web3.utils.BN;
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-const decimals = new BigNumber(18);
-const decimalsMultiplier = (new BigNumber(10)).pow(decimals);
-const convert = number => (new BigNumber(number)).mul(decimalsMultiplier);
-const bn = number => new BigNumber(number);
-
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
