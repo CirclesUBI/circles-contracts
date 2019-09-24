@@ -1,6 +1,6 @@
 {
   "name": "circles-contracts",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "contributors": [
     "Sarah Friend (https://github.com/ana0)",
     "Jake Gillberg (https://github.com/Jake-Gillberg)",
@@ -35,7 +35,7 @@
     "metatx-server": "^1.0.8",
     "openzeppelin-solidity": "2.1.1",
     "pify": "^4.0.1",
-    "truffle": "^5.0.34",
+    "truffle": "^5.0.35",
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
