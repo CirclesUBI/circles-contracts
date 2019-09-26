@@ -39,6 +39,7 @@
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
-    "@gnosis.pm/safe-contracts": "^1.0.0"
+    "@gnosis.pm/safe-contracts": "^1.0.0",
+    "isomorphic-fetch": "^2.2.1"
   }
 }
