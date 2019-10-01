@@ -3,7 +3,7 @@ const truffleContract = require('truffle-contract');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const { estimateBaseGas, estimateTxGas } = require('./helpers/estimateGas');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
-const { bn, convert } = require('./helpers/math');
+const { bn, convertToBaseUnit } = require('./helpers/math');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
@@ -25,7 +25,7 @@ contract('Token payments', ([_, owner, recipient, anotherAccount, systemOwner]) 
   const demurrage = bn(0);
   const symbol = 'CRC';
   const tokenName = 'MyCoin';
-  const initialPayout = convert(100);
+  const initialPayout = convertToBaseUnit(100);
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, issuance, demurrage, symbol, initialPayout);
@@ -46,7 +46,7 @@ contract('Token payments', ([_, owner, recipient, anotherAccount, systemOwner]) 
   });
 
   describe('user can use their token as payment token', () => {
-    const amount = convert(50);
+    const amount = convertToBaseUnit(50);
     const gasCosts = bn(38617);
 
     it('should transfer tokens', async () => {
