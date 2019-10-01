@@ -5,7 +5,7 @@ const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
-const { bn, convert } = require('./helpers/math');
+const { bn, convertToBaseUnit } = require('./helpers/math');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
@@ -27,7 +27,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   const demurrage = bn(0);
   const symbol = 'CRC';
   const tokenName = 'MyCoin';
-  const initialPayout = convert(100);
+  const initialPayout = convertToBaseUnit(100);
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, issuance, demurrage, symbol, initialPayout);
@@ -40,7 +40,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     });
 
     it('returns the total amount of tokens', async () => {
-      const balance = convert(100);
+      const balance = convertToBaseUnit(100);
       (await token.totalSupply()).should.be.bignumber.equal(balance);
     });
   });
@@ -70,7 +70,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
     describe('when the requested account has some tokens', () => {
       it('returns the total amount of tokens', async () => {
-        const balance = convert(100);
+        const balance = convertToBaseUnit(100);
         (await token.balanceOf(owner)).should.be.bignumber.equal(balance);
       });
     });
@@ -86,7 +86,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       const to = recipient;
 
       describe('when the sender does not have enough balance', () => {
-        const amount = convert(101);
+        const amount = convertToBaseUnit(101);
 
         it('reverts', async () => {
           await assertRevert(token.transfer(to, amount, { from: owner }));
@@ -94,7 +94,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       });
 
       describe('when the sender has enough balance', () => {
-        const amount = convert(100);
+        const amount = convertToBaseUnit(100);
 
         it('transfers the requested amount', async () => {
           await token.transfer(to, amount, { from: owner });
@@ -120,7 +120,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     describe('when the recipient is the zero address', () => {
       const to = ZERO_ADDRESS;
       it('reverts', async () => {
-        const balance = convert(100);
+        const balance = convertToBaseUnit(100);
         await assertRevert(token.transfer(to, balance, { from: owner }));
       });
     });
@@ -146,7 +146,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     describe('when the recipient is not the zero address', () => {
       describe('when the sender does not have enough balance', () => {
         it('reverts', async () => {
-          const amount = convert(101);
+          const amount = convertToBaseUnit(101);
 
           const txParams = {
             to: token.address,
@@ -164,7 +164,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       });
 
       describe('when the sender has enough balance', () => {
-        const amount = convert(100);
+        const amount = convertToBaseUnit(100);
 
         it('transfers the requested amount', async () => {
           const txParams = {
@@ -206,7 +206,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     describe('when the recipient is the zero address', () => {
       const to = ZERO_ADDRESS;
       it('reverts', async () => {
-        const balance = convert(100);
+        const balance = convertToBaseUnit(100);
         await assertRevert(token.transfer(to, balance, { from: owner }));
       });
     });
@@ -222,7 +222,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       const spender = recipient;
 
       describe('when the sender has enough balance', () => {
-        const amount = convert(100);
+        const amount = convertToBaseUnit(100);
 
         it('emits an approval event', async () => {
           const { logs } = await token.approve(spender, amount, { from: owner });
@@ -244,7 +244,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
         describe('when the spender had an approved amount', () => {
           beforeEach(async () => {
-            await token.approve(spender, convert(1), { from: owner });
+            await token.approve(spender, convertToBaseUnit(1), { from: owner });
           });
 
           it('approves the requested amount and replaces the previous one', async () => {
@@ -256,7 +256,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       });
 
       describe('when the sender does not have enough balance', () => {
-        const amount = convert(101);
+        const amount = convertToBaseUnit(101);
 
         it('emits an approval event', async () => {
           const { logs } = await token.approve(spender, amount, { from: owner });
@@ -278,7 +278,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
         describe('when the spender had an approved amount', () => {
           beforeEach(async () => {
-            await token.approve(spender, convert(1), { from: owner });
+            await token.approve(spender, convertToBaseUnit(1), { from: owner });
           });
 
           it('approves the requested amount and replaces the previous one', async () => {
@@ -291,7 +291,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     });
 
     describe('when the spender is the zero address', () => {
-      const amount = convert(100);
+      const amount = convertToBaseUnit(100);
       const spender = ZERO_ADDRESS;
 
       it('reverts', async () => {
@@ -313,12 +313,12 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
       describe('when the spender has enough approved balance', () => {
         beforeEach(async () => {
-          const amount = convert(100);
+          const amount = convertToBaseUnit(100);
           await token.approve(spender, amount, { from: owner });
         });
 
         describe('when the owner has enough balance', () => {
-          const amount = convert(100);
+          const amount = convertToBaseUnit(100);
 
           it('transfers the requested amount', async () => {
             await token.transferFrom(owner, to, amount, { from: spender });
@@ -350,7 +350,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
         });
 
         describe('when the owner does not have enough balance', () => {
-          const amount = convert(101);
+          const amount = convertToBaseUnit(101);
 
           it('reverts', async () => {
             await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
@@ -360,12 +360,12 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
       describe('when the spender does not have enough approved balance', () => {
         beforeEach(async () => {
-          const amount = convert(99);
+          const amount = convertToBaseUnit(99);
           await token.approve(spender, amount, { from: owner });
         });
 
         describe('when the owner has enough balance', () => {
-          const amount = convert(100);
+          const amount = convertToBaseUnit(100);
 
           it('reverts', async () => {
             await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
@@ -373,7 +373,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
         });
 
         describe('when the owner does not have enough balance', () => {
-          const amount = convert(101);
+          const amount = convertToBaseUnit(101);
 
           it('reverts', async () => {
             await assertRevert(token.transferFrom(owner, to, amount, { from: spender }));
@@ -383,7 +383,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     });
 
     describe('when the recipient is the zero address', () => {
-      const amount = convert(100);
+      const amount = convertToBaseUnit(100);
 
       beforeEach(async () => {
         await token.approve(spender, amount, { from: owner });
@@ -445,20 +445,20 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       };
 
       describe('when the sender has enough balance', () => {
-        const amount = convert(100);
+        const amount = convertToBaseUnit(100);
 
         shouldDecreaseApproval(amount);
       });
 
       describe('when the sender does not have enough balance', () => {
-        const amount = convert(101);
+        const amount = convertToBaseUnit(101);
 
         shouldDecreaseApproval(amount);
       });
     });
 
     describe('when the spender is the zero address', () => {
-      const amount = convert(100);
+      const amount = convertToBaseUnit(100);
       const spender = ZERO_ADDRESS;
 
       it('reverts', async () => {
@@ -468,7 +468,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   });
 
   describe('increase allowance', () => {
-    let amount = convert(100);
+    let amount = convertToBaseUnit(100);
 
     beforeEach(async () => {
       const signup = await hub.signup(tokenName, { from: owner });
@@ -499,7 +499,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
         describe('when the spender had an approved amount', () => {
           beforeEach(async () => {
-            const approval = convert(1);
+            const approval = convertToBaseUnit(1);
             await token.approve(spender, approval, { from: owner });
           });
 
@@ -507,13 +507,13 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
             await token.increaseAllowance(spender, amount, { from: owner });
 
             (await token.allowance(owner, spender))
-              .should.be.bignumber.equal(amount.add(convert(1)));
+              .should.be.bignumber.equal(amount.add(convertToBaseUnit(1)));
           });
         });
       });
 
       describe('when the sender does not have enough balance', () => {
-        amount = convert(101);
+        amount = convertToBaseUnit(101);
 
         it('emits an approval event', async () => {
           const { logs } = await token.increaseAllowance(spender, amount, { from: owner });
@@ -535,7 +535,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
         describe('when the spender had an approved amount', () => {
           beforeEach(async () => {
-            const approval = convert(1);
+            const approval = convertToBaseUnit(1);
             await token.approve(spender, approval, { from: owner });
           });
 
@@ -543,7 +543,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
             await token.increaseAllowance(spender, amount, { from: owner });
 
             (await token.allowance(owner, spender))
-              .should.be.bignumber.equal(amount.add(convert(1)));
+              .should.be.bignumber.equal(amount.add(convertToBaseUnit(1)));
           });
         });
       });
