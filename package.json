@@ -40,6 +40,5 @@
   },
   "dependencies": {
     "@gnosis.pm/safe-contracts": "^1.0.0",
-    "isomorphic-fetch": "^2.2.1"
   }
 }
