@@ -1,14 +1,12 @@
 pragma solidity ^0.5.3;
-// import "./Proxy.sol";
-import "@gnosis.pm/safe-contracts/contracts/proxies/Proxy.sol";
+import "./Proxy.sol";
 
-/// Based on:
+
 /// @title Proxy Factory - Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
 /// @author Stefan George - <stefan@gnosis.pm>
-
 contract ProxyFactory {
 
-    event ProxyCreation(Proxy proxy, address sender);
+    event ProxyCreation(Proxy proxy);
 
     /// @dev Allows to create new proxy contact and execute a message call to the new proxy within one transaction.
     /// @param masterCopy Address of master copy.
@@ -23,7 +21,7 @@ contract ProxyFactory {
             assembly {
                 if eq(call(gas, proxy, 0, add(data, 0x20), mload(data), 0, 0), 0) { revert(0, 0) }
             }
-        emit ProxyCreation(proxy, msg.sender);
+        emit ProxyCreation(proxy);
     }
 
     /// @dev Allows to retrieve the runtime code of a deployed Proxy. This can be used to check that the expected Proxy was deployed.
@@ -56,6 +54,6 @@ contract ProxyFactory {
             assembly {
                 if eq(call(gas, proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0), 0) { revert(0,0) }
             }
-        emit ProxyCreation(proxy, msg.sender);
+        emit ProxyCreation(proxy);
     }
 }

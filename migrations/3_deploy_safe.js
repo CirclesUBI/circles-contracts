@@ -1,10 +1,5 @@
-const truffleContract = require('truffle-contract');
 const ProxyFactory = artifacts.require('ProxyFactory.sol');
-const safeArtifacts = require("@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json");
-
-const GnosisSafe = truffleContract(safeArtifacts);
-
-GnosisSafe.setProvider(web3.currentProvider);
+const GnosisSafe = artifacts.require('GnosisSafe.sol');
 
 const notOwnedAddress = "0x0000000000000000000000000000000000000002";
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
