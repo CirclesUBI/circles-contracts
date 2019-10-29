@@ -1,9 +1,6 @@
-const truffleContract = require('truffle-contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const expectEvent = require('./helpers/expectEvent');
-const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
-const proxyArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/ProxyFactory.json');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
 const { bn } = require('./helpers/math');
 
@@ -13,10 +10,8 @@ require('chai')
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
-const GnosisSafe = truffleContract(safeArtifacts);
-const ProxyFactory = truffleContract(proxyArtifacts);
-GnosisSafe.setProvider(web3.currentProvider);
-ProxyFactory.setProvider(web3.currentProvider);
+const GnosisSafe = artifacts.require('GnosisSafe');
+const ProxyFactory = artifacts.require('ProxyFactory');
 
 contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;

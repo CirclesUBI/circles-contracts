@@ -1,5 +1,3 @@
-const truffleContract = require('truffle-contract');
-
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const { estimateBaseGas, estimateTxGas } = require('./helpers/estimateGas');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
@@ -7,10 +5,8 @@ const { bn, convertToBaseUnit } = require('./helpers/math');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
-const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
 
-const GnosisSafe = truffleContract(safeArtifacts);
-GnosisSafe.setProvider(web3.currentProvider);
+const GnosisSafe = artifacts.require('GnosisSafe');
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
