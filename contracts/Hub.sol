@@ -98,8 +98,8 @@ contract Hub {
     }
 
     function checkSendLimit(address from, address to) public view returns (uint256) {
-        uint256 max = (userToToken[to].totalSupply().mul(limits[to][from])).div(100);
-        return max.sub(userToToken[to].balanceOf(from));
+        uint256 max = (userToToken[from].totalSupply().mul(limits[to][from])).div(100);
+        return max.sub(userToToken[from].balanceOf(to));
     }
 
     // Starts with msg.sender then ,
@@ -109,13 +109,12 @@ contract Hub {
         address prev = msg.sender;
         for (uint i = 0; i < users.length; i++) {
             address curr = users[i];
-            uint256 max = (userToToken[curr].totalSupply().mul(limits[curr][prev])).div(1000000000000000000);
+            uint256 max = checkSendLimit(prev, curr);
 
             require(userToToken[prev].balanceOf(curr) + wad <= max, "Trust limit exceeded");
 
             userToToken[prev].hubTransfer(prev, curr, wad);
             prev = curr;
-
         }
     }
 

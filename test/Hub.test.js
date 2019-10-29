@@ -300,7 +300,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
       describe('calculates the tradeable amount', async () => {
         it('returns correct amount when no tokens have been traded', async () => {
-          const tokenAddress = await hub.userToToken(safeOwner);
+          const tokenAddress = await hub.userToToken(normalUser);
           const token = await Token.at(tokenAddress);
           const totalSupply = await token.totalSupply();
           const allowable = totalSupply * (trustLimit / 100);
@@ -310,7 +310,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
         it('returns correct amount when tokens have been traded', async () => {
           const amount = bn(25);
-          const tokenAddress = await hub.userToToken(safeOwner);
+          const tokenAddress = await hub.userToToken(normalUser);
           const token = await Token.at(tokenAddress);
           await token.transfer(safeOwner, amount, { from: normalUser });
           const totalSupply = await token.totalSupply();
@@ -321,7 +321,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
         it('returns correct amount when no tokens are tradeable', async () => {
           const amount = bn(50);
-          const tokenAddress = await hub.userToToken(safeOwner);
+          const tokenAddress = await hub.userToToken(normalUser);
           const token = await Token.at(tokenAddress);
           await token.transfer(safeOwner, amount, { from: normalUser });
           const totalSupply = await token.totalSupply();
@@ -361,7 +361,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
           });
 
           it('returns correct amount when no tokens have been traded', async () => {
-            const tokenAddress = await hub.userToToken(safeOwner);
+            const tokenAddress = await hub.userToToken(normalUser);
             const token = await Token.at(tokenAddress);
             const totalSupply = await token.totalSupply();
             const allowable = totalSupply * (newTrustLimit / 100);
@@ -371,9 +371,9 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
           it('returns correct amount when tokens have been traded', async () => {
             const amount = bn(25);
-            const tokenAddress = await hub.userToToken(safeOwner);
+            const tokenAddress = await hub.userToToken(normalUser);
             const token = await Token.at(tokenAddress);
-            await token.transfer(normalUser, amount, { from: safeOwner });
+            await token.transfer(safeOwner, amount, { from: normalUser });
             const totalSupply = await token.totalSupply();
             const allowable = bn(totalSupply * (newTrustLimit / 100)).sub(amount);
             (await hub.checkSendLimit(normalUser, safeOwner))
@@ -382,9 +382,9 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
 
           it('returns correct amount when no tokens are tradeable', async () => {
             const amount = bn(50);
-            const tokenAddress = await hub.userToToken(safeOwner);
+            const tokenAddress = await hub.userToToken(normalUser);
             const token = await Token.at(tokenAddress);
-            await token.transfer(normalUser, amount, { from: safeOwner });
+            await token.transfer(safeOwner, amount, { from: normalUser });
             const totalSupply = await token.totalSupply();
             const allowable = bn(totalSupply * (newTrustLimit / 100)).sub(amount);
             (await hub.checkSendLimit(normalUser, safeOwner)).should.be.bignumber.equal(allowable);
