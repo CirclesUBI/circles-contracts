@@ -312,7 +312,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
           const amount = bn(25);
           const tokenAddress = await hub.userToToken(safeOwner);
           const token = await Token.at(tokenAddress);
-          await token.transfer(normalUser, amount, { from: safeOwner });
+          await token.transfer(safeOwner, amount, { from: normalUser });
           const totalSupply = await token.totalSupply();
           const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
           (await hub.checkSendLimit(normalUser, safeOwner))
@@ -323,7 +323,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
           const amount = bn(50);
           const tokenAddress = await hub.userToToken(safeOwner);
           const token = await Token.at(tokenAddress);
-          await token.transfer(normalUser, amount, { from: safeOwner });
+          await token.transfer(safeOwner, amount, { from: normalUser });
           const totalSupply = await token.totalSupply();
           const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
           (await hub.checkSendLimit(normalUser, safeOwner))
