@@ -3069,10 +3069,150 @@
       "links": {},
       "address": "0xe982E462b094850F12AF94d21D470e21bE9D0E9C",
       "transactionHash": "0x8b8d8072acab6f3386004a2797e14948a881ff45b4ec564734c63d343279877c"
+    },
+    "1572306355305": {
+      "events": {
+        "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            }
+          ],
+          "name": "ProxyCreation",
+          "type": "event",
+          "signature": "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80"
+        }
+      },
+      "links": {},
+      "address": "0xe982E462b094850F12AF94d21D470e21bE9D0E9C",
+      "transactionHash": "0xe010fdae87e6e7adcd776d0630b69e7f3adfd86d7cdaf2a4a9095ba07904332f"
+    },
+    "1572306582179": {
+      "events": {
+        "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            }
+          ],
+          "name": "ProxyCreation",
+          "type": "event",
+          "signature": "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80"
+        }
+      },
+      "links": {},
+      "address": "0xe982E462b094850F12AF94d21D470e21bE9D0E9C",
+      "transactionHash": "0xe010fdae87e6e7adcd776d0630b69e7f3adfd86d7cdaf2a4a9095ba07904332f"
+    },
+    "1572306985578": {
+      "events": {
+        "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            }
+          ],
+          "name": "ProxyCreation",
+          "type": "event",
+          "signature": "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80"
+        }
+      },
+      "links": {},
+      "address": "0x59d3631c86BbE35EF041872d502F218A39FBa150",
+      "transactionHash": "0xd422ffbe654073e114a01e40e37e9f20d051a0ed1289d042d02f94755398bbf1"
+    },
+    "1572307247607": {
+      "events": {
+        "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            }
+          ],
+          "name": "ProxyCreation",
+          "type": "event",
+          "signature": "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80"
+        }
+      },
+      "links": {},
+      "address": "0x59d3631c86BbE35EF041872d502F218A39FBa150",
+      "transactionHash": "0xd422ffbe654073e114a01e40e37e9f20d051a0ed1289d042d02f94755398bbf1"
+    },
+    "1572307954197": {
+      "events": {
+        "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            }
+          ],
+          "name": "ProxyCreation",
+          "type": "event",
+          "signature": "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80"
+        }
+      },
+      "links": {},
+      "address": "0x0290FB167208Af455bB137780163b7B7a9a10C16",
+      "transactionHash": "0x39141e801db4efe8e63a3026a0fba65f44f7f222de7545c610d40929e40d16fc"
+    },
+    "1572308165362": {
+      "events": {
+        "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            }
+          ],
+          "name": "ProxyCreation",
+          "type": "event",
+          "signature": "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80"
+        }
+      },
+      "links": {},
+      "address": "0xe982E462b094850F12AF94d21D470e21bE9D0E9C",
+      "transactionHash": "0xe010fdae87e6e7adcd776d0630b69e7f3adfd86d7cdaf2a4a9095ba07904332f"
+    },
+    "1572308392595": {
+      "events": {
+        "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "proxy",
+              "type": "address"
+            }
+          ],
+          "name": "ProxyCreation",
+          "type": "event",
+          "signature": "0xa38789425dbeee0239e16ff2d2567e31720127fbc6430758c1a4efc6aef29f80"
+        }
+      },
+      "links": {},
+      "address": "0xe982E462b094850F12AF94d21D470e21bE9D0E9C",
+      "transactionHash": "0xe010fdae87e6e7adcd776d0630b69e7f3adfd86d7cdaf2a4a9095ba07904332f"
     }
   },
   "schemaVersion": "3.0.15",
-  "updatedAt": "2019-10-28T23:38:38.248Z",
+  "updatedAt": "2019-10-29T00:22:08.307Z",
   "devdoc": {
     "author": "Stefan George - <stefan@gnosis.pm>",
     "methods": {
