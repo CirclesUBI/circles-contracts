@@ -1,5 +1,4 @@
 // https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/test/token/ERC20/ERC20.test.js
-const truffleContract = require('truffle-contract');
 
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
@@ -9,10 +8,8 @@ const { bn, convertToBaseUnit } = require('./helpers/math');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
-const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
 
-const GnosisSafe = truffleContract(safeArtifacts);
-GnosisSafe.setProvider(web3.currentProvider);
+const GnosisSafe = artifacts.require('GnosisSafe');
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
