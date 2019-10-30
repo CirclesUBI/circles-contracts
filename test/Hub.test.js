@@ -405,7 +405,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser]) =
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
-        await hub.transferThrough([safeOwner, normalUser], [normalUser, thirdUser], amount, { from: safeOwner });
+        await hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, amount], { from: safeOwner });
       });
 
       it('deducts senders balance of own token', async () => {
