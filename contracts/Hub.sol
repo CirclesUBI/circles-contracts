@@ -104,17 +104,19 @@ contract Hub {
 
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
-    function transferThrough(address[] memory users, uint wad) public {
-        require(users.length <= 5);
-        address prev = msg.sender;
+    function transferThrough(address[] memory tokens, address[] memory users, uint wad) public {
+        require(users.length <= 5, "Too complex path");
+        require(users.length == tokens.length, "Tokens array length must equal users array" );
+        address prevUser = msg.sender;
         for (uint i = 0; i < users.length; i++) {
-            address curr = users[i];
-            uint256 max = checkSendLimit(prev, curr);
+            address currUser = users[i];
+            address token = tokens[i];
+            uint256 max = checkSendLimit(token, currUser);
 
-            require(userToToken[prev].balanceOf(curr) + wad <= max, "Trust limit exceeded");
+            require(userToToken[token].balanceOf(currUser) + wad <= max, "Trust limit exceeded");
 
-            userToToken[prev].hubTransfer(prev, curr, wad);
-            prev = curr;
+            userToToken[token].hubTransfer(prevUser, currUser, wad);
+            prevUser = currUser;
         }
     }
 
