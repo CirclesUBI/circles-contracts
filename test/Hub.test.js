@@ -18,7 +18,7 @@ const ProxyFactory = truffleContract(proxyArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 ProxyFactory.setProvider(web3.currentProvider);
 
-contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // eslint-disable-line no-unused-vars
+contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
   let proxyFactory = null;
@@ -392,5 +392,49 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser]) => { // esli
         });
       });
     });
+  });
+
+  describe('user can transact transitively when there is a valid path', async () => {
+    describe('when each user is sending their own token', async () => {
+      const trustLimit = 50;
+
+      beforeEach(async () => {
+        await hub.signup(tokenName, { from: safeOwner });
+        await hub.signup(tokenName, { from: normalUser });
+        await hub.signup(tokenName, { from: thirdUser });
+        await hub.trust(safeOwner, trustLimit, { from: normalUser });
+        await hub.trust(normalUser, trustLimit, { from: thirdUser });
+        const amount = bn(25);
+        await hub.transferThrough([safeOwner, normalUser], [normalUser, thirdUser], amount, { from: safeOwner });
+      });
+
+      it('deducts senders balance of own token', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(safeOwner))
+          .should.be.bignumber.equal(bn(75));
+      });
+
+      it('sends senders token to first user', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(normalUser))
+          .should.be.bignumber.equal(bn(25));
+      });
+
+      it('deducts first users balance', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(normalUser))
+          .should.be.bignumber.equal(bn(75));
+      });
+
+      it('sends first users token to destination', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(thirdUser))
+          .should.be.bignumber.equal(bn(25));
+      });
+    })
   });
 });
