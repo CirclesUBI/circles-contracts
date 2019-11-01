@@ -1,6 +1,6 @@
 {
   "name": "circles-contracts",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "contributors": [
     "Sarah Friend (https://github.com/ana0)",
     "Jake Gillberg (https://github.com/Jake-Gillberg)",
@@ -39,6 +39,6 @@
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
-    "@circles/safe-contracts": "^1.0.3"
+    "@circles/safe-contracts": "^1.0.4"
   }
 }

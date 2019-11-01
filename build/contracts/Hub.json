@@ -12645,9 +12645,154 @@
     "name": "solc",
     "version": "0.5.8+commit.23d335f2.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "1572554317846": {
+      "events": {
+        "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "name": "Signup",
+          "type": "event",
+          "signature": "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342"
+        },
+        "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "limit",
+              "type": "uint256"
+            }
+          ],
+          "name": "Trust",
+          "type": "event",
+          "signature": "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec"
+        }
+      },
+      "links": {},
+      "address": "0x457949C9f6C77c52A31f8F65237026474c986059",
+      "transactionHash": "0xba0cb5d684606303d21dd9eb43ad8b91b974d5aab82e89cfafc9af586f652de4"
+    },
+    "1572568145758": {
+      "events": {
+        "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "name": "Signup",
+          "type": "event",
+          "signature": "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342"
+        },
+        "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "limit",
+              "type": "uint256"
+            }
+          ],
+          "name": "Trust",
+          "type": "event",
+          "signature": "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec"
+        }
+      },
+      "links": {},
+      "address": "0x7676083baF90e90A29FfCcf604664Dd8B04EdEd0",
+      "transactionHash": "0x7d7d06e2b3ec4fecbd2fcd72aff1df57801a4e26c8bb890dda2ca6e6f0a16975"
+    },
+    "1572616813413": {
+      "events": {
+        "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "name": "Signup",
+          "type": "event",
+          "signature": "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342"
+        },
+        "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "limit",
+              "type": "uint256"
+            }
+          ],
+          "name": "Trust",
+          "type": "event",
+          "signature": "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec"
+        }
+      },
+      "links": {},
+      "address": "0xBCd958Ad028102Dc76e5F20FdebFB7F964158bbc",
+      "transactionHash": "0x4eab5d5a9df67113dc607243e65bfd73649ea055c3c3743b13931e79e9afdf53"
+    }
+  },
   "schemaVersion": "3.0.15",
-  "updatedAt": "2019-10-30T14:29:04.182Z",
+  "updatedAt": "2019-11-01T14:06:00.959Z",
   "devdoc": {
     "methods": {}
   },
