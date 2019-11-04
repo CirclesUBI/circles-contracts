@@ -104,15 +104,15 @@ contract Hub {
 
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
-    function transferThrough(address[] memory tokens, address[] memory srcs, address[] memory dests, uint[] memory wads) public {
+    function transferThrough(address[] memory tokenOwners, address[] memory srcs, address[] memory dests, uint[] memory wads) public {
         require(srcs.length <= 5, "Too complex path");
-        require(dests.length == tokens.length, "Tokens array length must equal dests array" );
-        require(srcs.length == tokens.length, "Tokens array length must equal srcs array" );
+        require(dests.length == tokenOwners.length, "Tokens array length must equal dests array" );
+        require(srcs.length == tokenOwners.length, "Tokens array length must equal srcs array" );
         //require(srcs.)
         for (uint i = 0; i < srcs.length; i++) {
             address src = srcs[i];
             address dest = dests[i];
-            address token = tokens[i];
+            address token = tokenOwners[i];
             uint256 wad = wads[i];
             
             uint256 max = checkSendLimit(token, dest);
