@@ -27,6 +27,14 @@ contract Hub {
     event Signup(address indexed user, address token);
     event Trust(address indexed from, address indexed to, uint256 limit);
 
+    struct transferValidator {
+        address identity;
+        uint256 sent;
+        uint256 received;
+    }
+    mapping (address => transferValidator) validation;
+    address[] seen;
+
     modifier onlyOwner() {
         require (msg.sender == owner);
         _;
@@ -104,11 +112,12 @@ contract Hub {
 
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
+    event Validation(address user, uint sent, uint received);
+
     function transferThrough(address[] memory tokenOwners, address[] memory srcs, address[] memory dests, uint[] memory wads) public {
         require(srcs.length <= 5, "Too complex path");
         require(dests.length == tokenOwners.length, "Tokens array length must equal dests array" );
         require(srcs.length == tokenOwners.length, "Tokens array length must equal srcs array" );
-        //require(srcs.)
         for (uint i = 0; i < srcs.length; i++) {
             address src = srcs[i];
             address dest = dests[i];
@@ -116,12 +125,52 @@ contract Hub {
             uint256 wad = wads[i];
             
             uint256 max = checkSendLimit(token, dest);
-
             require(userToToken[token].balanceOf(dest) + wad <= max, "Trust limit exceeded");
 
+            if (validation[src].identity != address(0)) {
+                validation[src].sent = validation[src].sent + wad;
+            } else {
+                validation[src].identity = src;
+                validation[src].sent = wad;
+                seen.push(src);
+            }
+            if (validation[dest].identity != address(0)) {
+                validation[dest].received = validation[dest].received + wad;
+            } else {
+                validation[dest].identity = dest;
+                validation[dest].received = wad; 
+                seen.push(dest);   
+            }
+
             userToToken[token].hubTransfer(src, dest, wad);
-            //srcUser = currUser;
         }
+        address src1;
+        address dest2;
+        for (uint i = 0; i < seen.length; i++) {
+            transferValidator memory curr = validation[seen[i]];
+            emit Validation(curr.identity, curr.sent, curr.received);
+            if (curr.sent > curr.received) {
+                require(src1 == address(0), "Path sends from more than one src");
+                require(curr.identity == msg.sender, "Path doesn't send from transaction sender");
+                src1 = curr.identity;
+            }
+            if (curr.received > curr.sent) {
+                require(dest2 == address(0), "Path sends to more than one dest");
+                dest2 = curr.identity;
+            }
+        }
+        emit Validation(validation[src1].identity, validation[src1].sent, validation[src1].received);
+        emit Validation(validation[dest2].identity, validation[dest2].sent, validation[dest2].received);
+        require(validation[src1].received == 0, "Sender is receiving");
+        require(validation[dest2].sent == 0, "Recipient is sending");
+        require(validation[src1].sent == validation[dest2].received, "Unequal sent and received amounts");
+        require(seen.length <= srcs.length + 1, "Seen too many addresses");
+        for (uint i = seen.length; i >= 1; i--) {
+            validation[seen[i-1]].sent = 0;
+            validation[seen[i-1]].received = 0;
+            seen.pop();
+        }
+        require(seen.length == 0, "Seen should be empty");
     }
 
 }
