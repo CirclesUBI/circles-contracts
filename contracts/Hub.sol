@@ -170,8 +170,9 @@ contract Hub {
     // executes transtive transfer - also validates path
     function transferThrough(address[] memory tokenOwners, address[] memory srcs, address[] memory dests, uint[] memory wads) public {
         require(srcs.length <= 5, "Too complex path");
-        require(dests.length == tokenOwners.length, "Tokens array length must equal dests array" );
-        require(srcs.length == tokenOwners.length, "Tokens array length must equal srcs array" );
+        require(dests.length == tokenOwners.length, "Tokens array length must equal dests array");
+        require(srcs.length == tokenOwners.length, "Tokens array length must equal srcs array");
+        require(wads.length == tokenOwners.length, "Tokens array length must equal amounts array");
         for (uint i = 0; i < srcs.length; i++) {
             address src = srcs[i];
             address dest = dests[i];
