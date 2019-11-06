@@ -21385,9 +21385,81 @@
     "name": "solc",
     "version": "0.5.8+commit.23d335f2.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "100": {
+      "events": {
+        "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "name": "Signup",
+          "type": "event",
+          "signature": "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342"
+        },
+        "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "limit",
+              "type": "uint256"
+            }
+          ],
+          "name": "Trust",
+          "type": "event",
+          "signature": "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec"
+        },
+        "0xacbf70d48e7d89eaa1c759e3a000a04acab21905642e422a1905bd3cdc4051a6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "sent",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "received",
+              "type": "uint256"
+            }
+          ],
+          "name": "Validation",
+          "type": "event",
+          "signature": "0xacbf70d48e7d89eaa1c759e3a000a04acab21905642e422a1905bd3cdc4051a6"
+        }
+      },
+      "links": {},
+      "address": "0x21C59b106a98d7D1E3ad621625f32F0bc22e7e55",
+      "transactionHash": "0xa9ebad1c5e10b4e483e065a7f87600015c873f8f69c84502fd97feb5a59800cd"
+    }
+  },
   "schemaVersion": "3.0.15",
-  "updatedAt": "2019-11-06T13:37:38.555Z",
+  "updatedAt": "2019-11-06T14:25:25.897Z",
   "devdoc": {
     "methods": {}
   },
