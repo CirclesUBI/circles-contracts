@@ -39,6 +39,8 @@
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
-    "@circles/safe-contracts": "^1.0.4"
+    "@circles/safe-contracts": "^1.0.4",
+    "dotenv": "^8.2.0",
+    "truffle-hdwallet-provider": "^1.0.17"
   }
 }
