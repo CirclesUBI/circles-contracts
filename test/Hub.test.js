@@ -435,6 +435,39 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser]) =
         (await token.balanceOf(thirdUser))
           .should.be.bignumber.equal(bn(25));
       });
+
+      it('sends first users token to destination', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(thirdUser))
+          .should.be.bignumber.equal(bn(25));
+      });
+
+      it('cleans up the seen array', async () => {
+        const seen = await hub.getSeen();
+        seen.should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for safeOwner', async () => {
+        const validation = await hub.getValidation(safeOwner);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for normalUser', async () => {
+        const validation = await hub.getValidation(normalUser);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for thirdUser', async () => {
+        const validation = await hub.getValidation(thirdUser);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
     })
   });
 });

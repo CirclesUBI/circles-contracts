@@ -32,8 +32,8 @@ contract Hub {
         uint256 sent;
         uint256 received;
     }
-    mapping (address => transferValidator) validation;
-    address[] seen;
+    mapping (address => transferValidator) private validation;
+    address[] private seen;
 
     modifier onlyOwner() {
         require (msg.sender == owner);
@@ -109,8 +109,6 @@ contract Hub {
         uint256 max = (userToToken[from].totalSupply().mul(limits[to][from])).div(100);
         return max.sub(userToToken[from].balanceOf(to));
     }
-
-    event Validation(address user, uint sent, uint received);
 
     // build the data structures we will use for validation
     // if we haven't seen the addresses, add them to the validation mapping
@@ -189,6 +187,14 @@ contract Hub {
             userToToken[token].hubTransfer(src, dest, wad);
         }
         validateTransferThrough(srcs.length);
+    }
+
+    function getSeen() public view returns (uint256) {
+        return seen.length;
+    }
+
+    function getValidation(address user) public view returns (address, uint256, uint256) {
+        return (validation[user].identity, validation[user].sent, validation[user].received);
     }
 
 }
