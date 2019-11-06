@@ -18,7 +18,7 @@ const ProxyFactory = truffleContract(proxyArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 ProxyFactory.setProvider(web3.currentProvider);
 
-contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser]) => { // eslint-disable-line no-unused-vars
+contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
   let proxyFactory = null;
@@ -470,6 +470,105 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser]) =
       });
     })
 
+    describe('when each user is sending their own token and path is valid but forks', async () => {
+      const trustLimit = 50;
+
+      beforeEach(async () => {
+        await hub.signup(tokenName, { from: safeOwner });
+        await hub.signup(tokenName, { from: normalUser });
+        await hub.signup(tokenName, { from: thirdUser });
+        await hub.signup(tokenName, { from: fourthUser });
+        await hub.trust(safeOwner, trustLimit, { from: normalUser });
+        await hub.trust(safeOwner, trustLimit, { from: fourthUser });
+        await hub.trust(normalUser, trustLimit, { from: thirdUser });
+        await hub.trust(fourthUser, trustLimit, { from: thirdUser });
+        const amount = bn(25);
+        await hub.transferThrough([safeOwner, normalUser, fourthUser, safeOwner], [safeOwner, normalUser, fourthUser, safeOwner], [normalUser, thirdUser, thirdUser, fourthUser], [15, 15, 10, 10], { from: safeOwner, gas: 6721975 });
+      });
+
+      it('deducts senders balance of own token', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(safeOwner))
+          .should.be.bignumber.equal(bn(75));
+      });
+
+      it('sends senders token to first user', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(normalUser))
+          .should.be.bignumber.equal(bn(15));
+      });
+
+      it('deducts first users balance', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(normalUser))
+          .should.be.bignumber.equal(bn(85));
+      });
+
+      it('sends first users token to destination', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(thirdUser))
+          .should.be.bignumber.equal(bn(15));
+      });
+
+      it('sends senders token to fourth user', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(fourthUser))
+          .should.be.bignumber.equal(bn(10));
+      });
+
+      it('deducts fourth users balance', async () => {
+        const tokenAddress = await hub.userToToken(fourthUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(fourthUser))
+          .should.be.bignumber.equal(bn(90));
+      });
+
+      it('sends fourth users token to destination', async () => {
+        const tokenAddress = await hub.userToToken(fourthUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(thirdUser))
+          .should.be.bignumber.equal(bn(10));
+      });
+
+      it('cleans up the seen array', async () => {
+        const seen = await hub.getSeen();
+        seen.should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for safeOwner', async () => {
+        const validation = await hub.getValidation(safeOwner);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for normalUser', async () => {
+        const validation = await hub.getValidation(normalUser);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for thirdUser', async () => {
+        const validation = await hub.getValidation(thirdUser);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for fourthUser', async () => {
+        const validation = await hub.getValidation(fourthUser);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+    })
+
     describe('when each user is sending their own token but trust path is invalid', async () => {
       const trustLimit = 50;
 
@@ -532,6 +631,35 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser]) =
         await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, amount, amount], { from: safeOwner, gas: 6721975 }));
       });
 
+      it('should throw when sender is not sending enough', async () => {
+        await hub.signup(tokenName, { from: safeOwner });
+        await hub.signup(tokenName, { from: normalUser });
+        await hub.signup(tokenName, { from: thirdUser });
+        await hub.trust(safeOwner, trustLimit, { from: normalUser });
+        await hub.trust(normalUser, trustLimit, { from: thirdUser })
+        const amount = bn(25);
+        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [15, amount], { from: safeOwner, gas: 6721975 }));
+      });
+
+      it('should throw when sender is sending too much', async () => {
+        await hub.signup(tokenName, { from: safeOwner });
+        await hub.signup(tokenName, { from: normalUser });
+        await hub.signup(tokenName, { from: thirdUser });
+        await hub.trust(safeOwner, trustLimit, { from: normalUser });
+        await hub.trust(normalUser, trustLimit, { from: thirdUser })
+        const amount = bn(25);
+        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, 15], { from: safeOwner, gas: 6721975 }));
+      });
+
+      it('should throw when sender is receiving', async () => {
+        await hub.signup(tokenName, { from: safeOwner });
+        await hub.signup(tokenName, { from: normalUser });
+        await hub.signup(tokenName, { from: thirdUser });
+        await hub.trust(safeOwner, trustLimit, { from: normalUser });
+        await hub.trust(normalUser, trustLimit, { from: safeOwner })
+        const amount = bn(25);
+        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, safeOwner], [amount, amount], { from: safeOwner, gas: 6721975 }));
+      });
     })
   });
 });

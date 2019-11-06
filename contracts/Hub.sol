@@ -148,6 +148,8 @@ contract Hub {
                 dest = curr.identity;
             }
         }
+        require(src != address(0), "Transaction must have a src");
+        require(dest != address(0), "Transaction must have a dest");
         // sender should not recieve, recipient should not send
         require(validation[src].received == 0, "Sender is receiving");
         require(validation[dest].sent == 0, "Recipient is sending");
