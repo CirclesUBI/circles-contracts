@@ -3,12 +3,6 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Token.sol";
 
-//finish update function in token
-//what should initial demurrage rate be? And initial issuance?
-//more events in Token
-//parallel transfer helper
-//abstract ownership utils?
-
 contract Hub {
     using SafeMath for uint256;
 
@@ -112,8 +106,13 @@ contract Hub {
     }
 
     function checkSendLimit(address token, address from, address to) public view returns (uint256) {
+        // if sending dest's token to dest, src can send 100% of their holdings
         if (token == to) {
             return userToToken[token].balanceOf(from);
+        }
+        // if the token doesn't exist, nothing can be sent
+        if (address(userToToken[token]) == address(0)) {
+            return 0;
         }
         uint256 max = (userToToken[token].totalSupply().mul(limits[to][token])).div(100);
         return max.sub(userToToken[token].balanceOf(to));
@@ -124,14 +123,14 @@ contract Hub {
     // if we have, increment their sent/received amounts
     function buildValidationData(address src, address dest, uint wad) internal {
         if (validation[src].identity != address(0)) {
-            validation[src].sent = validation[src].sent + wad;
+            validation[src].sent = validation[src].sent.add(wad);
         } else {
             validation[src].identity = src;
             validation[src].sent = wad;
             seen.push(src);
         }
         if (validation[dest].identity != address(0)) {
-            validation[dest].received = validation[dest].received + wad;
+            validation[dest].received = validation[dest].received.add(wad);
         } else {
             validation[dest].identity = dest;
             validation[dest].received = wad; 
