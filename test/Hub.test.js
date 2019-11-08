@@ -435,7 +435,9 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             await token.transfer(safeOwner, amount, { from: normalUser });
             const totalSupply = await token.totalSupply();
             const allowable = bn(totalSupply * (newTrustLimit / 100)).sub(amount);
-            (await hub.checkSendLimit(normalUser, normalUser, safeOwner)).should.be.bignumber.equal(allowable);
+            (await hub
+              .checkSendLimit(normalUser, normalUser, safeOwner))
+              .should.be.bignumber.equal(allowable);
           });
         });
       });
@@ -453,7 +455,13 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
-        await hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, amount], { from: safeOwner, gas: 6721975 });
+        await hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser],
+            [normalUser, thirdUser],
+            [amount, amount],
+            { from: safeOwner, gas: 6721975 });
       });
 
       it('deducts senders balance of own token', async () => {
@@ -516,7 +524,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
-    })
+    });
 
     describe('when each user is sending their own token and path is valid but forks', async () => {
       const trustLimit = 50;
@@ -530,8 +538,13 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         await hub.trust(safeOwner, trustLimit, { from: fourthUser });
         await hub.trust(normalUser, trustLimit, { from: thirdUser });
         await hub.trust(fourthUser, trustLimit, { from: thirdUser });
-        const amount = bn(25);
-        await hub.transferThrough([safeOwner, normalUser, fourthUser, safeOwner], [safeOwner, normalUser, fourthUser, safeOwner], [normalUser, thirdUser, thirdUser, fourthUser], [15, 15, 10, 10], { from: safeOwner, gas: 6721975 });
+        await hub
+          .transferThrough(
+            [safeOwner, normalUser, fourthUser, safeOwner],
+            [safeOwner, normalUser, fourthUser, safeOwner],
+            [normalUser, thirdUser, thirdUser, fourthUser],
+            [15, 15, 10, 10],
+            { from: safeOwner, gas: 6721975 });
       });
 
       it('deducts senders balance of own token', async () => {
@@ -615,7 +628,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
-    })
+    });
 
     describe('when each user is sending their own token but trust path is invalid', async () => {
       const trustLimit = 50;
@@ -625,61 +638,115 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         await hub.signup(tokenName, { from: normalUser });
         await hub.signup(tokenName, { from: thirdUser });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
-      })
+      });
 
       it('should throw when missing trust', async () => {
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, amount], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser],
+            [normalUser, thirdUser],
+            [amount, amount],
+            { from: safeOwner, gas: 6721975 }));
       });
 
       it('should throw when trust limit is too low', async () => {
-        await hub.trust(normalUser, 15, { from: thirdUser })
+        await hub.trust(normalUser, 15, { from: thirdUser });
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, amount], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser],
+            [normalUser, thirdUser],
+            [amount, amount],
+            { from: safeOwner, gas: 6721975 }));
       });
 
       it('should throw when passed too many srcs', async () => {
-        await hub.trust(normalUser, trustLimit, { from: thirdUser })
+        await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser, thirdUser], [normalUser, thirdUser], [amount, amount], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser, thirdUser],
+            [normalUser, thirdUser],
+            [amount, amount],
+            { from: safeOwner, gas: 6721975 }));
       });
 
       it('should throw when passed too many tokenOwners', async () => {
-        await hub.trust(normalUser, trustLimit, { from: thirdUser })
+        await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser, thirdUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, amount], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser, thirdUser],
+            [safeOwner, normalUser],
+            [normalUser, thirdUser],
+            [amount, amount],
+            { from: safeOwner, gas: 6721975 }));
       });
 
       it('should throw when passed too many dests', async () => {
-        await hub.trust(normalUser, trustLimit, { from: thirdUser })
+        await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser, safeOwner], [amount, amount], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser],
+            [normalUser, thirdUser, safeOwner],
+            [amount, amount],
+            { from: safeOwner, gas: 6721975 }));
       });
 
       it('should throw when passed too many amounts', async () => {
-        await hub.trust(normalUser, trustLimit, { from: thirdUser })
+        await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, amount, amount], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser],
+            [normalUser, thirdUser],
+            [amount, amount, amount],
+            { from: safeOwner, gas: 6721975 }));
       });
 
       it('should throw when sender is not sending enough', async () => {
-        await hub.trust(normalUser, trustLimit, { from: thirdUser })
+        await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [15, amount], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser],
+            [normalUser, thirdUser],
+            [15, amount],
+            { from: safeOwner, gas: 6721975 }));
       });
 
       it('should throw when sender is sending too much', async () => {
-        await hub.trust(normalUser, trustLimit, { from: thirdUser })
+        await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, thirdUser], [amount, 15], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser],
+            [normalUser, thirdUser],
+            [amount, 15],
+            { from: safeOwner, gas: 6721975 }));
       });
 
       it('should throw when sender is receiving', async () => {
-        await hub.trust(normalUser, trustLimit, { from: safeOwner })
+        await hub.trust(normalUser, trustLimit, { from: safeOwner });
         const amount = bn(25);
-        await assertRevert(hub.transferThrough([safeOwner, normalUser], [safeOwner, normalUser], [normalUser, safeOwner], [amount, amount], { from: safeOwner, gas: 6721975 }));
+        await assertRevert(hub
+          .transferThrough(
+            [safeOwner, normalUser],
+            [safeOwner, normalUser],
+            [normalUser, safeOwner],
+            [amount, amount],
+            { from: safeOwner, gas: 6721975 }));
       });
-    })
+    });
 
     describe('when each user is not necessarily sending their own token and path is valid', async () => {
       const trustLimit = 50;
@@ -695,7 +762,13 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         const tokenAddress = await hub.userToToken(normalUser);
         const token = await Token.at(tokenAddress);
         await token.transfer(safeOwner, amount, { from: normalUser });
-        await hub.transferThrough([normalUser], [safeOwner], [normalUser], [amount], { from: safeOwner, gas: 6721975 });
+        await hub
+          .transferThrough(
+            [normalUser],
+            [safeOwner],
+            [normalUser],
+            [amount],
+            { from: safeOwner, gas: 6721975 });
       });
 
       it('correctly set senders balance', async () => {
@@ -744,6 +817,6 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
-    })
+    });
   });
 });
