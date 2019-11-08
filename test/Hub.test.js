@@ -267,12 +267,45 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
   describe('user can set trust limits', async () => {
     const trustLimit = 50;
 
-    describe('when trust destination is not a circles token', async () => {
+    describe('when user tries to adjust their trust for themselves', async () => {
       beforeEach(async () => {
         await hub.signup(tokenName, { from: safeOwner });
       });
 
-      it('should throw', async () => assertRevert(hub.trust(normalUser, trustLimit)));
+      it('should throw', async () => assertRevert(hub.trust(safeOwner, trustLimit, { from: safeOwner })));
+
+      it('correctly sets the trust limit on signup', async () => {
+        (await hub.limits(safeOwner, safeOwner))
+          .should.be.bignumber.equal(new BigNumber(100));
+      });
+
+      it('checkSendLimit returns the correct amount for self-send', async () => {
+        (await hub.checkSendLimit(safeOwner, safeOwner, safeOwner))
+          .should.be.bignumber.equal(bn(100));
+      });
+    });
+
+    describe('when trust destination is not a circles token', async () => {
+      beforeEach(async () => {
+        await hub.signup(tokenName, { from: safeOwner });
+        await hub.trust(normalUser, trustLimit, { from: safeOwner });
+      });
+
+      it('creates a trust event', async () => {
+        const logs = await hub.getPastEvents('Trust', { fromBlock: 0, toBlock: 'latest' });
+
+        const event = expectEvent.inLogs(logs, 'Trust', {
+          from: safeOwner,
+          to: normalUser,
+        });
+
+        return event.args.limit.should.be.bignumber.equal(new BigNumber(trustLimit));
+      });
+
+      it('correctly sets the trust limit', async () => {
+        (await hub.limits(safeOwner, normalUser))
+          .should.be.bignumber.equal(new BigNumber(trustLimit));
+      });
     });
 
     describe('when trust destination is a circles token', async () => {
@@ -319,6 +352,16 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             .should.be.bignumber.equal(allowable);
         });
 
+        it('returns correct amount for returnable to sender, after tokens have been traded', async () => {
+          const amount = bn(25);
+          const tokenAddress = await hub.userToToken(normalUser);
+          const token = await Token.at(tokenAddress);
+          await token.transfer(safeOwner, amount, { from: normalUser });
+          const balance = await token.balanceOf(safeOwner);
+          (await hub.checkSendLimit(normalUser, safeOwner, normalUser))
+            .should.be.bignumber.equal(balance);
+        });
+
         it('returns correct amount when no tokens are tradeable', async () => {
           const amount = bn(50);
           const tokenAddress = await hub.userToToken(normalUser);
@@ -328,6 +371,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
           const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
           (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
             .should.be.bignumber.equal(allowable);
+        });
+
+        it('returns correct amount when no tokens are returnable', async () => {
+          (await hub.checkSendLimit(normalUser, safeOwner, normalUser))
+            .should.be.bignumber.equal(bn(0));
         });
 
         it('returns correct amount when there is not trust connection', async () => {
