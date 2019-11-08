@@ -69,14 +69,14 @@
     "absolutePath": "/media/000/Documents/Circles/circles-contracts/contracts/interfaces/HubI.sol",
     "exportedSymbols": {
       "HubI": [
-        1295
+        1315
       ]
     },
-    "id": 1296,
+    "id": 1316,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1274,
+        "id": 1294,
         "literals": [
           "solidity",
           "^",
@@ -92,9 +92,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 1295,
+        "id": 1315,
         "linearizedBaseContracts": [
-          1295
+          1315
         ],
         "name": "HubI",
         "nodeType": "ContractDefinition",
@@ -102,28 +102,28 @@
           {
             "body": null,
             "documentation": null,
-            "id": 1279,
+            "id": 1299,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "issuanceRate",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1275,
+              "id": 1295,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "66:2:4"
             },
             "returnParameters": {
-              "id": 1278,
+              "id": 1298,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1277,
+                  "id": 1297,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1279,
+                  "scope": 1299,
                   "src": "90:7:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -132,7 +132,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1276,
+                    "id": 1296,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "90:7:4",
@@ -147,7 +147,7 @@
               ],
               "src": "89:9:4"
             },
-            "scope": 1295,
+            "scope": 1315,
             "src": "45:54:4",
             "stateMutability": "view",
             "superFunction": null,
@@ -156,28 +156,28 @@
           {
             "body": null,
             "documentation": null,
-            "id": 1284,
+            "id": 1304,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "demurrageRate",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1280,
+              "id": 1300,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "126:2:4"
             },
             "returnParameters": {
-              "id": 1283,
+              "id": 1303,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1282,
+                  "id": 1302,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1284,
+                  "scope": 1304,
                   "src": "150:7:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -186,7 +186,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1281,
+                    "id": 1301,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "150:7:4",
@@ -201,7 +201,7 @@
               ],
               "src": "149:9:4"
             },
-            "scope": 1295,
+            "scope": 1315,
             "src": "104:55:4",
             "stateMutability": "view",
             "superFunction": null,
@@ -210,28 +210,28 @@
           {
             "body": null,
             "documentation": null,
-            "id": 1289,
+            "id": 1309,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "decimals",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1285,
+              "id": 1305,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "181:2:4"
             },
             "returnParameters": {
-              "id": 1288,
+              "id": 1308,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1287,
+                  "id": 1307,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1289,
+                  "scope": 1309,
                   "src": "205:5:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -240,7 +240,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 1286,
+                    "id": 1306,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "205:5:4",
@@ -255,7 +255,7 @@
               ],
               "src": "204:7:4"
             },
-            "scope": 1295,
+            "scope": 1315,
             "src": "164:48:4",
             "stateMutability": "view",
             "superFunction": null,
@@ -264,28 +264,28 @@
           {
             "body": null,
             "documentation": null,
-            "id": 1294,
+            "id": 1314,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "symbol",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1290,
+              "id": 1310,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "232:2:4"
             },
             "returnParameters": {
-              "id": 1293,
+              "id": 1313,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1292,
+                  "id": 1312,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1294,
+                  "scope": 1314,
                   "src": "256:13:4",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -294,7 +294,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 1291,
+                    "id": 1311,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "256:6:4",
@@ -309,14 +309,14 @@
               ],
               "src": "255:15:4"
             },
-            "scope": 1295,
+            "scope": 1315,
             "src": "217:54:4",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 1296,
+        "scope": 1316,
         "src": "25:248:4"
       }
     ],
@@ -326,14 +326,14 @@
     "absolutePath": "/media/000/Documents/Circles/circles-contracts/contracts/interfaces/HubI.sol",
     "exportedSymbols": {
       "HubI": [
-        1295
+        1315
       ]
     },
-    "id": 1296,
+    "id": 1316,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1274,
+        "id": 1294,
         "literals": [
           "solidity",
           "^",
@@ -349,9 +349,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 1295,
+        "id": 1315,
         "linearizedBaseContracts": [
-          1295
+          1315
         ],
         "name": "HubI",
         "nodeType": "ContractDefinition",
@@ -359,28 +359,28 @@
           {
             "body": null,
             "documentation": null,
-            "id": 1279,
+            "id": 1299,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "issuanceRate",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1275,
+              "id": 1295,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "66:2:4"
             },
             "returnParameters": {
-              "id": 1278,
+              "id": 1298,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1277,
+                  "id": 1297,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1279,
+                  "scope": 1299,
                   "src": "90:7:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -389,7 +389,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1276,
+                    "id": 1296,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "90:7:4",
@@ -404,7 +404,7 @@
               ],
               "src": "89:9:4"
             },
-            "scope": 1295,
+            "scope": 1315,
             "src": "45:54:4",
             "stateMutability": "view",
             "superFunction": null,
@@ -413,28 +413,28 @@
           {
             "body": null,
             "documentation": null,
-            "id": 1284,
+            "id": 1304,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "demurrageRate",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1280,
+              "id": 1300,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "126:2:4"
             },
             "returnParameters": {
-              "id": 1283,
+              "id": 1303,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1282,
+                  "id": 1302,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1284,
+                  "scope": 1304,
                   "src": "150:7:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -443,7 +443,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1281,
+                    "id": 1301,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "150:7:4",
@@ -458,7 +458,7 @@
               ],
               "src": "149:9:4"
             },
-            "scope": 1295,
+            "scope": 1315,
             "src": "104:55:4",
             "stateMutability": "view",
             "superFunction": null,
@@ -467,28 +467,28 @@
           {
             "body": null,
             "documentation": null,
-            "id": 1289,
+            "id": 1309,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "decimals",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1285,
+              "id": 1305,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "181:2:4"
             },
             "returnParameters": {
-              "id": 1288,
+              "id": 1308,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1287,
+                  "id": 1307,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1289,
+                  "scope": 1309,
                   "src": "205:5:4",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -497,7 +497,7 @@
                     "typeString": "uint8"
                   },
                   "typeName": {
-                    "id": 1286,
+                    "id": 1306,
                     "name": "uint8",
                     "nodeType": "ElementaryTypeName",
                     "src": "205:5:4",
@@ -512,7 +512,7 @@
               ],
               "src": "204:7:4"
             },
-            "scope": 1295,
+            "scope": 1315,
             "src": "164:48:4",
             "stateMutability": "view",
             "superFunction": null,
@@ -521,28 +521,28 @@
           {
             "body": null,
             "documentation": null,
-            "id": 1294,
+            "id": 1314,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "symbol",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1290,
+              "id": 1310,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "232:2:4"
             },
             "returnParameters": {
-              "id": 1293,
+              "id": 1313,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1292,
+                  "id": 1312,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1294,
+                  "scope": 1314,
                   "src": "256:13:4",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -551,7 +551,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 1291,
+                    "id": 1311,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "256:6:4",
@@ -566,14 +566,14 @@
               ],
               "src": "255:15:4"
             },
-            "scope": 1295,
+            "scope": 1315,
             "src": "217:54:4",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 1296,
+        "scope": 1316,
         "src": "25:248:4"
       }
     ],
@@ -585,7 +585,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.15",
-  "updatedAt": "2019-11-07T16:01:33.067Z",
+  "updatedAt": "2019-11-08T13:22:21.600Z",
   "devdoc": {
     "methods": {}
   },
