@@ -24054,9 +24054,58 @@
     "name": "solc",
     "version": "0.5.8+commit.23d335f2.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "1573228419043": {
+      "events": {
+        "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "name": "Signup",
+          "type": "event",
+          "signature": "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342"
+        },
+        "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "limit",
+              "type": "uint256"
+            }
+          ],
+          "name": "Trust",
+          "type": "event",
+          "signature": "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec"
+        }
+      },
+      "links": {},
+      "address": "0x356783ee8a657A5C574EAd562613a77cbE6cDBF3",
+      "transactionHash": "0xbb4c7fb5dd851ace9355834cc9527a94d934974036962613fff91af5ccdf45ef"
+    }
+  },
   "schemaVersion": "3.0.15",
-  "updatedAt": "2019-11-08T15:42:43.696Z",
+  "updatedAt": "2019-11-08T15:53:56.146Z",
   "devdoc": {
     "methods": {}
   },
