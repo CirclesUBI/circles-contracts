@@ -105,9 +105,12 @@ contract Hub {
         emit Trust(msg.sender, toTrust, limit);
     }
 
-    function checkSendLimit(address from, address to) public view returns (uint256) {
-        uint256 max = (userToToken[from].totalSupply().mul(limits[to][from])).div(100);
-        return max.sub(userToToken[from].balanceOf(to));
+    function checkSendLimit(address token, address from, address to) public view returns (uint256) {
+        if (token == to) {
+            return userToToken[token].balanceOf(from);
+        }
+        uint256 max = (userToToken[token].totalSupply().mul(limits[to][token])).div(100);
+        return max.sub(userToToken[token].balanceOf(to));
     }
 
     // build the data structures we will use for validation
@@ -182,8 +185,11 @@ contract Hub {
             uint256 wad = wads[i];
             
             // check that no trust limits are violated
-            uint256 max = checkSendLimit(token, dest);
-            require(userToToken[token].balanceOf(dest) + wad <= max, "Trust limit exceeded");
+            // you always trust yourself 100%
+            if (token != dest) {
+                uint256 max = checkSendLimit(token, src, dest);
+                require(userToToken[token].balanceOf(dest) + wad <= max, "Trust limit exceeded");
+            }
 
             buildValidationData(src, dest, wad);
 
