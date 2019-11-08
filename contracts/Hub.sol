@@ -92,6 +92,7 @@ contract Hub {
         Token token = new Token(msg.sender, _name, initialPayout);
         userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
+        _trust(msg.sender, 100);
 
         emit Signup(msg.sender, address(token));
         return true;
@@ -100,7 +101,12 @@ contract Hub {
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address toTrust, uint limit) public {
-        require(trustable(toTrust));
+        //require(trustable(toTrust));
+        require(msg.sender != toTrust, "You can't untrust yourself");
+        _trust(toTrust, limit);
+    }
+
+    function _trust(address toTrust, uint limit) internal {
         limits[msg.sender][toTrust] = limit;
         emit Trust(msg.sender, toTrust, limit);
     }
