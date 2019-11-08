@@ -15,8 +15,6 @@ contract Token is ERC20 {
     HubI public controller;
     address public owner;
 
-    event TokenIssuance(uint256 amount);
-
     modifier onlyHub() {
         require(msg.sender == hub);
         _;
@@ -36,18 +34,6 @@ contract Token is ERC20 {
         _mint(_owner, initialPayout);
     }
 
-    function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-        require(_newOwner != address(0));
-        owner = _newOwner;
-        return true;
-    }
-
-    function updateHub(address _hub) public onlyOwner returns (bool) {
-        require(_hub != address(0));
-        hub = _hub;
-        return true;
-    }
-
     function time() internal view returns (uint) {
         return block.timestamp;
     }
@@ -65,10 +51,9 @@ contract Token is ERC20 {
     // the universal basic income part
     function update() public {
         uint256 gift = look();
-        //this.mint(cast(gift));
+        //this._mint(cast(gift));
         //this.push(owner, cast(gift));
         lastTouched = time();
-        emit TokenIssuance(gift);
     }
 
     function hubTransfer(
@@ -78,14 +63,11 @@ contract Token is ERC20 {
     }
 
     function transfer(address dst, uint wad) public returns (bool) {
-        if (msg.sender != address(this)) {
-            update();
-        }
+        update();
         return super.transfer(dst, wad);
     }
 
     function approve(address guy, uint wad) public returns (bool) {
-        //update();
         return super.approve(guy, wad);
     }
 
