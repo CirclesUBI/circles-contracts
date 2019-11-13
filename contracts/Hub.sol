@@ -106,13 +106,13 @@ contract Hub {
     }
 
     function checkSendLimit(address token, address from, address to) public view returns (uint256) {
-        // if sending dest's token to dest, src can send 100% of their holdings
-        if (token == to) {
-            return userToToken[token].balanceOf(from);
-        }
         // if the token doesn't exist, nothing can be sent
         if (address(userToToken[token]) == address(0)) {
             return 0;
+        }
+        // if sending dest's token to dest, src can send 100% of their holdings
+        if (token == to) {
+            return userToToken[token].balanceOf(from);
         }
         uint256 max = (userToToken[token].totalSupply().mul(limits[to][token])).div(100);
         return max.sub(userToToken[token].balanceOf(to));

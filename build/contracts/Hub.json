@@ -24610,10 +24610,58 @@
       "links": {},
       "address": "0x4b167f3AE9d9e09463778C69f648b3F3b8f90654",
       "transactionHash": "0x47507a9ac4048709df2ac73040a420b28a3b8fb5a54bfdb4c26c260f0fe75e31"
+    },
+    "1573255884451": {
+      "events": {
+        "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "name": "Signup",
+          "type": "event",
+          "signature": "0x358ba8f768af134eb5af120e9a61dc1ef29b29f597f047b555fc3675064a0342"
+        },
+        "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "limit",
+              "type": "uint256"
+            }
+          ],
+          "name": "Trust",
+          "type": "event",
+          "signature": "0xe60c754dd8ab0b1b5fccba257d6ebcd7d09e360ab7dd7a6e58198ca1f57cdcec"
+        }
+      },
+      "links": {},
+      "address": "0xc33f50ea26a8a5fFef7e1E8aa28d7c31c4dd2f3D",
+      "transactionHash": "0x76d8f4df8accab08c47d0ba77b1732e1ebe2d066d1dd4ce520c67baa2808ae51"
     }
   },
   "schemaVersion": "3.0.15",
-  "updatedAt": "2019-11-08T23:28:22.925Z",
+  "updatedAt": "2019-11-08T23:31:41.453Z",
   "devdoc": {
     "methods": {}
   },
