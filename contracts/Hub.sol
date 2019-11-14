@@ -9,11 +9,9 @@ contract Hub {
     address public owner;
 
     uint256 public issuanceRate; // = 1736111111111111; // ~1050 tokens per week
-    uint256 public demurrageRate; // = 0;
     string public symbol; // = 'CRC';
-    uint256 initialPayout;
+    uint256 public initialPayout;
 
-    mapping (address => bool) public relayers;
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
     mapping (address => mapping (address => uint256)) public limits;
@@ -26,6 +24,7 @@ contract Hub {
         uint256 sent;
         uint256 received;
     }
+
     mapping (address => transferValidator) private validation;
     address[] private seen;
 
@@ -34,11 +33,10 @@ contract Hub {
         _;
     }
 
-    constructor(address _owner, uint256 _issuance, uint256 _demurrage, string memory _symbol, uint256 _initialPayout) public {
+    constructor(address _owner, uint256 _issuance, string memory _symbol, uint256 _initialPayout) public {
         require (_owner != address(0));
         owner = _owner;
         issuanceRate = _issuance;
-        demurrageRate = _demurrage;
         symbol = _symbol;
         initialPayout = _initialPayout;
     }
@@ -49,21 +47,9 @@ contract Hub {
         return true;
     }
 
-    function updateRelayer(address _relayer, bool isRelayer) public onlyOwner returns (bool) {
-        require(_relayer != address(0));
-        relayers[_relayer] = isRelayer;
-        return true;
-    }
-
     function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
         // safety checks on issuance go here
         issuanceRate = _issuance;
-        return true;
-    }
-
-    function updateDemurrage(uint256 _demurrage) public onlyOwner returns (bool) {
-        // safety checks on demurrage go here
-        demurrageRate = _demurrage;
         return true;
     }
 
