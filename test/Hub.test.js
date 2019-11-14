@@ -24,13 +24,12 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
   let proxyFactory = null;
 
   const issuance = bn(1736111111111111);
-  const demurrage = bn(0);
   const symbol = 'CRC';
   const initialPayout = bn(100);
   const tokenName = 'testToken';
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, issuance, demurrage, symbol, initialPayout);
+    hub = await Hub.new(systemOwner, issuance, symbol, initialPayout);
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
     await safe.setup([systemOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
@@ -52,14 +51,6 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
     await assertRevert(hub.updateIssuance(42, { from: attacker }));
   });
 
-  it('has a demurrage rate', async () => {
-    (await hub.demurrageRate()).should.be.bignumber.equal(demurrage);
-  });
-
-  it('attacker cannot change demurrage', async () => {
-    await assertRevert(hub.updateDemurrage(42, { from: attacker }));
-  });
-
   it('has a symbol', async () => {
     (await hub.symbol()).should.be.equal(symbol);
   });
@@ -71,7 +62,6 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
   describe('owner can change system vars', async () => {
     after(async () => {
       await hub.updateIssuance(issuance, { from: systemOwner });
-      await hub.updateDemurrage(demurrage, { from: systemOwner });
       await hub.updateSymbol(symbol, { from: systemOwner });
     });
 
@@ -79,11 +69,6 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
     it('owner can change issuance', async () => {
       await hub.updateIssuance(1, { from: systemOwner });
       (await hub.issuanceRate()).should.be.bignumber.equal(bn(1));
-    });
-
-    it('owner can change demurrage', async () => {
-      await hub.updateDemurrage(1, { from: systemOwner });
-      (await hub.demurrageRate()).should.be.bignumber.equal(bn(1));
     });
 
     it('owner can change symbol', async () => {
