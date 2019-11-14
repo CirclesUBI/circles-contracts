@@ -43,6 +43,16 @@ contract Hub {
         deployedAt = block.timestamp;
     }
 
+    function totalSupply() public pure returns (uint256) {
+        // total supply that a token would have if it signed up for circles
+        // at hub launch, used as the "principal" of inflation calculations
+        return 100;
+    }
+
+    function issuanceDivisor() public pure returns (uint256) {
+        return 1000000000;
+    }
+
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
         require(_newOwner != address(0));
         owner = _newOwner;

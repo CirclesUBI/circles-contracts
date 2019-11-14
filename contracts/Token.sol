@@ -67,9 +67,12 @@ contract Token is ERC20 {
     }
 
     function look() public view returns (uint256) {
-        uint256 period = time().sub(lastTouched);
         uint256 issuance = HubI(hub).issuanceRate();
-        return issuance.mul(period);
+        uint256 issuanceD = HubI(hub).issuanceDivisor();
+        uint256 totalSupply = HubI(hub).totalSupply();
+        uint256 q = pow(issuance, time());
+        uint256 d = pow(issuanceD, time());
+        return (totalSupply.mul(q.div(d))).sub(totalSupply);
     }
 
     // the universal basic income part
