@@ -42,6 +42,30 @@ contract Token is ERC20 {
         return HubI(hub).symbol();
     }
 
+    function pow(uint256 base, uint256 exponent) internal pure returns (uint256) {
+        if (exponent == 0) {
+            return 1;
+        }
+        if (exponent == 1) {
+            return base;
+        }
+        if (base == 0) {
+            return 0;
+        }
+        uint256 y = 1;
+        while(exponent > 1) {
+            if(exponent.mod(2) == 0) {
+                base = base.mul(base);
+                exponent = exponent.div(2);
+            } else {
+                y = base.mul(y);
+                base = base.mul(base);
+                exponent = (exponent.sub(1)).div(2);
+            }
+        }
+        return base.mul(y);
+    }
+
     function look() public view returns (uint256) {
         uint256 period = time().sub(lastTouched);
         uint256 issuance = HubI(hub).issuanceRate();
