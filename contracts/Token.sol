@@ -52,7 +52,6 @@ contract Token is ERC20 {
     function update() public {
         uint256 gift = look();
         //this._mint(cast(gift));
-        //this.push(owner, cast(gift));
         lastTouched = time();
     }
 
