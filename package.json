@@ -1,6 +1,6 @@
 {
   "name": "circles-contracts",
-  "version": "1.0.6",
+  "version": "1.0.10",
   "contributors": [
     "Sarah Friend (https://github.com/ana0)",
     "Jake Gillberg (https://github.com/Jake-Gillberg)",
@@ -36,9 +36,11 @@
     "openzeppelin-solidity": "2.1.1",
     "pify": "^4.0.1",
     "truffle": "^5.0.35",
-    "truffle-contract": "^4.0.29"
+    "truffle-contract": "^4.0.29",
+    "dotenv": "^8.2.0"
   },
   "dependencies": {
-    "@gnosis.pm/safe-contracts": "^1.0.0"
+    "@circles/safe-contracts": "^1.0.4",
+    "truffle-hdwallet-provider": "^1.0.17"
   }
 }

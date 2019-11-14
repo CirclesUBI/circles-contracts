@@ -7,7 +7,7 @@ const { bn, convertToBaseUnit } = require('./helpers/math');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
-const safeArtifacts = require('@gnosis.pm/safe-contracts/build/contracts/GnosisSafe.json');
+const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
 
 const GnosisSafe = truffleContract(safeArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
@@ -47,7 +47,7 @@ contract('Token payments', ([_, owner, recipient, anotherAccount, systemOwner]) 
 
   describe('user can use their token as payment token', () => {
     const amount = convertToBaseUnit(50);
-    const gasCosts = bn(38617);
+    const gasCosts = bn(37567);
 
     it('should transfer tokens', async () => {
       const to = token.address;

@@ -1,3 +1,6 @@
+require('dotenv').config();
+const HDWalletProvider = require('truffle-hdwallet-provider');
+
 module.exports = {
   networks: {
     development: {
@@ -21,6 +24,16 @@ module.exports = {
       host: 'localhost',
       port: 8545,
       network_id: '*',
+    },
+    xdai: {
+      provider: function() {
+        return new HDWalletProvider(
+          process.env.MNEMONIC,
+          "https://dai.poa.network")
+      },
+      network_id: 100,
+      gas: 10000000,
+      gasPrice: 1000000000
     },
   },
 };
