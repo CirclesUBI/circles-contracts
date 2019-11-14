@@ -5,6 +5,7 @@ const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
 const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
+const { getTimestamp } = require('./helpers/getTimestamp');
 const { bn } = require('./helpers/math');
 
 require('chai')
@@ -57,6 +58,12 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
 
   it('attacker cannot change symbol', async () => {
     await assertRevert(hub.updateSymbol('PLUM', { from: attacker }));
+  });
+
+  it('has the right deployed time', async () => {
+    const timestamp = await getTimestamp(hub.transactionHash, web3);
+    const deployed = await hub.deployedAt();
+    (bn(timestamp)).should.be.bignumber.equal(deployed);
   });
 
   describe('owner can change system vars', async () => {

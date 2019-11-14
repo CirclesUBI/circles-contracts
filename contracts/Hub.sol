@@ -11,6 +11,7 @@ contract Hub {
     uint256 public issuanceRate; // = 1736111111111111; // ~1050 tokens per week
     string public symbol; // = 'CRC';
     uint256 public initialPayout;
+    uint256 public deployedAt;
 
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
@@ -39,6 +40,7 @@ contract Hub {
         issuanceRate = _issuance;
         symbol = _symbol;
         initialPayout = _initialPayout;
+        deployedAt = block.timestamp;
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
