@@ -283,6 +283,11 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         (await hub.checkSendLimit(safeOwner, safeOwner, safeOwner))
           .should.be.bignumber.equal(bn(100));
       });
+
+      it('checkSendLimit returns the correct amount for token that isnt deployed', async () => {
+        (await hub.checkSendLimit(ZERO_ADDRESS, safeOwner, safeOwner))
+          .should.be.bignumber.equal(bn(0));
+      });
     });
 
     describe('when trust destination is not a circles token', async () => {
