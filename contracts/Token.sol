@@ -42,45 +42,45 @@ contract Token is ERC20 {
         return HubI(hub).symbol();
     }
 
-    function pow(uint256 base, uint256 exponent) internal pure returns (uint256) {
-        if (exponent == 0) {
-            return 1;
-        }
-        if (exponent == 1) {
-            return base;
-        }
-        if (base == 0) {
-            return 0;
-        }
-        uint256 y = 1;
-        while(exponent > 1) {
-            if(exponent.mod(2) == 0) {
-                base = base.mul(base);
-                exponent = exponent.div(2);
-            } else {
-                y = base.mul(y);
-                base = base.mul(base);
-                exponent = (exponent.sub(1)).div(2);
-            }
-        }
-        return base.mul(y);
-    }
+    // function pow(uint256 base, uint256 exponent) internal pure returns (uint256) {
+    //     if (exponent == 0) {
+    //         return 1;
+    //     }
+    //     if (exponent == 1) {
+    //         return base;
+    //     }
+    //     if (base == 0) {
+    //         return 0;
+    //     }
+    //     uint256 y = 1;
+    //     while(exponent > 1) {
+    //         if(exponent.mod(2) == 0) {
+    //             base = base.mul(base);
+    //             exponent = exponent.div(2);
+    //         } else {
+    //             y = base.mul(y);
+    //             base = base.mul(base);
+    //             exponent = (exponent.sub(1)).div(2);
+    //         }
+    //     }
+    //     return base.mul(y);
+    // }
 
-    function look() public view returns (uint256) {
-        uint256 issuance = HubI(hub).issuanceRate();
-        uint256 issuanceD = HubI(hub).issuanceDivisor();
-        uint256 totalSupply = HubI(hub).totalSupply();
-        uint256 q = pow(issuance, time());
-        uint256 d = pow(issuanceD, time());
-        return (totalSupply.mul(q.div(d))).sub(totalSupply);
-    }
+    // function look() public view returns (uint256) {
+    //     uint256 issuance = HubI(hub).issuanceRate();
+    //     uint256 issuanceD = HubI(hub).issuanceDivisor();
+    //     uint256 totalSupply = HubI(hub).totalSupply();
+    //     uint256 q = pow(issuance, time());
+    //     uint256 d = pow(issuanceD, time());
+    //     return (totalSupply.mul(q.div(d))).sub(totalSupply);
+    // }
 
     // the universal basic income part
-    function update() public {
-        uint256 gift = look();
-        //this._mint(cast(gift));
-        lastTouched = time();
-    }
+    // function update() public {
+    //     uint256 gift = look();
+    //     //this._mint(cast(gift));
+    //     lastTouched = time();
+    // }
 
     function hubTransfer(
         address from, address to, uint256 amount
@@ -89,7 +89,7 @@ contract Token is ERC20 {
     }
 
     function transfer(address dst, uint wad) public returns (bool) {
-        update();
+        //update();
         return super.transfer(dst, wad);
     }
 
