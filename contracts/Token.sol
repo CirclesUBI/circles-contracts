@@ -43,14 +43,14 @@ contract Token is ERC20 {
     }
 
     function pow(uint256 base, uint256 exponent) public pure returns (uint256) {
+        if (base == 0) {
+            return 0;
+        }
         if (exponent == 0) {
             return 1;
         }
         if (exponent == 1) {
             return base;
-        }
-        if (base == 0) {
-            return 0;
         }
         uint256 y = 1;
         while(exponent > 1) {
