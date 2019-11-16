@@ -2,6 +2,7 @@ const truffleContract = require('truffle-contract');
 
 const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
+const { assertRevert } = require('./helpers/assertRevert');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
@@ -46,9 +47,16 @@ contract('UBI', ([_, owner, recipient, anotherAccount, systemOwner]) => { // esl
       (await token.pow(12, 1)).should.be.bignumber.equal(bn('12'));
     });
 
+    it('returns the result of base^exponent for base=0 exponent=1', async () => {
+      (await token.pow(0, 1)).should.be.bignumber.equal(bn('0'));
+    });
 
     it('returns the result of base^exponent for exponent=0', async () => {
       (await token.pow(12, 0)).should.be.bignumber.equal(bn('1'));
+    });
+
+    it('should throw on overflow', async () => {
+      await assertRevert(token.pow(12, 583333333))
     });
   });
 
