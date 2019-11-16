@@ -24,13 +24,15 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
   let safe = null;
   let proxyFactory = null;
 
-  const issuance = bn(1736111111111111);
+  const inflation = bn(275);
+  const divisor = bn(100);
+  const period = bn(7885000000);
   const symbol = 'CRC';
   const initialPayout = bn(100);
   const tokenName = 'testToken';
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, issuance, symbol, initialPayout);
+    hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
     await safe.setup([systemOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
@@ -44,12 +46,12 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
     await assertRevert(hub.changeOwner(attacker, { from: attacker }));
   });
 
-  it('has an issuance rate', async () => {
-    (await hub.issuanceRate()).should.be.bignumber.equal(issuance);
+  it('has an inflation rate', async () => {
+    (await hub.inflation()).should.be.bignumber.equal(inflation);
   });
 
-  it('attacker cannot change issuance', async () => {
-    await assertRevert(hub.updateIssuance(42, { from: attacker }));
+  it('attacker cannot change inflation', async () => {
+    await assertRevert(hub.updateInflation(42, { from: attacker }));
   });
 
   it('has a symbol', async () => {
@@ -68,14 +70,14 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
 
   describe('owner can change system vars', async () => {
     after(async () => {
-      await hub.updateIssuance(issuance, { from: systemOwner });
+      await hub.updateInflation(inflation, { from: systemOwner });
       await hub.updateSymbol(symbol, { from: systemOwner });
     });
 
 
-    it('owner can change issuance', async () => {
-      await hub.updateIssuance(1, { from: systemOwner });
-      (await hub.issuanceRate()).should.be.bignumber.equal(bn(1));
+    it('owner can change inflation', async () => {
+      await hub.updateInflation(1, { from: systemOwner });
+      (await hub.inflation()).should.be.bignumber.equal(bn(1));
     });
 
     it('owner can change symbol', async () => {
