@@ -8,7 +8,9 @@ contract Hub {
 
     address public owner;
 
-    uint256 public issuanceRate; // = 1736111111111111; // ~1050 tokens per week
+    uint256 public inflation;
+    uint256 public divisor;
+    uint256 public period;
     string public symbol; // = 'CRC';
     uint256 public initialPayout;
     uint256 public deployedAt;
@@ -34,23 +36,25 @@ contract Hub {
         _;
     }
 
-    constructor(address _owner, uint256 _issuance, string memory _symbol, uint256 _initialPayout) public {
+    constructor(address _owner, uint256 _inflation, uint256 _divisor, uint256 _period, string memory _symbol, uint256 _initialPayout) public {
         require (_owner != address(0));
         owner = _owner;
-        issuanceRate = _issuance;
+        inflation = _inflation;
+        divisor = _divisor;
+        period = _period;
         symbol = _symbol;
         initialPayout = _initialPayout;
         deployedAt = block.timestamp;
     }
 
-    function totalSupply() public pure returns (uint256) {
-        // total supply that a token would have if it signed up for circles
-        // at hub launch, used as the "principal" of inflation calculations
-        return 100;
+    function periods() public view returns (uint256) {
+        return deployedAt.mod(period);
     }
 
-    function issuanceDivisor() public pure returns (uint256) {
-        return 1000000000;
+    function issuance() public view returns (uint256) {
+        uint256 q = pow(inflation, periods());
+        uint256 d = pow(divisor, periods());
+        return initialPayout.mul(q.div(d));
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
@@ -59,9 +63,9 @@ contract Hub {
         return true;
     }
 
-    function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
+    function updateInflation(uint256 _inflation) public onlyOwner returns (bool) {
         // safety checks on issuance go here
-        issuanceRate = _issuance;
+        inflation = _inflation;
         return true;
     }
 
@@ -101,6 +105,30 @@ contract Hub {
     function _trust(address toTrust, uint limit) internal {
         limits[msg.sender][toTrust] = limit;
         emit Trust(msg.sender, toTrust, limit);
+    }
+
+    function pow(uint256 base, uint256 exponent) public pure returns (uint256) {
+        if (base == 0) {
+            return 0;
+        }
+        if (exponent == 0) {
+            return 1;
+        }
+        if (exponent == 1) {
+            return base;
+        }
+        uint256 y = 1;
+        while(exponent > 1) {
+            if(exponent.mod(2) == 0) {
+                base = base.mul(base);
+                exponent = exponent.div(2);
+            } else {
+                y = base.mul(y);
+                base = base.mul(base);
+                exponent = (exponent.sub(1)).div(2);
+            }
+        }
+        return base.mul(y);
     }
 
     function checkSendLimit(address token, address from, address to) public view returns (uint256) {

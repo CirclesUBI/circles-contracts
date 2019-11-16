@@ -12,7 +12,6 @@ contract Token is ERC20 {
     string public name;
     uint public lastTouched;
     address public hub;
-    HubI public controller;
     address public owner;
 
     modifier onlyHub() {
@@ -42,44 +41,10 @@ contract Token is ERC20 {
         return HubI(hub).symbol();
     }
 
-    function pow(uint256 base, uint256 exponent) public pure returns (uint256) {
-        if (base == 0) {
-            return 0;
-        }
-        if (exponent == 0) {
-            return 1;
-        }
-        if (exponent == 1) {
-            return base;
-        }
-        uint256 y = 1;
-        while(exponent > 1) {
-            if(exponent.mod(2) == 0) {
-                base = base.mul(base);
-                exponent = exponent.div(2);
-            } else {
-                y = base.mul(y);
-                base = base.mul(base);
-                exponent = (exponent.sub(1)).div(2);
-            }
-        }
-        return base.mul(y);
-    }
-
-    function look() public view returns (uint256) {
-        uint256 issuance = HubI(hub).issuanceRate();
-        uint256 issuanceD = HubI(hub).issuanceDivisor();
-        uint256 totalSupply = HubI(hub).totalSupply();
-        uint256 q = pow(issuance, time());
-        uint256 d = pow(issuanceD, time());
-        return (totalSupply.mul(q.div(d))).sub(totalSupply);
-    }
-
     // the universal basic income part
     function update() public {
-        uint256 gift = look();
         lastTouched = time();
-        _mint(owner, gift);
+        _mint(owner, lastTouched);
     }
 
     function hubTransfer(
