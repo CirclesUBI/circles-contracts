@@ -48,13 +48,13 @@ contract Hub {
     }
 
     function periods() public view returns (uint256) {
-        return deployedAt.mod(period);
+        return (block.timestamp.sub(deployedAt)).div(period);
     }
 
     function issuance() public view returns (uint256) {
         uint256 q = pow(inflation, periods());
         uint256 d = pow(divisor, periods());
-        return initialPayout.mul(q.div(d));
+        return (initialPayout.mul(q)).div(d);
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
