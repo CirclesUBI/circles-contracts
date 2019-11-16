@@ -42,7 +42,7 @@ contract Token is ERC20 {
         return HubI(hub).symbol();
     }
 
-    function pow(uint256 base, uint256 exponent) internal pure returns (uint256) {
+    function pow(uint256 base, uint256 exponent) public pure returns (uint256) {
         if (exponent == 0) {
             return 1;
         }
