@@ -86,6 +86,33 @@ contract('UBI', ([_, owner, recipient, anotherAccount, systemOwner]) => { // esl
       const compounded = (initialPayout.mul(q)).div(d);
       (await hub.issuance()).should.be.bignumber.equal(compounded);
     });
+
+  });
+
+  describe('ubi payouts', () => {
+    beforeEach(async () => {
+      hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
+      const signup = await hub.signup(tokenName, { from: owner });
+      token = await Token.at(signup.logs[1].args.token);
+    });
+
+    it('correctly calculates the ubi payout', async () => {
+      await increase(period.toNumber());
+      const q = inflation.pow(bn(1));
+      const payout = await token.look();
+      console.log(payout.toString());
+      (true).should.be.equal(false);
+    });
+
+    it('updates owners balance with payout', async () => {
+      await increase(period.toNumber());
+      await token.update();
+      const bal = await token.balanceOf(owner);
+      console.log(bal.toString());
+      (true).should.be.equal(false);
+    });
+
+
   });
 
 });
