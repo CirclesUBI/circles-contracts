@@ -5,8 +5,10 @@ const convertToBaseUnit = number => (new BigNumber(number)).mul(decimalsMultipli
 const bn = number => new BigNumber(number);
 
 const ubiPayout = (init, inf, div, periods) => {
-  const q = inf.pow(bn(periods.add(new BigNumber(1))));
-  const d = div.pow(bn(periods.add(new BigNumber(1))));
+  // const q = inf.pow(bn(periods.add(new BigNumber(1))));
+  // const d = div.pow(bn(periods.add(new BigNumber(1))));
+  const q = inf.pow(bn(periods));
+  const d = div.pow(bn(periods));
   return ((div.mul(init).mul(q.sub(d))).div(inf.sub(div))).div(d);
 }
 

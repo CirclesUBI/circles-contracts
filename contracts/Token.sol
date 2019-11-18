@@ -56,11 +56,15 @@ contract Token is ERC20 {
     }
 
     function periods() public view returns (uint256) {
-        return (block.timestamp.sub(lastTouched)).div(period()).add(1);
+        if (block.timestamp.sub(lastTouched) == period()) return 1;
+        if (block.timestamp.sub(lastTouched) < period()) return 0;
+        return (block.timestamp.sub(lastTouched)).div(period());//.add(1);
     }
 
     function look() public view returns (uint256) {
         uint256 p = periods();
+        if (p == 0) return 0;
+        if (p == 1) return HubI(hub).issuance();
         uint256 div = divisor();
         uint256 inf = inflation();
         uint256 q = HubI(hub).pow(inf, p);
@@ -69,7 +73,7 @@ contract Token is ERC20 {
         uint256 q1 = div.mul(initial).mul(mid);
         uint256 q2 = inf.sub(div);
         uint256 bal = q1.div(q2);
-        return bal.div(d);
+        return (bal.div(d)).sub(initial);
     }
 
     function updateTime() internal {
@@ -78,14 +82,14 @@ contract Token is ERC20 {
     }
 
     function payout() public view returns (uint256) {
-        return look().sub(totalSupply());
+        return look();//.sub(totalSupply());
     }
 
     function update() public returns (uint256) {
         uint256 gift = payout();
         if (gift > 0) {
             updateTime();
-            initial = inflation();
+            initial = HubI(hub).issuance();
             _mint(owner, gift);
         }
     }
@@ -114,9 +118,9 @@ contract Token is ERC20 {
     function balanceOf(address src) public view returns (uint256) {
         uint256 balance = super.balanceOf(src);
 
-        // if (src == owner) {
-        //    balance = balance.add(payout());
-        // }
+        if (src == owner) {
+           balance = balance.add(payout());
+        }
 
         return balance;
     }

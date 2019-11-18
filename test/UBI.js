@@ -101,7 +101,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
     it('correctly calculates the ubi payout at deployment', async () => {
       const bal = ubiPayout(initialPayout, inflation, divisor, bn(0));
-      (await token.look()).should.be.bignumber.equal(bal);
+      (await token.payout()).should.be.bignumber.equal(bal);
     });
 
     it('doesnt change balance at deployment', async () => {
@@ -116,8 +116,15 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       (time).should.be.bignumber.equal(bn(deployTime));
     });
 
+    it('doesnt change timestamp if no payout was made, even if time increased', async () => {
+      await increase(50);
+      await token.update();
+      const time = await token.lastTouched();
+      (time).should.be.bignumber.equal(bn(deployTime));
+    });
+
     it('should not change no matter how many times you call update if 0 periods', async () => {
-      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(0));
+      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(1));
       await token.update();
       await token.update();
       await token.update();
@@ -128,13 +135,14 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
     it('correctly calculates the ubi payout after 1 period', async () => {
       await increase(period.toNumber());
-      const bal = ubiPayout(initialPayout, inflation, divisor, bn(1));
-      (await token.look()).should.be.bignumber.equal(bal);
+      const bal = ubiPayout(initialPayout, inflation, divisor, bn(2));
+      (await token.look()).should.be.bignumber.equal(bal.sub(initialPayout));
     });
 
     it('updates owners balance with payout after 1 period', async () => {
       await increase(period.toNumber());
-      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(1));
+      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(2));
+      const k = await token.look();
       await token.update();
       const balance = await token.balanceOf(owner);
       (balance).should.be.bignumber.equal(goalBal);
@@ -142,7 +150,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
     it('should update owners balance even if called by attacker', async () => {
       await increase(period.toNumber());
-      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(1));
+      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(2));
       await token.update({ from: attacker });
       const balance = await token.balanceOf(owner);
       (balance).should.be.bignumber.equal(goalBal);
@@ -155,11 +163,26 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       (balance).should.be.bignumber.equal(bn(0));
     });
 
+    it('should update lastTouched by period if exactly one period has passed', async () => {
+      await increase(period.toNumber());
+      await token.update();
+      const u = await token.periods();
+      const time = await token.lastTouched();
+      (time).should.be.bignumber.equal(bn(deployTime).add(period));
+    });
+
+    it('should update lastTouched by period if more than a period but less than two has passed', async () => {
+      await increase(period.toNumber()+500);
+      await token.update();
+      const time = await token.lastTouched();
+      (time).should.be.bignumber.equal(bn(deployTime).add(period));
+    });
+
     it('correctly calculates the ubi payout after x periods', async () => {
       const time = period.mul(bn(5))
       await increase(time.toNumber());
       const bal = ubiPayout(initialPayout, inflation, divisor, bn(5));
-      (await token.look()).should.be.bignumber.equal(bal);
+      (await token.look()).should.be.bignumber.equal(bal.sub(initialPayout));
     });
 
     it('updates owners balance with payout after x periods', async () => {
@@ -169,6 +192,22 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       await token.update();
       const balance = await token.balanceOf(owner);
       (balance).should.be.bignumber.equal(goalBal);
+    });
+
+    it('should update lastTouched by period if x period has passed', async () => {
+      const time = period.mul(bn(5))
+      await increase(time.toNumber());
+      await token.update();
+      const lastTouched = await token.lastTouched();
+      (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
+    });
+
+    it('should update lastTouched by period if more x but less than y periods have passed', async () => {
+      const time = period.mul(bn(5))
+      await increase(time.toNumber()+500);
+      await token.update();
+      const lastTouched = await token.lastTouched();
+      (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
     });
   });
 
