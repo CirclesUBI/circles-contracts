@@ -3276,7 +3276,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.15",
-  "updatedAt": "2019-11-17T21:44:45.873Z",
+  "updatedAt": "2019-11-18T12:45:56.222Z",
   "devdoc": {
     "details": "Unsigned math operations with safety checks that revert on error",
     "methods": {},
