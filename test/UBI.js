@@ -1,7 +1,7 @@
 const truffleContract = require('truffle-contract');
 
 const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
-const { bn, convertToBaseUnit } = require('./helpers/math');
+const { bn, convertToBaseUnit, ubiPayout } = require('./helpers/math');
 const { assertRevert } = require('./helpers/assertRevert');
 const { increase } = require('./helpers/increaseTime');
 
@@ -86,7 +86,6 @@ contract('UBI', ([_, owner, recipient, anotherAccount, systemOwner]) => { // esl
       const compounded = (initialPayout.mul(q)).div(d);
       (await hub.issuance()).should.be.bignumber.equal(compounded);
     });
-
   });
 
   describe('ubi payouts', () => {
@@ -98,18 +97,16 @@ contract('UBI', ([_, owner, recipient, anotherAccount, systemOwner]) => { // esl
 
     it('correctly calculates the ubi payout', async () => {
       await increase(period.toNumber());
-      const q = inflation.pow(bn(1));
-      const payout = await token.look();
-      console.log(payout.toString());
-      (true).should.be.equal(false);
+      const bal = ubiPayout(initialPayout, inflation, divisor, bn(1));
+      (await token.look()).should.be.bignumber.equal(bal);
     });
 
     it('updates owners balance with payout', async () => {
       await increase(period.toNumber());
+      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(1));
       await token.update();
-      const bal = await token.balanceOf(owner);
-      console.log(bal.toString());
-      (true).should.be.equal(false);
+      const balance = await token.balanceOf(owner);
+      (balance).should.be.bignumber.equal(goalBal);
     });
 
 
