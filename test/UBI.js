@@ -4,6 +4,7 @@ const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
 const { bn, convertToBaseUnit, ubiPayout } = require('./helpers/math');
 const { assertRevert } = require('./helpers/assertRevert');
 const { increase } = require('./helpers/increaseTime');
+const { getTimestamp } = require('./helpers/getTimestamp');
 
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
@@ -12,7 +13,7 @@ require('chai')
   .use(require('chai-bn')(BigNumber))
   .should();
 
-contract('UBI', ([_, owner, recipient, anotherAccount, systemOwner]) => { // eslint-disable-line no-unused-vars
+contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let token = null;
 
@@ -89,19 +90,49 @@ contract('UBI', ([_, owner, recipient, anotherAccount, systemOwner]) => { // esl
   });
 
   describe('ubi payouts', () => {
+    let deployTime;
+
     beforeEach(async () => {
       hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
       const signup = await hub.signup(tokenName, { from: owner });
       token = await Token.at(signup.logs[1].args.token);
+      deployTime = await getTimestamp(signup.logs[0].transactionHash, web3)
     });
 
-    it('correctly calculates the ubi payout', async () => {
+    it('correctly calculates the ubi payout at deployment', async () => {
+      const bal = ubiPayout(initialPayout, inflation, divisor, bn(0));
+      (await token.look()).should.be.bignumber.equal(bal);
+    });
+
+    it('doesnt change balance at deployment', async () => {
+      await token.update();
+      const balance = await token.balanceOf(owner);
+      (balance).should.be.bignumber.equal(initialPayout);
+    });
+
+    it('doesnt change timestamp if no payout was made', async () => {
+      await token.update();
+      const time = await token.lastTouched();
+      (time).should.be.bignumber.equal(bn(deployTime));
+    });
+
+    it('should not change no matter how many times you call update if 0 periods', async () => {
+      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(0));
+      await token.update();
+      await token.update();
+      await token.update();
+      await token.update();
+      const balance = await token.balanceOf(owner);
+      (balance).should.be.bignumber.equal(goalBal);
+    });
+
+    it('correctly calculates the ubi payout after 1 period', async () => {
       await increase(period.toNumber());
       const bal = ubiPayout(initialPayout, inflation, divisor, bn(1));
       (await token.look()).should.be.bignumber.equal(bal);
     });
 
-    it('updates owners balance with payout', async () => {
+    it('updates owners balance with payout after 1 period', async () => {
       await increase(period.toNumber());
       const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(1));
       await token.update();
@@ -109,7 +140,36 @@ contract('UBI', ([_, owner, recipient, anotherAccount, systemOwner]) => { // esl
       (balance).should.be.bignumber.equal(goalBal);
     });
 
+    it('should update owners balance even if called by attacker', async () => {
+      await increase(period.toNumber());
+      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(1));
+      await token.update({ from: attacker });
+      const balance = await token.balanceOf(owner);
+      (balance).should.be.bignumber.equal(goalBal);
+    });
 
+    it('should not change attacker balance if called by attacker', async () => {
+      await increase(period.toNumber());
+      await token.update({ from: attacker });
+      const balance = await token.balanceOf(attacker);
+      (balance).should.be.bignumber.equal(bn(0));
+    });
+
+    it('correctly calculates the ubi payout after x periods', async () => {
+      const time = period.mul(bn(5))
+      await increase(time.toNumber());
+      const bal = ubiPayout(initialPayout, inflation, divisor, bn(5));
+      (await token.look()).should.be.bignumber.equal(bal);
+    });
+
+    it('updates owners balance with payout after x periods', async () => {
+      const time = period.mul(bn(5))
+      await increase(time.toNumber());
+      const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(5));
+      await token.update();
+      const balance = await token.balanceOf(owner);
+      (balance).should.be.bignumber.equal(goalBal);
+    });
   });
 
 });
