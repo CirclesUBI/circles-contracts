@@ -72,6 +72,11 @@ contract Token is ERC20 {
         return bal.div(d);
     }
 
+    function updateTime() internal {
+        uint256 sec = period().mul(periods());
+        lastTouched = lastTouched.add(sec);
+    }
+
     function payout() public view returns (uint256) {
         return look().sub(totalSupply());
     }
@@ -79,7 +84,7 @@ contract Token is ERC20 {
     function update() public returns (uint256) {
         uint256 gift = payout();
         if (gift > 0) {
-            lastTouched = time();
+            updateTime();
             initial = inflation();
             _mint(owner, gift);
         }
