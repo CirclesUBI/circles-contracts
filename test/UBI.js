@@ -101,7 +101,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
     it('correctly calculates the ubi payout at deployment', async () => {
       const bal = ubiPayout(initialPayout, inflation, divisor, bn(0));
-      (await token.payout()).should.be.bignumber.equal(bal);
+      (await token.look()).should.be.bignumber.equal(bal);
     });
 
     it('doesnt change balance at deployment', async () => {
