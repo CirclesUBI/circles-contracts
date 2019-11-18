@@ -8,11 +8,6 @@ module.exports = {
       port: 8545,
       network_id: '*',
     },
-    staging: {
-      host: 'api.joincircles.net',
-      port: 8545,
-      network_id: '*',
-    },
     coverage: {
       host: 'localhost',
       network_id: '*',
@@ -24,6 +19,16 @@ module.exports = {
       host: 'localhost',
       port: 8545,
       network_id: '*',
+    },
+    kovan: {
+      provider: function() {
+        return new HDWalletProvider(
+          process.env.MNEMONIC,
+          `https://kovan.infura.io/v3/${process.env.PROJECT_ID}`)
+      },
+      network_id: 100,
+      gas: 10000000,
+      gasPrice: 1000000000
     },
     xdai: {
       provider: function() {

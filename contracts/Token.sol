@@ -25,14 +25,14 @@ contract Token is ERC20 {
         _;
     }
 
-    constructor(address _owner, string memory _name, uint256 initialPayout) public {
+    constructor(address _owner, string memory _name, uint256 _initial) public {
         require(_owner != address(0));
         name = _name;
         owner = _owner;
         hub = msg.sender;
         lastTouched = time();
         initial = HubI(hub).issuance();
-        _mint(_owner, initialPayout);
+        _mint(_owner, _initial);
     }
 
     function time() internal view returns (uint) {
@@ -58,7 +58,7 @@ contract Token is ERC20 {
     function periods() public view returns (uint256) {
         if (block.timestamp.sub(lastTouched) == period()) return 1;
         if (block.timestamp.sub(lastTouched) < period()) return 0;
-        return (block.timestamp.sub(lastTouched)).div(period());//.add(1);
+        return (block.timestamp.sub(lastTouched)).div(period());
     }
 
     function look() public view returns (uint256) {
@@ -81,12 +81,8 @@ contract Token is ERC20 {
         lastTouched = lastTouched.add(sec);
     }
 
-    function payout() public view returns (uint256) {
-        return look();//.sub(totalSupply());
-    }
-
     function update() public returns (uint256) {
-        uint256 gift = payout();
+        uint256 gift = look();
         if (gift > 0) {
             updateTime();
             initial = HubI(hub).issuance();
@@ -112,14 +108,14 @@ contract Token is ERC20 {
     }
 
     function totalSupply() public view returns (uint256) {
-        return super.totalSupply();//.add(payout());
+        return super.totalSupply().add(look());
     }
 
     function balanceOf(address src) public view returns (uint256) {
         uint256 balance = super.balanceOf(src);
 
         if (src == owner) {
-           balance = balance.add(payout());
+           balance = balance.add(look());
         }
 
         return balance;
