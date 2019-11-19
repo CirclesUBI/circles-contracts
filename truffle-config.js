@@ -26,9 +26,10 @@ module.exports = {
           process.env.MNEMONIC,
           `https://kovan.infura.io/v3/${process.env.PROJECT_ID}`)
       },
-      network_id: 100,
+      port: 8545,
+      network_id: 42,
       gas: 10000000,
-      gasPrice: 1000000000
+      gasPrice: 12500000000
     },
     xdai: {
       provider: function() {

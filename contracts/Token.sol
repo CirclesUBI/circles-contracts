@@ -93,6 +93,9 @@ contract Token is ERC20 {
     function hubTransfer(
         address from, address to, uint256 amount
     ) public onlyHub returns (bool) {
+        if (from == owner) {
+            update();
+        }
         _transfer(from, to, amount);
     }
 
@@ -108,15 +111,15 @@ contract Token is ERC20 {
     }
 
     function totalSupply() public view returns (uint256) {
-        return super.totalSupply().add(look());
+        return super.totalSupply();//.add(look());
     }
 
     function balanceOf(address src) public view returns (uint256) {
         uint256 balance = super.balanceOf(src);
 
-        if (src == owner) {
-           balance = balance.add(look());
-        }
+        // if (src == owner) {
+        //    balance = balance.add(look());
+        // }
 
         return balance;
     }
