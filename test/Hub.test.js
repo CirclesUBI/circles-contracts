@@ -273,9 +273,14 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
           .should.be.bignumber.equal(new BigNumber(100));
       });
 
-      it('checkSendLimit returns the correct amount for self-send', async () => {
+      it('checkSendLimit returns the correct amount for an untrusted user', async () => {
         (await hub.checkSendLimit(safeOwner, safeOwner, safeOwner))
           .should.be.bignumber.equal(bn(100));
+      });
+
+      it('checkSendLimit returns the correct amount for self-send', async () => {
+        (await hub.checkSendLimit(safeOwner, normalUser, safeOwner))
+          .should.be.bignumber.equal(bn(0));
       });
 
       it('checkSendLimit returns the correct amount for token that isnt deployed', async () => {
