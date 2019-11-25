@@ -140,6 +140,9 @@ contract Hub {
         if (token == to) {
             return userToToken[token].balanceOf(from);
         }
+        if (limits[to][token] == 0) {
+            return 0;
+        }
         uint256 max = (userToToken[token].totalSupply().mul(limits[to][token])).div(100);
         return max.sub(userToToken[token].balanceOf(to));
     }
