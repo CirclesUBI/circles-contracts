@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@circles/safe-contracts": "^1.0.5",
+    "bluebird": "^3.7.1",
     "truffle-hdwallet-provider": "^1.0.17"
   }
 }
