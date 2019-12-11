@@ -1,6 +1,4 @@
-const truffleContract = require('truffle-contract');
-
-const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
+const { BigNumber } = require('./helpers/constants');
 const { bn, convertToBaseUnit, ubiPayout } = require('./helpers/math');
 const { assertRevert } = require('./helpers/assertRevert');
 const { increase } = require('./helpers/increaseTime');
@@ -80,7 +78,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('returns the correct issuance after x period', async () => {
-      const time = period.mul(bn(5))
+      const time = period.mul(bn(5));
       await increase(time.toNumber());
       const q = inflation.pow(bn(5));
       const d = divisor.pow(bn(5));
@@ -96,7 +94,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
       const signup = await hub.signup(tokenName, { from: owner });
       token = await Token.at(signup.logs[1].args.token);
-      deployTime = await getTimestamp(signup.logs[0].transactionHash, web3)
+      deployTime = await getTimestamp(signup.logs[0].transactionHash, web3);
     });
 
     it('correctly calculates the ubi payout at deployment', async () => {
@@ -166,27 +164,27 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     it('should update lastTouched by period if exactly one period has passed', async () => {
       await increase(period.toNumber());
       await token.update();
-      const u = await token.periods();
+      await token.periods();
       const time = await token.lastTouched();
       (time).should.be.bignumber.equal(bn(deployTime).add(period));
     });
 
     it('should update lastTouched by period if more than a period but less than two has passed', async () => {
-      await increase(period.toNumber()+500);
+      await increase(period.toNumber() + 500);
       await token.update();
       const time = await token.lastTouched();
       (time).should.be.bignumber.equal(bn(deployTime).add(period));
     });
 
     it('correctly calculates the ubi payout after x periods', async () => {
-      const time = period.mul(bn(5))
+      const time = period.mul(bn(5));
       await increase(time.toNumber());
       const bal = ubiPayout(initialPayout, inflation, divisor, bn(5));
       (await token.look()).should.be.bignumber.equal(bal.sub(initialPayout));
     });
 
     it('updates owners balance with payout after x periods', async () => {
-      const time = period.mul(bn(5))
+      const time = period.mul(bn(5));
       await increase(time.toNumber());
       const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(5));
       await token.update();
@@ -195,7 +193,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('should update lastTouched by period if x period has passed', async () => {
-      const time = period.mul(bn(5))
+      const time = period.mul(bn(5));
       await increase(time.toNumber());
       await token.update();
       const lastTouched = await token.lastTouched();
@@ -203,8 +201,8 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('should update lastTouched by period if more x but less than y periods have passed', async () => {
-      const time = period.mul(bn(5))
-      await increase(time.toNumber()+500);
+      const time = period.mul(bn(5));
+      await increase(time.toNumber() + 500);
       await token.update();
       const lastTouched = await token.lastTouched();
       (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
@@ -213,7 +211,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     it('should update balance twice if two periods pass, regardless of how update is called', async () => {
       await increase(period.toNumber());
       await token.update();
-      await increase(period.toNumber()+500);
+      await increase(period.toNumber() + 500);
       await token.update();
       const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(3));
       const balance = await token.balanceOf(owner);
@@ -223,7 +221,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     it('should update balance lastTouched twice if two periods pass, regardless of how update is called', async () => {
       await increase(period.toNumber());
       await token.update();
-      await increase(period.toNumber()+500);
+      await increase(period.toNumber() + 500);
       await token.update();
       const lastTouched = await token.lastTouched();
       const timePassed = bn(deployTime).add(period.mul(bn(2)));
@@ -231,8 +229,8 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('should not update lastTouched if update isnt called', async () => {
-      const time = period.mul(bn(2))
-      await increase(time.toNumber()+500);
+      const time = period.mul(bn(2));
+      await increase(time.toNumber() + 500);
       const lastTouched = await token.lastTouched();
       (lastTouched).should.be.bignumber.equal(bn(deployTime));
     });
@@ -248,7 +246,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
       const signup = await hub.signup(tokenName, { from: owner });
       token = await Token.at(signup.logs[1].args.token);
-      deployTime = await getTimestamp(signup.logs[0].transactionHash, web3)
+      deployTime = await getTimestamp(signup.logs[0].transactionHash, web3);
     });
 
     it('correctly calculates the ubi payout at deployment', async () => {
@@ -294,7 +292,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     it('updates owners balance with payout after 1 period', async () => {
       await increase(period.toNumber());
       const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(2));
-      const k = await token.look();
+      await token.look();
       await token.update();
       const balance = await token.balanceOf(owner);
       (balance).should.be.bignumber.equal(goalBal);
@@ -318,27 +316,27 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     it('should update lastTouched by period if exactly one period has passed', async () => {
       await increase(period.toNumber());
       await token.update();
-      const u = await token.periods();
+      await token.periods();
       const time = await token.lastTouched();
       (time).should.be.bignumber.equal(bn(deployTime).add(period));
     });
 
     it('should update lastTouched by period if more than a period but less than two has passed', async () => {
-      await increase(period.toNumber()+500);
+      await increase(period.toNumber() + 500);
       await token.update();
       const time = await token.lastTouched();
       (time).should.be.bignumber.equal(bn(deployTime).add(period));
     });
 
     it('correctly calculates the ubi payout after x periods', async () => {
-      const time = period.mul(bn(5))
+      const time = period.mul(bn(5));
       await increase(time.toNumber());
       const bal = ubiPayout(initialPayout, inflation, divisor, bn(5));
       (await token.look()).should.be.bignumber.equal(bal.sub(initialPayout));
     });
 
     it('updates owners balance with payout after x periods', async () => {
-      const time = period.mul(bn(5))
+      const time = period.mul(bn(5));
       await increase(time.toNumber());
       const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(5));
       await token.update();
@@ -347,7 +345,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('should update lastTouched by period if x period has passed', async () => {
-      const time = period.mul(bn(5))
+      const time = period.mul(bn(5));
       await increase(time.toNumber());
       await token.update();
       const lastTouched = await token.lastTouched();
@@ -355,8 +353,8 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('should update lastTouched by period if more x but less than y periods have passed', async () => {
-      const time = period.mul(bn(5))
-      await increase(time.toNumber()+500);
+      const time = period.mul(bn(5));
+      await increase(time.toNumber() + 500);
       await token.update();
       const lastTouched = await token.lastTouched();
       (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
