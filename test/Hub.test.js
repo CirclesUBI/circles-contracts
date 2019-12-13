@@ -299,8 +299,8 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         const logs = await hub.getPastEvents('Trust', { fromBlock: 0, toBlock: 'latest' });
 
         const event = expectEvent.inLogs(logs, 'Trust', {
-          from: safeOwner,
-          to: normalUser,
+          canSendTo: safeOwner,
+          user: normalUser,
         });
 
         return event.args.limit.should.be.bignumber.equal(new BigNumber(trustLimit));
@@ -323,8 +323,8 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         const logs = await hub.getPastEvents('Trust', { fromBlock: 0, toBlock: 'latest' });
 
         const event = expectEvent.inLogs(logs, 'Trust', {
-          from: safeOwner,
-          to: normalUser,
+          canSendTo: safeOwner,
+          user: normalUser,
         });
 
         return event.args.limit.should.be.bignumber.equal(new BigNumber(trustLimit));
@@ -400,8 +400,8 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             const { logs } = txHash;
 
             const event = expectEvent.inLogs(logs, 'Trust', {
-              from: safeOwner,
-              to: normalUser,
+              canSendTo: safeOwner,
+              user: normalUser,
             });
 
             return event.args.limit.should.be.bignumber.equal(bn(newTrustLimit));

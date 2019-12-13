@@ -20,7 +20,7 @@ contract Hub {
     mapping (address => mapping (address => uint256)) public limits;
 
     event Signup(address indexed user, address token);
-    event Trust(address indexed from, address indexed to, uint256 limit);
+    event Trust(address indexed canSendTo, address indexed user, uint256 limit);
 
     struct transferValidator {
         address identity;
@@ -77,10 +77,6 @@ contract Hub {
 
     function time() public view returns (uint) { return block.timestamp; }
 
-    function trustable(address _address) public view returns (bool) {
-        return (address(userToToken[_address]) != address(0));
-    }
-
     // No exit allowed. Once you create a personal token, you're in for good.
     function signup(string memory _name) public returns (bool) {
         require(address(userToToken[msg.sender]) == address(0));
@@ -96,15 +92,14 @@ contract Hub {
 
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
-    function trust(address toTrust, uint limit) public {
-        //require(trustable(toTrust));
-        require(msg.sender != toTrust, "You can't untrust yourself");
-        _trust(toTrust, limit);
+    function trust(address user, uint limit) public {
+        require(msg.sender != user, "You can't untrust yourself");
+        _trust(user, limit);
     }
 
-    function _trust(address toTrust, uint limit) internal {
-        limits[msg.sender][toTrust] = limit;
-        emit Trust(msg.sender, toTrust, limit);
+    function _trust(address user, uint limit) internal {
+        limits[msg.sender][user] = limit;
+        emit Trust(msg.sender, user, limit);
     }
 
     function pow(uint256 base, uint256 exponent) public pure returns (uint256) {
@@ -131,20 +126,20 @@ contract Hub {
         return base.mul(y);
     }
 
-    function checkSendLimit(address token, address from, address to) public view returns (uint256) {
+    function checkSendLimit(address token, address src, address dest) public view returns (uint256) {
         // if the token doesn't exist, nothing can be sent
         if (address(userToToken[token]) == address(0)) {
             return 0;
         }
         // if sending dest's token to dest, src can send 100% of their holdings
-        if (token == to) {
-            return userToToken[token].balanceOf(from);
+        if (token == dest) {
+            return userToToken[token].balanceOf(src);
         }
-        if (limits[to][token] == 0) {
+        if (limits[dest][token] == 0) {
             return 0;
         }
-        uint256 max = (userToToken[token].totalSupply().mul(limits[to][token])).div(100);
-        return max.sub(userToToken[token].balanceOf(to));
+        uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][token])).div(100);
+        return max.sub(userToToken[token].balanceOf(dest));
     }
 
     // build the data structures we will use for validation
