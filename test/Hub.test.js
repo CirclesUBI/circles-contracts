@@ -528,6 +528,17 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
+
+      it('creates a HubTransfer event', async () => {
+        const logs = await hub.getPastEvents('HubTransfer', { fromBlock: 0, toBlock: 'latest' });
+
+        const event = expectEvent.inLogs(logs, 'HubTransfer', {
+          from: safeOwner,
+          to: thirdUser,
+        });
+
+        return event.args.amount.should.be.bignumber.equal(bn(25));
+      });
     });
 
     describe('when each user is sending their own token and path is valid but forks', async () => {
@@ -631,6 +642,17 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         validation['0'].should.be.equal(ZERO_ADDRESS);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('creates a HubTransfer event', async () => {
+        const logs = await hub.getPastEvents('HubTransfer', { fromBlock: 0, toBlock: 'latest' });
+
+        const event = expectEvent.inLogs(logs, 'HubTransfer', {
+          from: safeOwner,
+          to: thirdUser,
+        });
+
+        return event.args.amount.should.be.bignumber.equal(bn(25));
       });
     });
 
@@ -820,6 +842,17 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         validation['0'].should.be.equal(ZERO_ADDRESS);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('creates a HubTransfer event', async () => {
+        const logs = await hub.getPastEvents('HubTransfer', { fromBlock: 0, toBlock: 'latest' });
+
+        const event = expectEvent.inLogs(logs, 'HubTransfer', {
+          from: safeOwner,
+          to: normalUser,
+        });
+
+        return event.args.amount.should.be.bignumber.equal(bn(25));
       });
     });
   });

@@ -21,6 +21,7 @@ contract Hub {
 
     event Signup(address indexed user, address token);
     event Trust(address indexed canSendTo, address indexed user, uint256 limit);
+    event HubTransfer(address indexed from, address indexed to, uint256 amount);
 
     struct transferValidator {
         address identity;
@@ -189,6 +190,7 @@ contract Hub {
         require(validation[src].sent == validation[dest].received, "Unequal sent and received amounts");
         // the maximum amount of addresses we should see is one more than steps in the path
         require(seen.length <= steps + 1, "Seen too many addresses");
+        emit HubTransfer(src, dest, validation[src].sent);
         // clean up the validation datastructures
         for (uint i = seen.length; i >= 1; i--) {
             validation[seen[i-1]].sent = 0;
