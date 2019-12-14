@@ -127,20 +127,20 @@ contract Hub {
         return base.mul(y);
     }
 
-    function checkSendLimit(address token, address src, address dest) public view returns (uint256) {
+    function checkSendLimit(address tokenOwner, address src, address dest) public view returns (uint256) {
         // if the token doesn't exist, nothing can be sent
-        if (address(userToToken[token]) == address(0)) {
+        if (address(userToToken[tokenOwner]) == address(0)) {
             return 0;
         }
         // if sending dest's token to dest, src can send 100% of their holdings
-        if (token == dest) {
-            return userToToken[token].balanceOf(src);
+        if (tokenOwner == dest) {
+            return userToToken[tokenOwner].balanceOf(src);
         }
-        if (limits[dest][token] == 0) {
+        if (limits[dest][tokenOwner] == 0) {
             return 0;
         }
-        uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][token])).div(100);
-        return max.sub(userToToken[token].balanceOf(dest));
+        uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
+        return max.sub(userToToken[tokenOwner].balanceOf(dest));
     }
 
     // build the data structures we will use for validation
