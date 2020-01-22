@@ -37,15 +37,23 @@ contract Hub {
         _;
     }
 
-    constructor(address _owner, uint256 _inflation, uint256 _divisor, uint256 _period, string memory _symbol, uint256 _initialPayout) public {
+    constructor(address _owner, uint256 _inflation, uint256 _period, string memory _symbol, uint256 _initialPayout) public {
         require (_owner != address(0));
         owner = _owner;
         inflation = _inflation;
-        divisor = _divisor;
+        divisor = findDivisor(_inflation);
         period = _period;
         symbol = _symbol;
         initialPayout = _initialPayout;
         deployedAt = block.timestamp;
+    }
+
+    function findDivisor(uint256 _inf) internal pure returns (uint256) {
+        uint256 iter = 0;
+        while (_inf.div(pow(10, iter)) > 10) {
+            iter += 1;
+        }
+        return pow(10, iter + 1);
     }
 
     function periods() public view returns (uint256) {

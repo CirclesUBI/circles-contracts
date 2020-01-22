@@ -24,14 +24,13 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   let token = null;
 
   const inflation = bn(275);
-  const divisor = bn(100);
   const period = bn(7885000000);
   const symbol = 'CRC';
   const tokenName = 'MyCoin';
   const initialPayout = convertToBaseUnit(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout);
   });
 
   describe('total supply', () => {

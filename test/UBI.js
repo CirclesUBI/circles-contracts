@@ -23,7 +23,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
   const initialPayout = convertToBaseUnit(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout);
   });
 
   describe('power', () => {
@@ -56,13 +56,13 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('should throw on overflow', async () => {
-      await assertRevert(hub.pow(12, 583333333))
+      await assertRevert(hub.pow(12, 583333333));
     });
   });
 
   describe('issuance', () => {
     beforeEach(async () => {
-      hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout);
     });
 
     it('returns the correct issuance at deployment', async () => {
@@ -91,7 +91,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     let deployTime;
 
     beforeEach(async () => {
-      hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout);
       const signup = await hub.signup(tokenName, { from: owner });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestamp(signup.logs[0].transactionHash, web3);
@@ -243,7 +243,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     inflation = bn(1019178);
 
     beforeEach(async () => {
-      hub = await Hub.new(systemOwner, inflation, divisor, period, symbol, initialPayout);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout);
       const signup = await hub.signup(tokenName, { from: owner });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestamp(signup.logs[0].transactionHash, web3);

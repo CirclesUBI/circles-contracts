@@ -38,7 +38,7 @@
     "dotenv": "^8.2.0"
   },
   "dependencies": {
-    "@circles/safe-contracts": "^1.0.5",
+    "@circles/safe-contracts": "^1.0.6",
     "bluebird": "^3.7.1",
     "truffle-hdwallet-provider": "^1.0.17"
   }
