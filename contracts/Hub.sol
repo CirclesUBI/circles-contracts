@@ -61,9 +61,13 @@ contract Hub {
     }
 
     function issuance() public view returns (uint256) {
-        uint256 q = pow(inflation, periods());
-        uint256 d = pow(divisor, periods());
-        return (initialPayout.mul(q)).div(d);
+        return inflate(initialPayout, periods());
+    }
+
+    function inflate(uint256 _initial, uint256 _periods) public view returns (uint256) {
+        uint256 q = pow(inflation, _periods);
+        uint256 d = pow(divisor, _periods);
+        return (_initial.mul(q)).div(d);
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
@@ -90,7 +94,7 @@ contract Hub {
     function signup(string memory _name) public returns (bool) {
         require(address(userToToken[msg.sender]) == address(0));
 
-        Token token = new Token(msg.sender, _name, initialPayout);
+        Token token = new Token(msg.sender, _name);
         userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
         _trust(msg.sender, 100);

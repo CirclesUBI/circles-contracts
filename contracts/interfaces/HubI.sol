@@ -10,4 +10,6 @@ contract HubI {
     function totalSupply() public view returns (uint256);
     function decimals() public view returns (uint8);
     function symbol() public view returns (string memory);
+    function deployedAt() public view returns (uint256);
+    function inflate(uint256, uint256) public view returns (uint256);
 }

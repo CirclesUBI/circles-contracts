@@ -13,7 +13,8 @@ contract Token is ERC20 {
     uint256 public lastTouched;
     address public hub;
     address public owner;
-    uint256 public initial;
+    uint256 public inflationOffset;
+    uint256 public currentRate;
 
     modifier onlyHub() {
         require(msg.sender == hub);
@@ -25,14 +26,17 @@ contract Token is ERC20 {
         _;
     }
 
-    constructor(address _owner, string memory _name, uint256 _initial) public {
+    constructor(address _owner, string memory _name) public {
         require(_owner != address(0));
         name = _name;
         owner = _owner;
         hub = msg.sender;
         lastTouched = time();
-        initial = HubI(hub).issuance();
-        _mint(_owner, _initial);
+        inflationOffset = findInflationOffset();
+        // initial = HubI(hub).issuance();
+        currentRate = HubI(hub).issuance();
+        // _mint(_owner, _initial);
+        _mint(_owner, currentRate);
     }
 
     function time() internal view returns (uint) {
@@ -56,36 +60,64 @@ contract Token is ERC20 {
     }
 
     function periods() public view returns (uint256) {
-        if (block.timestamp.sub(lastTouched) == period()) return 1;
-        if (block.timestamp.sub(lastTouched) < period()) return 0;
-        return (block.timestamp.sub(lastTouched)).div(period());
+        // if (block.timestamp.sub(lastTouched) == period()) return 1;
+        // if (block.timestamp.sub(lastTouched) < period()) return 0;
+        // return (block.timestamp.sub(lastTouched)).div(period());
+        return HubI(hub).periods();
     }
+
+    function hubDeploy() public view returns (uint256) {
+        return HubI(hub).deployedAt();
+    }
+
+    function findInflationOffset() public view returns (uint256) {
+        return ((period().mul(periods())).add(hubDeploy())).sub(time());
+    }
+
+    // function look() public view returns (uint256) {
+    //     uint256 p = periods();
+    //     if (p == 0) return 0;
+    //     if (p == 1) return HubI(hub).issuance();
+    //     uint256 div = divisor();
+    //     uint256 inf = inflation();
+    //     uint256 q = HubI(hub).pow(inf, p);
+    //     uint256 d = HubI(hub).pow(div, p);
+    //     uint256 mid = q.sub(d);
+    //     uint256 q1 = div.mul(initial).mul(mid);
+    //     uint256 q2 = inf.sub(div);
+    //     uint256 bal = q1.div(q2);
+    //     return (bal.div(d)).sub(initial);
+    // }
 
     function look() public view returns (uint256) {
-        uint256 p = periods();
-        if (p == 0) return 0;
-        if (p == 1) return HubI(hub).issuance();
-        uint256 div = divisor();
-        uint256 inf = inflation();
-        uint256 q = HubI(hub).pow(inf, p);
-        uint256 d = HubI(hub).pow(div, p);
-        uint256 mid = q.sub(d);
-        uint256 q1 = div.mul(initial).mul(mid);
-        uint256 q2 = inf.sub(div);
-        uint256 bal = q1.div(q2);
-        return (bal.div(d)).sub(initial);
+        uint256 payout = 0;
+        uint256 clock = lastTouched;
+        uint256 offset = inflationOffset;
+        uint256 rate = currentRate;
+        while (lastTouched.add(offset) >= time()) {
+            payout = payout.add(offset.mul(rate));
+            clock = clock.add(offset);
+            offset = period();
+            rate = HubI(hub).inflate(rate, 1);
+        }
+        payout = payout.add((time().sub(lastTouched)).mul(rate));
+        // inflationOffset = findInflationOffset();
+        // lastTouched = time();
+        return payout;
+
     }
 
-    function updateTime() internal {
-        uint256 sec = period().mul(periods());
-        lastTouched = lastTouched.add(sec);
-    }
+    // function updateTime() internal {
+    //     uint256 sec = period().mul(periods());
+    //     lastTouched = lastTouched.add(sec);
+    // }
 
     function update() public returns (uint256) {
         uint256 gift = look();
         if (gift > 0) {
-            updateTime();
-            initial = HubI(hub).issuance();
+            inflationOffset = findInflationOffset();
+            lastTouched = time();
+            currentRate = HubI(hub).issuance();
             _mint(owner, gift);
         }
     }
@@ -117,9 +149,9 @@ contract Token is ERC20 {
     function balanceOf(address src) public view returns (uint256) {
         uint256 balance = super.balanceOf(src);
 
-        // if (src == owner) {
-        //    balance = balance.add(look());
-        // }
+        if (src == owner) {
+           balance = balance.add(look());
+        }
 
         return balance;
     }
