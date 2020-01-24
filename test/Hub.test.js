@@ -6,7 +6,7 @@ const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSaf
 const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
 const { getTimestamp } = require('./helpers/getTimestamp');
-const { bn } = require('./helpers/math');
+const { bn, ubiPayout } = require('./helpers/math');
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
@@ -29,6 +29,8 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
   const symbol = 'CRC';
   const initialPayout = bn(100);
   const tokenName = 'testToken';
+
+  const gas = 6721975;
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout);
@@ -134,7 +136,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         to: hub.address,
         data: await hub.contract.methods.signup(tokenName).encodeABI(),
       };
-      await executeSafeTx(safe, txParams, systemOwner, 6721975, systemOwner, web3);
+      await executeSafeTx(safe, txParams, systemOwner, gas, systemOwner, web3);
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -176,7 +178,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         to: hub.address,
         data: await hub.contract.methods.signup(tokenName).encodeABI(),
       };
-      await executeSafeTx(safe, txParams, systemOwner, 6721975, systemOwner, web3);
+      await executeSafeTx(safe, txParams, systemOwner, gas, systemOwner, web3);
 
       const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
 
@@ -194,7 +196,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         .encodeABI();
 
       const tx = await proxyFactory
-        .createProxy(safe.address, proxyData, { from: safeOwner, gas: 330000 });
+        .createProxy(safe.address, proxyData, { from: safeOwner, gas });
 
       const { logs } = tx;
 
@@ -206,7 +208,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         to: hub.address,
         data: await hub.contract.methods.signup(tokenName).encodeABI(),
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, 6721975, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, gas, safeOwner, web3);
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -249,7 +251,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
         to: hub.address,
         data: await hub.contract.methods.signup(tokenName).encodeABI(),
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, 6721975, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, gas, safeOwner, web3);
 
       const logs = await userSafe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
 
@@ -348,7 +350,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
           const amount = bn(25);
           const tokenAddress = await hub.userToToken(normalUser);
           const token = await Token.at(tokenAddress);
-          await token.transfer(safeOwner, amount, { from: normalUser });
+          await token.transfer(safeOwner, amount, { from: normalUser, gas });
           const totalSupply = await token.totalSupply();
           const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
           (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
@@ -359,7 +361,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
           const amount = bn(25);
           const tokenAddress = await hub.userToToken(normalUser);
           const token = await Token.at(tokenAddress);
-          await token.transfer(safeOwner, amount, { from: normalUser });
+          await token.transfer(safeOwner, amount, { from: normalUser, gas });
           const balance = await token.balanceOf(safeOwner);
           (await hub.checkSendLimit(normalUser, safeOwner, normalUser))
             .should.be.bignumber.equal(balance);
@@ -369,7 +371,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
           const amount = bn(50);
           const tokenAddress = await hub.userToToken(normalUser);
           const token = await Token.at(tokenAddress);
-          await token.transfer(safeOwner, amount, { from: normalUser });
+          await token.transfer(safeOwner, amount, { from: normalUser, gas });
           const totalSupply = await token.totalSupply();
           const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
           (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
@@ -424,7 +426,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             const amount = bn(25);
             const tokenAddress = await hub.userToToken(normalUser);
             const token = await Token.at(tokenAddress);
-            await token.transfer(safeOwner, amount, { from: normalUser });
+            await token.transfer(safeOwner, amount, { from: normalUser, gas });
             const totalSupply = await token.totalSupply();
             const allowable = bn(totalSupply * (newTrustLimit / 100)).sub(amount);
             (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
@@ -435,7 +437,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             const amount = bn(50);
             const tokenAddress = await hub.userToToken(normalUser);
             const token = await Token.at(tokenAddress);
-            await token.transfer(safeOwner, amount, { from: normalUser });
+            await token.transfer(safeOwner, amount, { from: normalUser, gas });
             const totalSupply = await token.totalSupply();
             const allowable = bn(totalSupply * (newTrustLimit / 100)).sub(amount);
             (await hub
@@ -464,7 +466,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas: 6721975 });
+            { from: safeOwner, gas });
       });
 
       it('deducts senders balance of own token', async () => {
@@ -484,8 +486,12 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
       it('deducts first users balance', async () => {
         const tokenAddress = await hub.userToToken(normalUser);
         const token = await Token.at(tokenAddress);
+        const lastTouched = await token.lastTouched();
+        const blocktime = (await web3.eth.getBlock('latest')).timestamp + 1;
+        const offset = await token.inflationOffset();
+        const payout = ubiPayout(initialPayout, lastTouched, blocktime, offset, period);
         (await token.balanceOf(normalUser))
-          .should.be.bignumber.equal(bn(75));
+          .should.be.bignumber.equal(bn(75).add(payout));
       });
 
       it('sends first users token to destination', async () => {
@@ -558,14 +564,18 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser, fourthUser, safeOwner],
             [normalUser, thirdUser, thirdUser, fourthUser],
             [15, 15, 10, 10],
-            { from: safeOwner, gas: 6721975 });
+            { from: safeOwner, gas });
       });
 
       it('deducts senders balance of own token', async () => {
         const tokenAddress = await hub.userToToken(safeOwner);
         const token = await Token.at(tokenAddress);
+        const lastTouched = await token.lastTouched();
+        const blocktime = (await web3.eth.getBlock('latest')).timestamp + 1;
+        const offset = await token.inflationOffset();
+        const payout = ubiPayout(initialPayout, lastTouched, blocktime, offset, period);
         (await token.balanceOf(safeOwner))
-          .should.be.bignumber.equal(bn(75));
+          .should.be.bignumber.equal(bn(75).add(payout));
       });
 
       it('sends senders token to first user', async () => {
@@ -578,8 +588,12 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
       it('deducts first users balance', async () => {
         const tokenAddress = await hub.userToToken(normalUser);
         const token = await Token.at(tokenAddress);
+        const lastTouched = await token.lastTouched();
+        const blocktime = (await web3.eth.getBlock('latest')).timestamp + 1;
+        const offset = await token.inflationOffset();
+        const payout = ubiPayout(initialPayout, lastTouched, blocktime, offset, period);
         (await token.balanceOf(normalUser))
-          .should.be.bignumber.equal(bn(85));
+          .should.be.bignumber.equal(bn(85).add(payout));
       });
 
       it('sends first users token to destination', async () => {
@@ -673,7 +687,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
 
       it('should throw when trust limit is too low', async () => {
@@ -685,7 +699,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
 
       it('should throw when passed too many srcs', async () => {
@@ -697,7 +711,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser, thirdUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
 
       it('should throw when passed too many tokenOwners', async () => {
@@ -709,7 +723,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
 
       it('should throw when passed too many dests', async () => {
@@ -721,7 +735,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, thirdUser, safeOwner],
             [amount, amount],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
 
       it('should throw when passed too many amounts', async () => {
@@ -733,7 +747,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount, amount],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
 
       it('should throw when sender is not sending enough', async () => {
@@ -745,7 +759,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [15, amount],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
 
       it('should throw when sender is sending too much', async () => {
@@ -757,7 +771,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, 15],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
 
       it('should throw when sender is receiving', async () => {
@@ -769,7 +783,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner, normalUser],
             [normalUser, safeOwner],
             [amount, amount],
-            { from: safeOwner, gas: 6721975 }));
+            { from: safeOwner, gas }));
       });
     });
 
@@ -793,14 +807,18 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
             [safeOwner],
             [normalUser],
             [amount],
-            { from: safeOwner, gas: 6721975 });
+            { from: safeOwner, gas });
       });
 
       it('correctly set senders balance', async () => {
         const tokenAddress = await hub.userToToken(safeOwner);
         const token = await Token.at(tokenAddress);
+        const lastTouched = await token.lastTouched();
+        const blocktime = (await web3.eth.getBlock('latest')).timestamp + 1;
+        const offset = await token.inflationOffset();
+        const payout = ubiPayout(initialPayout, lastTouched, blocktime, offset, period);
         (await token.balanceOf(safeOwner))
-          .should.be.bignumber.equal(bn(100));
+          .should.be.bignumber.equal(bn(100).add(payout));
       });
 
       it('sender has all their tokens back', async () => {

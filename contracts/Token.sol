@@ -71,7 +71,7 @@ contract Token is ERC20 {
     }
 
     function findInflationOffset() public view returns (uint256) {
-        return ((period().mul(periods())).add(hubDeploy())).sub(time());
+        return ((period().mul(periods().add(1))).add(hubDeploy())).sub(time());
     }
 
     // function look() public view returns (uint256) {
@@ -94,17 +94,16 @@ contract Token is ERC20 {
         uint256 clock = lastTouched;
         uint256 offset = inflationOffset;
         uint256 rate = currentRate;
-        while (lastTouched.add(offset) >= time()) {
+        while (clock.add(offset) <= time()) {
             payout = payout.add(offset.mul(rate));
             clock = clock.add(offset);
             offset = period();
             rate = HubI(hub).inflate(rate, 1);
         }
-        payout = payout.add((time().sub(lastTouched)).mul(rate));
+        payout = payout.add((time().sub(clock)).mul(rate));
         // inflationOffset = findInflationOffset();
         // lastTouched = time();
         return payout;
-
     }
 
     // function updateTime() internal {
@@ -143,7 +142,7 @@ contract Token is ERC20 {
     }
 
     function totalSupply() public view returns (uint256) {
-        return super.totalSupply();//.add(look());
+        return super.totalSupply().add(look());
     }
 
     function balanceOf(address src) public view returns (uint256) {
