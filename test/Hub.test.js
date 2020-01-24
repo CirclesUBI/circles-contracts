@@ -5,21 +5,8 @@ const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
 const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
-const { getTimestamp } = require('./helpers/getTimestamp');
-const { bn, ubiPayout } = require('./helpers/math');
-const { advanceBlock } = require('./helpers/increaseTime');
-
-const findPayout = async (_token, init, inf, div, per) => {
-  const offset = await _token.inflationOffset();
-  const lastTouched = await _token.lastTouched();
-  // const block = await web3.eth.getBlock('latest');
-  // const blocktime = bn(block.timestamp);
-  const time = await _token.time();
-  await advanceBlock();
-  const payout = ubiPayout(init, lastTouched, time, offset, inf, div, per);
-  return payout;
-};
-
+const { getTimestampFromTx } = require('./helpers/getTimestamp');
+const { bn } = require('./helpers/math');
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
@@ -38,7 +25,6 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
   let proxyFactory = null;
 
   const inflation = bn(275);
-  const divisor = bn(100);
   const period = bn(7885000000);
   const symbol = 'CRC';
   const initialPayout = bn(100);
@@ -78,7 +64,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
   });
 
   it('has the right deployed time', async () => {
-    const timestamp = await getTimestamp(hub.transactionHash, web3);
+    const timestamp = await getTimestampFromTx(hub.transactionHash, web3);
     const deployed = await hub.deployedAt();
     (bn(timestamp)).should.be.bignumber.equal(deployed);
   });
