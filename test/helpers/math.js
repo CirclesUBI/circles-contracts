@@ -16,15 +16,24 @@ const inflate = (init, inf, div, periods) => {
   return (init.mul(q)).div(d);
 };
 
-const ubiPayout = (rate, clock, time, offset, period) => {
+const ubiPayout = (rate, clock, time, offset, inf, div, period) => {
   let payout = bn(0);
-  while (clock.add(offset).lte(bn(time))) {
-    payout = payout.add(offset.mul(rate));
-    clock = clock.add(offset);
-    offset = period;
-    rate = inflate(rate, 1);
+  let c = clock;
+  let o = offset;
+  let r = rate;
+  // console.log("period", period.toString())
+  // console.log("offset", offset.toString())
+  // console.log("clock", clock.toString())
+  // console.log("rate", rate.toString())
+  // console.log("time", time.toString())
+  while (c.add(o).lte(bn(time))) {
+    payout = payout.add(o.mul(r));
+    c = c.add(o);
+    o = period;
+    r = inflate(r, inf, div, 1);
   }
-  payout = payout.add(bn(time).sub(clock).mul(rate));
+  payout = payout.add(bn(time).sub(c).mul(r));
+  console.log("payout", payout.toString())
   return payout;
 };
 

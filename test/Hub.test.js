@@ -7,6 +7,19 @@ const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFac
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
 const { getTimestamp } = require('./helpers/getTimestamp');
 const { bn, ubiPayout } = require('./helpers/math');
+const { advanceBlock } = require('./helpers/increaseTime');
+
+const findPayout = async (_token, init, inf, div, per) => {
+  const offset = await _token.inflationOffset();
+  const lastTouched = await _token.lastTouched();
+  // const block = await web3.eth.getBlock('latest');
+  // const blocktime = bn(block.timestamp);
+  const time = await _token.time();
+  await advanceBlock();
+  const payout = ubiPayout(init, lastTouched, time, offset, inf, div, per);
+  return payout;
+};
+
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
@@ -25,6 +38,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
   let proxyFactory = null;
 
   const inflation = bn(275);
+  const divisor = bn(100);
   const period = bn(7885000000);
   const symbol = 'CRC';
   const initialPayout = bn(100);
@@ -472,8 +486,8 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
       it('deducts senders balance of own token', async () => {
         const tokenAddress = await hub.userToToken(safeOwner);
         const token = await Token.at(tokenAddress);
-        (await token.balanceOf(safeOwner))
-          .should.be.bignumber.equal(bn(75));
+        const bal = await token.balanceOf(safeOwner);
+        bal.should.be.bignumber.equal(bn(75));
       });
 
       it('sends senders token to first user', async () => {
@@ -486,12 +500,8 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
       it('deducts first users balance', async () => {
         const tokenAddress = await hub.userToToken(normalUser);
         const token = await Token.at(tokenAddress);
-        const lastTouched = await token.lastTouched();
-        const blocktime = (await web3.eth.getBlock('latest')).timestamp + 1;
-        const offset = await token.inflationOffset();
-        const payout = ubiPayout(initialPayout, lastTouched, blocktime, offset, period);
         (await token.balanceOf(normalUser))
-          .should.be.bignumber.equal(bn(75).add(payout));
+          .should.be.bignumber.equal(bn(75));
       });
 
       it('sends first users token to destination', async () => {
@@ -570,12 +580,8 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
       it('deducts senders balance of own token', async () => {
         const tokenAddress = await hub.userToToken(safeOwner);
         const token = await Token.at(tokenAddress);
-        const lastTouched = await token.lastTouched();
-        const blocktime = (await web3.eth.getBlock('latest')).timestamp + 1;
-        const offset = await token.inflationOffset();
-        const payout = ubiPayout(initialPayout, lastTouched, blocktime, offset, period);
-        (await token.balanceOf(safeOwner))
-          .should.be.bignumber.equal(bn(75).add(payout));
+        const bal = await token.balanceOf(safeOwner);
+        bal.should.be.bignumber.equal(bn(75));
       });
 
       it('sends senders token to first user', async () => {
@@ -588,12 +594,7 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
       it('deducts first users balance', async () => {
         const tokenAddress = await hub.userToToken(normalUser);
         const token = await Token.at(tokenAddress);
-        const lastTouched = await token.lastTouched();
-        const blocktime = (await web3.eth.getBlock('latest')).timestamp + 1;
-        const offset = await token.inflationOffset();
-        const payout = ubiPayout(initialPayout, lastTouched, blocktime, offset, period);
-        (await token.balanceOf(normalUser))
-          .should.be.bignumber.equal(bn(85).add(payout));
+        (await token.balanceOf(normalUser)).should.be.bignumber.equal(bn(85));
       });
 
       it('sends first users token to destination', async () => {
@@ -813,12 +814,8 @@ contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fo
       it('correctly set senders balance', async () => {
         const tokenAddress = await hub.userToToken(safeOwner);
         const token = await Token.at(tokenAddress);
-        const lastTouched = await token.lastTouched();
-        const blocktime = (await web3.eth.getBlock('latest')).timestamp + 1;
-        const offset = await token.inflationOffset();
-        const payout = ubiPayout(initialPayout, lastTouched, blocktime, offset, period);
         (await token.balanceOf(safeOwner))
-          .should.be.bignumber.equal(bn(100).add(payout));
+          .should.be.bignumber.equal(bn(100));
       });
 
       it('sender has all their tokens back', async () => {

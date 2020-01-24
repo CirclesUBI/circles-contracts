@@ -33,13 +33,11 @@ contract Token is ERC20 {
         hub = msg.sender;
         lastTouched = time();
         inflationOffset = findInflationOffset();
-        // initial = HubI(hub).issuance();
         currentRate = HubI(hub).issuance();
-        // _mint(_owner, _initial);
         _mint(_owner, currentRate);
     }
 
-    function time() internal view returns (uint) {
+    function time() public view returns (uint) {
         return block.timestamp;
     }
 
@@ -60,9 +58,6 @@ contract Token is ERC20 {
     }
 
     function periods() public view returns (uint256) {
-        // if (block.timestamp.sub(lastTouched) == period()) return 1;
-        // if (block.timestamp.sub(lastTouched) < period()) return 0;
-        // return (block.timestamp.sub(lastTouched)).div(period());
         return HubI(hub).periods();
     }
 
@@ -73,21 +68,6 @@ contract Token is ERC20 {
     function findInflationOffset() public view returns (uint256) {
         return ((period().mul(periods().add(1))).add(hubDeploy())).sub(time());
     }
-
-    // function look() public view returns (uint256) {
-    //     uint256 p = periods();
-    //     if (p == 0) return 0;
-    //     if (p == 1) return HubI(hub).issuance();
-    //     uint256 div = divisor();
-    //     uint256 inf = inflation();
-    //     uint256 q = HubI(hub).pow(inf, p);
-    //     uint256 d = HubI(hub).pow(div, p);
-    //     uint256 mid = q.sub(d);
-    //     uint256 q1 = div.mul(initial).mul(mid);
-    //     uint256 q2 = inf.sub(div);
-    //     uint256 bal = q1.div(q2);
-    //     return (bal.div(d)).sub(initial);
-    // }
 
     function look() public view returns (uint256) {
         uint256 payout = 0;
@@ -101,15 +81,8 @@ contract Token is ERC20 {
             rate = HubI(hub).inflate(rate, 1);
         }
         payout = payout.add((time().sub(clock)).mul(rate));
-        // inflationOffset = findInflationOffset();
-        // lastTouched = time();
         return payout;
     }
-
-    // function updateTime() internal {
-    //     uint256 sec = period().mul(periods());
-    //     lastTouched = lastTouched.add(sec);
-    // }
 
     function update() public returns (uint256) {
         uint256 gift = look();
@@ -124,33 +97,25 @@ contract Token is ERC20 {
     function hubTransfer(
         address from, address to, uint256 amount
     ) public onlyHub returns (bool) {
-        if (from == owner) {
-            update();
-        }
         _transfer(from, to, amount);
     }
 
     function transfer(address dst, uint wad) public returns (bool) {
+        // this totally redundant code is covering what I believe is weird compiler
+        // eccentricity, making gnosis's revert message not correctly return the gas
+        // when this function only super() calls the inherited contract
         if (msg.sender == owner) {
-            update();
+            owner = msg.sender;
         }
         return super.transfer(dst, wad);
-    }
-
-    function approve(address guy, uint wad) public returns (bool) {
-        return super.approve(guy, wad);
-    }
-
-    function totalSupply() public view returns (uint256) {
-        return super.totalSupply().add(look());
     }
 
     function balanceOf(address src) public view returns (uint256) {
         uint256 balance = super.balanceOf(src);
 
-        if (src == owner) {
-           balance = balance.add(look());
-        }
+        // if (src == owner) {
+        //    balance = balance.add(look());
+        // }
 
         return balance;
     }

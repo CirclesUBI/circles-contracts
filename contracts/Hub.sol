@@ -88,7 +88,7 @@ contract Hub {
         return true;
     }
 
-    function time() public view returns (uint) { return block.timestamp; }
+    function time() public view returns (uint256) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
     function signup(string memory _name) public returns (bool) {
