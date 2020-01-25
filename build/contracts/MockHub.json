@@ -498,21 +498,21 @@
       "type": "event"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"time\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"divisor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getValidation\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"userToToken\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_initial\",\"type\":\"uint256\"},{\"name\":\"_periods\",\"type\":\"uint256\"}],\"name\":\"inflate\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_inflation\",\"type\":\"uint256\"}],\"name\":\"updateInflation\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"base\",\"type\":\"uint256\"},{\"name\":\"exponent\",\"type\":\"uint256\"}],\"name\":\"pow\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"initialPayout\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getSeen\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_name\",\"type\":\"string\"}],\"name\":\"signup\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_symbol\",\"type\":\"string\"}],\"name\":\"updateSymbol\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"issuance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"tokenOwner\",\"type\":\"address\"},{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dest\",\"type\":\"address\"}],\"name\":\"checkSendLimit\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"trust\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"tokenToUser\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"limits\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"periods\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"changeOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"inflation\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tokenOwners\",\"type\":\"address[]\"},{\"name\":\"srcs\",\"type\":\"address[]\"},{\"name\":\"dests\",\"type\":\"address[]\"},{\"name\":\"wads\",\"type\":\"uint256[]\"}],\"name\":\"transferThrough\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"deployedAt\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"period\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"}],\"name\":\"Signup\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"canSendTo\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"Trust\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"HubTransfer\",\"type\":\"event\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockHub.sol\":\"MockHub\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/circles-contracts/contracts/Hub.sol\":{\"keccak256\":\"0x8b6f89c9b7ff76f9201ac46c053ef231529469443a1cb5db05029f968020af42\",\"urls\":[\"bzzr://3d2ec42fbbd2dece9985dd1c5dd85d7485250ae0918357fdaed62e8336a420fe\"]},\"/media/000/Documents/Circles/circles-contracts/contracts/Token.sol\":{\"keccak256\":\"0xd85f4e6c09a6665b777c1191e72a6d08d8a7acc0d2a76dbf058efc3461737558\",\"urls\":[\"bzzr://b9ee1017e8d3588acab51568d7eaf38f9970ae2aad43bcf82400972b34fef6e0\"]},\"/media/000/Documents/Circles/circles-contracts/contracts/interfaces/HubI.sol\":{\"keccak256\":\"0x8d4e826c7b21e2fade877391b868e99a25cb802beeebb88a781858221f42b7f2\",\"urls\":[\"bzzr://8aa10d7a744a2ad7bfd233adeb1213e9db5de7367fbe4a8b2e004ba729e161f8\"]},\"/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockHub.sol\":{\"keccak256\":\"0x218a08544a580497cce023a4ce23cad626db563b4fc06ef61c3f01884ff0fad1\",\"urls\":[\"bzzr://5933af5588d429ea9c87537fb1e11b35c60dbfb647eaec1ed48e97b9de0fdd7a\"]},\"/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockToken.sol\":{\"keccak256\":\"0x9522305b035458399b7568358f82330b98a8a83f204a9111ac79de37952815a0\",\"urls\":[\"bzzr://c334edf0fda3074b464a4604f33579d9c73ec2bed42acc5fee6c12c18fc2099c\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x965012d27b4262d7a41f5028cbb30c51ebd9ecd4be8fb30380aaa7a3c64fbc8b\",\"urls\":[\"bzzr://41ca38f6b0fa4b77b0feec43e422cfbec48b7eb38a41edf0b85c77e8d9a296b1\"]},\"openzeppelin-solidity/contracts/token/ERC20/ERC20.sol\":{\"keccak256\":\"0xba431353cb4fe70777ac026231eb5468e41aa1e81240a2b8136917acc5fff4dc\",\"urls\":[\"bzzr://80cd02a56e6e33504318124d0d645c82e615cc8a4b5829cc9d82d17635c644c8\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x079c4e23ee448f529e43bfa3c4e8fb4be52cd0318ee923a276835bedf45b93d8\",\"urls\":[\"bzzr://48248e86f64407a95f241d6c5c8cfea6b4d4ebf4ebb467e5c98c8af3868fafe4\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"time\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"divisor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getValidation\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"userToToken\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_initial\",\"type\":\"uint256\"},{\"name\":\"_periods\",\"type\":\"uint256\"}],\"name\":\"inflate\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_inflation\",\"type\":\"uint256\"}],\"name\":\"updateInflation\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"base\",\"type\":\"uint256\"},{\"name\":\"exponent\",\"type\":\"uint256\"}],\"name\":\"pow\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"initialPayout\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getSeen\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_name\",\"type\":\"string\"}],\"name\":\"signup\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_symbol\",\"type\":\"string\"}],\"name\":\"updateSymbol\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"issuance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"tokenOwner\",\"type\":\"address\"},{\"name\":\"src\",\"type\":\"address\"},{\"name\":\"dest\",\"type\":\"address\"}],\"name\":\"checkSendLimit\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"trust\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"tokenToUser\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"limits\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"periods\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"changeOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"inflation\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tokenOwners\",\"type\":\"address[]\"},{\"name\":\"srcs\",\"type\":\"address[]\"},{\"name\":\"dests\",\"type\":\"address[]\"},{\"name\":\"wads\",\"type\":\"uint256[]\"}],\"name\":\"transferThrough\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"deployedAt\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"period\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"}],\"name\":\"Signup\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"canSendTo\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"limit\",\"type\":\"uint256\"}],\"name\":\"Trust\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"HubTransfer\",\"type\":\"event\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockHub.sol\":\"MockHub\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/000/Documents/Circles/circles-contracts/contracts/Hub.sol\":{\"keccak256\":\"0x8b6f89c9b7ff76f9201ac46c053ef231529469443a1cb5db05029f968020af42\",\"urls\":[\"bzzr://3d2ec42fbbd2dece9985dd1c5dd85d7485250ae0918357fdaed62e8336a420fe\"]},\"/media/000/Documents/Circles/circles-contracts/contracts/Token.sol\":{\"keccak256\":\"0xd85f4e6c09a6665b777c1191e72a6d08d8a7acc0d2a76dbf058efc3461737558\",\"urls\":[\"bzzr://b9ee1017e8d3588acab51568d7eaf38f9970ae2aad43bcf82400972b34fef6e0\"]},\"/media/000/Documents/Circles/circles-contracts/contracts/interfaces/HubI.sol\":{\"keccak256\":\"0x8d4e826c7b21e2fade877391b868e99a25cb802beeebb88a781858221f42b7f2\",\"urls\":[\"bzzr://8aa10d7a744a2ad7bfd233adeb1213e9db5de7367fbe4a8b2e004ba729e161f8\"]},\"/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockHub.sol\":{\"keccak256\":\"0xa437312148a8bfcc9f502ff13ce24d075fe91bfbb0bccb97c61296f9fc3f945c\",\"urls\":[\"bzzr://bbb2b668d074b3670d0dc5237c844c91edc9a0b7a19f63897a5f2ae4e8ad85f4\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x965012d27b4262d7a41f5028cbb30c51ebd9ecd4be8fb30380aaa7a3c64fbc8b\",\"urls\":[\"bzzr://41ca38f6b0fa4b77b0feec43e422cfbec48b7eb38a41edf0b85c77e8d9a296b1\"]},\"openzeppelin-solidity/contracts/token/ERC20/ERC20.sol\":{\"keccak256\":\"0xba431353cb4fe70777ac026231eb5468e41aa1e81240a2b8136917acc5fff4dc\",\"urls\":[\"bzzr://80cd02a56e6e33504318124d0d645c82e615cc8a4b5829cc9d82d17635c644c8\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x079c4e23ee448f529e43bfa3c4e8fb4be52cd0318ee923a276835bedf45b93d8\",\"urls\":[\"bzzr://48248e86f64407a95f241d6c5c8cfea6b4d4ebf4ebb467e5c98c8af3868fafe4\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.5.0;\nimport \"../Hub.sol\";\nimport \"./MockToken.sol\";\n\ncontract MockHub is Hub {\n\n//     function signup(string memory _name) public returns (bool) {\n//         require(address(userToToken[msg.sender]) == address(0));\n\n//         Token token = new MockToken(msg.sender, _name);\n//         userToToken[msg.sender] = token;\n//         tokenToUser[address(token)] = msg.sender;\n//         _trust(msg.sender, 100);\n\n//         emit Signup(msg.sender, address(token));\n//         return true;\n//     }\n}",
+  "source": "pragma solidity ^0.5.0;\nimport \"../Hub.sol\";\n\ncontract MockHub is Hub {\n\n}",
   "sourcePath": "/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockHub.sol",
   "ast": {
     "absolutePath": "/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockHub.sol",
     "exportedSymbols": {
       "MockHub": [
-        1659
+        1658
       ]
     },
-    "id": 1660,
+    "id": 1659,
     "nodeType": "SourceUnit",
     "nodes": [
       {
@@ -531,20 +531,9 @@
         "file": "../Hub.sol",
         "id": 1655,
         "nodeType": "ImportDirective",
-        "scope": 1660,
+        "scope": 1659,
         "sourceUnit": 1056,
         "src": "24:20:5",
-        "symbolAliases": [],
-        "unitAlias": ""
-      },
-      {
-        "absolutePath": "/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockToken.sol",
-        "file": "./MockToken.sol",
-        "id": 1656,
-        "nodeType": "ImportDirective",
-        "scope": 1660,
-        "sourceUnit": 1686,
-        "src": "45:25:5",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -554,19 +543,19 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1657,
+              "id": 1656,
               "name": "Hub",
               "nodeType": "UserDefinedTypeName",
               "referencedDeclaration": 1055,
-              "src": "92:3:5",
+              "src": "66:3:5",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_Hub_$1055",
                 "typeString": "contract Hub"
               }
             },
-            "id": 1658,
+            "id": 1657,
             "nodeType": "InheritanceSpecifier",
-            "src": "92:3:5"
+            "src": "66:3:5"
           }
         ],
         "contractDependencies": [
@@ -575,28 +564,28 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 1659,
+        "id": 1658,
         "linearizedBaseContracts": [
-          1659,
+          1658,
           1055
         ],
         "name": "MockHub",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 1660,
-        "src": "72:443:5"
+        "scope": 1659,
+        "src": "46:28:5"
       }
     ],
-    "src": "0:515:5"
+    "src": "0:74:5"
   },
   "legacyAST": {
     "absolutePath": "/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockHub.sol",
     "exportedSymbols": {
       "MockHub": [
-        1659
+        1658
       ]
     },
-    "id": 1660,
+    "id": 1659,
     "nodeType": "SourceUnit",
     "nodes": [
       {
@@ -615,20 +604,9 @@
         "file": "../Hub.sol",
         "id": 1655,
         "nodeType": "ImportDirective",
-        "scope": 1660,
+        "scope": 1659,
         "sourceUnit": 1056,
         "src": "24:20:5",
-        "symbolAliases": [],
-        "unitAlias": ""
-      },
-      {
-        "absolutePath": "/media/000/Documents/Circles/circles-contracts/contracts/mocks/MockToken.sol",
-        "file": "./MockToken.sol",
-        "id": 1656,
-        "nodeType": "ImportDirective",
-        "scope": 1660,
-        "sourceUnit": 1686,
-        "src": "45:25:5",
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -638,19 +616,19 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 1657,
+              "id": 1656,
               "name": "Hub",
               "nodeType": "UserDefinedTypeName",
               "referencedDeclaration": 1055,
-              "src": "92:3:5",
+              "src": "66:3:5",
               "typeDescriptions": {
                 "typeIdentifier": "t_contract$_Hub_$1055",
                 "typeString": "contract Hub"
               }
             },
-            "id": 1658,
+            "id": 1657,
             "nodeType": "InheritanceSpecifier",
-            "src": "92:3:5"
+            "src": "66:3:5"
           }
         ],
         "contractDependencies": [
@@ -659,19 +637,19 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 1659,
+        "id": 1658,
         "linearizedBaseContracts": [
-          1659,
+          1658,
           1055
         ],
         "name": "MockHub",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 1660,
-        "src": "72:443:5"
+        "scope": 1659,
+        "src": "46:28:5"
       }
     ],
-    "src": "0:515:5"
+    "src": "0:74:5"
   },
   "compiler": {
     "name": "solc",
@@ -679,7 +657,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.15",
-  "updatedAt": "2020-01-24T23:14:07.219Z",
+  "updatedAt": "2020-01-25T00:31:04.928Z",
   "devdoc": {
     "methods": {}
   },

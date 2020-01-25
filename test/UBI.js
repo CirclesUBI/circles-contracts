@@ -7,13 +7,10 @@ const { getTimestampFromTx, getTimestampFromBlock, getBlockHeight } = require('.
 const Hub = artifacts.require('Hub');
 const Token = artifacts.require('Token');
 
-const abi = Token.toJSON().abi;
-const tokenW3 = new web3.eth.Contract(abi);
-
 const findPayout = async (_token, init, inf, div, per) => {
   const offset = await _token.inflationOffset();
   const lastTouched = await _token.lastTouched();
-  const blocktime = bn(await getTimestampFromBlock(web3));
+  const blocktime = await _token.time();
   const payout = ubiPayout(init, lastTouched, blocktime, offset, inf, div, per);
   return payout;
 };
@@ -109,129 +106,121 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('correctly calculates the ubi payout at deployment', async () => {
-      const bal = await findPayout(token, initialPayout, inflation, divisor, period);
-      const look = await token.look();
-      look.should.bignumber.satisfy(() => near(look, bal, initialPayout));
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      const bal = await token.look();
+      bal.should.bignumber.satisfy(() => near(bal, goal, initialPayout));
     });
 
     it('doesnt change balance at deployment', async () => {
       await token.update();
       const balance = await token.balanceOf(owner);
-      (balance).should.bignumber.satisfy(() => near(initialPayout, balance, initialPayout));
+      (balance).should.bignumber.satisfy(() => near(balance, initialPayout, initialPayout));
     });
 
     it('correctly calculates the ubi payout after 1 period', async () => {
       await increase(period.toNumber());
-      const bal = await findPayout(token, initialPayout, inflation, divisor, period);
-      const look = await token.look();
-      look.should.bignumber.satisfy(() => near(look, bal, initialPayout));
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      const bal = await token.look();
+      bal.should.bignumber.satisfy(() => near(bal, goal, initialPayout));
     });
 
-    // it('updates owners balance with payout after 1 period', async () => {
-    //   await increase(period.toNumber());
-    //   const goalBal = await findPayout(token, initialPayout, inflation, divisor, period);
-    //   // const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(2));
-    //   const k = await token.look();
-    //   await token.update();
-    //   const balance = await token.balanceOf(owner);
-    //   (balance).should.be.bignumber.equal(goalBal);
-    // });
+    it('updates owners balance with payout after 1 period', async () => {
+      await increase(period.toNumber());
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      await token.update();
+      const balance = await token.balanceOf(owner);
+      balance.should.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    // it('should update owners balance even if called by attacker', async () => {
-    //   await increase(period.toNumber());
-    //   const goalBal = await findPayout(token, initialPayout, inflation, divisor, period);
-    //   // const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(2));
-    //   await token.update({ from: attacker });
-    //   const balance = await token.balanceOf(owner);
-    //   (balance).should.be.bignumber.equal(goalBal);
-    // });
+    it('should update owners balance even if called by attacker', async () => {
+      await increase(period.toNumber());
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      await token.update({ from: attacker });
+      const balance = await token.balanceOf(owner);
+      (balance).should.be.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    // it('should not change attacker balance if called by attacker', async () => {
-    //   await increase(period.toNumber());
-    //   await token.update({ from: attacker });
-    //   const balance = await token.balanceOf(attacker);
-    //   (balance).should.be.bignumber.equal(bn(0));
-    // });
+    it('should not change attacker balance if called by attacker', async () => {
+      await increase(period.toNumber());
+      await token.update({ from: attacker });
+      const balance = await token.balanceOf(attacker);
+      (balance).should.be.bignumber.equal(bn(0));
+    });
 
-    // it('should update lastTouched by period if exactly one period has passed', async () => {
-    //   await increase(period.toNumber());
-    //   await token.update();
-    //   await token.periods();
-    //   const time = await token.lastTouched();
-    //   (time).should.be.bignumber.equal(bn(deployTime).add(period));
-    // });
+    it('should update lastTouched by period if exactly one period has passed', async () => {
+      await increase(period.toNumber());
+      await token.update();
+      const time = await token.lastTouched();
+      (time).should.be.bignumber.equal(bn(deployTime).add(period));
+    });
 
-    // it('should update lastTouched by period if more than a period but less than two has passed', async () => {
-    //   await increase(period.toNumber() + 500);
-    //   await token.update();
-    //   const time = await token.lastTouched();
-    //   (time).should.be.bignumber.equal(bn(deployTime).add(period));
-    // });
+    it('should update lastTouched by period+x if more than a period but less than two has passed', async () => {
+      const timechange = period.toNumber() + 500;
+      await increase(timechange);
+      await token.update();
+      const time = await token.lastTouched();
+      const goal = bn(deployTime).add(bn(timechange));
+      time.should.bignumber.satisfy(() => near(time, goal, bn(1)));
+    });
 
-    // it('correctly calculates the ubi payout after x periods', async () => {
-    //   const time = period.mul(bn(5));
-    //   await increase(time.toNumber());
-    //   const bal = await findPayout(token, initialPayout, inflation, divisor, period);
+    it('correctly calculates the ubi payout after x periods', async () => {
+      const time = period.mul(bn(5));
+      await increase(time.toNumber());
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      const balance = await token.look();
+      balance.should.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    //   // const bal = ubiPayout(initialPayout, inflation, divisor, bn(5));
-    //   (await token.look()).should.be.bignumber.equal(bal);
-    // });
+    it('updates owners balance with payout after x periods', async () => {
+      const time = period.mul(bn(5));
+      await increase(time.toNumber());
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      await token.update();
+      const balance = await token.balanceOf(owner);
+      balance.should.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    // it('updates owners balance with payout after x periods', async () => {
-    //   const time = period.mul(bn(5));
-    //   await increase(time.toNumber());
-    //   const goalBal = await findPayout(token, initialPayout, inflation, divisor, period);
+    it('updates owners balance with payout after x periods when update is called multiple times', async () => {
+      const lastTouched = await token.lastTouched();
+      const offset = await token.inflationOffset();
+      await increase(period.toNumber());
+      await token.update();
+      await increase(period.toNumber());
+      await token.update();
+      await increase(period.toNumber());
+      await token.update();
+      await increase(period.toNumber());
+      await token.update();
+      const blocktime = await token.time();
+      const goal = ubiPayout(
+        initialPayout, lastTouched, blocktime, offset, inflation, divisor, period);
+      const balance = await token.balanceOf(owner);
+      balance.should.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    //   // const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(5));
-    //   await token.update();
-    //   const balance = await token.balanceOf(owner);
-    //   (balance).should.be.bignumber.equal(goalBal);
-    // });
+    it('should update lastTouched by period if x period has passed', async () => {
+      const time = period.mul(bn(5));
+      await increase(time.toNumber());
+      await token.update();
+      const lastTouched = await token.lastTouched();
+      (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
+    });
 
-    // it('should update lastTouched by period if x period has passed', async () => {
-    //   const time = period.mul(bn(5));
-    //   await increase(time.toNumber());
-    //   await token.update();
-    //   const lastTouched = await token.lastTouched();
-    //   (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
-    // });
+    it('should update lastTouched by period if more x but less than y periods have passed', async () => {
+      const timechange = (period.mul(bn(5))).toNumber() + 500;
+      await increase(timechange);
+      await token.update();
+      const lastTouched = await token.lastTouched();
+      const goal = bn(deployTime).add(bn(timechange));
+      lastTouched.should.bignumber.satisfy(() => near(lastTouched, goal, bn(1)));
+    });
 
-    // it('should update lastTouched by period if more x but less than y periods have passed', async () => {
-    //   const time = period.mul(bn(5));
-    //   await increase(time.toNumber() + 500);
-    //   await token.update();
-    //   const lastTouched = await token.lastTouched();
-    //   (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
-    // });
-
-    // it('should update balance twice if two periods pass, regardless of how update is called', async () => {
-    //   await increase(period.toNumber());
-    //   await token.update();
-    //   await increase(period.toNumber() + 500);
-    //   await token.update();
-    //   const goalBal = await findPayout(token, initialPayout, inflation, divisor, period);
-
-    //   // const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(3));
-    //   const balance = await token.balanceOf(owner);
-    //   (balance).should.be.bignumber.equal(goalBal);
-    // });
-
-    // it('should update balance lastTouched twice if two periods pass, regardless of how update is called', async () => {
-    //   await increase(period.toNumber());
-    //   await token.update();
-    //   await increase(period.toNumber() + 500);
-    //   await token.update();
-    //   const lastTouched = await token.lastTouched();
-    //   const timePassed = bn(deployTime).add(period.mul(bn(2)));
-    //   (lastTouched).should.be.bignumber.equal(timePassed);
-    // });
-
-    // it('should not update lastTouched if update isnt called', async () => {
-    //   const time = period.mul(bn(2));
-    //   await increase(time.toNumber() + 500);
-    //   const lastTouched = await token.lastTouched();
-    //   (lastTouched).should.be.bignumber.equal(bn(deployTime));
-    // });
+    it('should not update lastTouched if update isnt called', async () => {
+      const time = period.mul(bn(2));
+      await increase(time.toNumber() + 500);
+      const lastTouched = await token.lastTouched();
+      (lastTouched).should.be.bignumber.equal(bn(deployTime));
+    });
   });
 
   describe('ubi payouts - with different config params', () => {
@@ -248,101 +237,120 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('correctly calculates the ubi payout at deployment', async () => {
-      const bal = await findPayout(token, initialPayout, inflation, divisor, period);
-      const look = await token.look();
-      look.should.bignumber.satisfy(() => near(look, bal, initialPayout));
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      const bal = await token.look();
+      bal.should.bignumber.satisfy(() => near(bal, goal, initialPayout));
     });
 
     it('doesnt change balance at deployment', async () => {
       await token.update();
       const balance = await token.balanceOf(owner);
-      (balance).should.bignumber.satisfy(() => near(initialPayout, balance, initialPayout));
+      (balance).should.bignumber.satisfy(() => near(balance, initialPayout, initialPayout));
     });
 
     it('correctly calculates the ubi payout after 1 period', async () => {
       await increase(period.toNumber());
-      const bal = await findPayout(token, initialPayout, inflation, divisor, period);
-      const look = await token.look();
-      look.should.bignumber.satisfy(() => near(look, bal, initialPayout));
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      const bal = await token.look();
+      bal.should.bignumber.satisfy(() => near(bal, goal, initialPayout));
     });
 
+    it('updates owners balance with payout after 1 period', async () => {
+      await increase(period.toNumber());
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      await token.update();
+      const balance = await token.balanceOf(owner);
+      balance.should.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    // it('updates owners balance with payout after 1 period', async () => {
-    //   await increase(period.toNumber());
-    //   const goalBal = await findPayout(token, initialPayout, inflation, divisor, period);
+    it('should update owners balance even if called by attacker', async () => {
+      await increase(period.toNumber());
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      await token.update({ from: attacker });
+      const balance = await token.balanceOf(owner);
+      (balance).should.be.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    //   // const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(2));
-    //   await token.update();
-    //   const balance = await token.balanceOf(owner);
-    //   (balance).should.be.bignumber.equal(goalBal);
-    // });
+    it('should not change attacker balance if called by attacker', async () => {
+      await increase(period.toNumber());
+      await token.update({ from: attacker });
+      const balance = await token.balanceOf(attacker);
+      (balance).should.be.bignumber.equal(bn(0));
+    });
 
-    // it('should update owners balance even if called by attacker', async () => {
-    //   await increase(period.toNumber());
-    //   const goalBal = await findPayout(token, initialPayout, inflation, divisor, period);
+    it('should update lastTouched by period if exactly one period has passed', async () => {
+      await increase(period.toNumber());
+      await token.update();
+      const time = await token.lastTouched();
+      (time).should.be.bignumber.equal(bn(deployTime).add(period));
+    });
 
-    //   // const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(2));
-    //   await token.update({ from: attacker });
-    //   const balance = await token.balanceOf(owner);
-    //   (balance).should.be.bignumber.equal(goalBal);
-    // });
+    it('should update lastTouched by period+x if more than a period but less than two has passed', async () => {
+      const timechange = period.toNumber() + 500;
+      await increase(timechange);
+      await token.update();
+      const time = await token.lastTouched();
+      const goal = bn(deployTime).add(bn(timechange));
+      time.should.bignumber.satisfy(() => near(time, goal, bn(1)));
+    });
 
-    // it('should not change attacker balance if called by attacker', async () => {
-    //   await increase(period.toNumber());
-    //   await token.update({ from: attacker });
-    //   const balance = await token.balanceOf(attacker);
-    //   (balance).should.be.bignumber.equal(bn(0));
-    // });
+    it('correctly calculates the ubi payout after x periods', async () => {
+      const time = period.mul(bn(5));
+      await increase(time.toNumber());
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      const balance = await token.look();
+      balance.should.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    // it('should update lastTouched by period if exactly one period has passed', async () => {
-    //   await increase(period.toNumber());
-    //   await token.update();
-    //   await token.periods();
-    //   const time = await token.lastTouched();
-    //   (time).should.be.bignumber.equal(bn(deployTime).add(period));
-    // });
+    it('updates owners balance with payout after x periods', async () => {
+      const time = period.mul(bn(5));
+      await increase(time.toNumber());
+      const goal = await findPayout(token, initialPayout, inflation, divisor, period);
+      await token.update();
+      const balance = await token.balanceOf(owner);
+      balance.should.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    // it('should update lastTouched by period if more than a period but less than two has passed', async () => {
-    //   await increase(period.toNumber() + 500);
-    //   await token.update();
-    //   const time = await token.lastTouched();
-    //   (time).should.be.bignumber.equal(bn(deployTime).add(period));
-    // });
+    it('updates owners balance with payout after x periods when update is called multiple times', async () => {
+      const lastTouched = await token.lastTouched();
+      const offset = await token.inflationOffset();
+      await increase(period.toNumber());
+      await token.update();
+      await increase(period.toNumber());
+      await token.update();
+      await increase(period.toNumber());
+      await token.update();
+      await increase(period.toNumber());
+      await token.update();
+      const blocktime = await token.time();
+      const goal = ubiPayout(
+        initialPayout, lastTouched, blocktime, offset, inflation, divisor, period);
+      const balance = await token.balanceOf(owner);
+      balance.should.bignumber.satisfy(() => near(balance, goal, initialPayout));
+    });
 
-    // it('correctly calculates the ubi payout after x periods', async () => {
-    //   const time = period.mul(bn(5));
-    //   await increase(time.toNumber());
-    //   const bal = await findPayout(token, initialPayout, inflation, divisor, period);
+    it('should update lastTouched by period if x period has passed', async () => {
+      const time = period.mul(bn(5));
+      await increase(time.toNumber());
+      await token.update();
+      const lastTouched = await token.lastTouched();
+      (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
+    });
 
-    //   // const bal = ubiPayout(initialPayout, inflation, divisor, bn(5));
-    //   (await token.look()).should.be.bignumber.equal(bal);
-    // });
+    it('should update lastTouched by period if more x but less than y periods have passed', async () => {
+      const timechange = (period.mul(bn(5))).toNumber() + 500;
+      await increase(timechange);
+      await token.update();
+      const lastTouched = await token.lastTouched();
+      const goal = bn(deployTime).add(bn(timechange));
+      lastTouched.should.bignumber.satisfy(() => near(lastTouched, goal, bn(1)));
+    });
 
-    // it('updates owners balance with payout after x periods', async () => {
-    //   const time = period.mul(bn(5));
-    //   await increase(time.toNumber());
-    //   const goalBal = await findPayout(token, initialPayout, inflation, divisor, period);
-
-    //   // const goalBal = ubiPayout(initialPayout, inflation, divisor, bn(5));
-    //   await token.update();
-    //   const balance = await token.balanceOf(owner);
-    //   (balance).should.be.bignumber.equal(goalBal);
-    // });
-
-    // it('should update lastTouched by period if x period has passed', async () => {
-    //   const time = period.mul(bn(5));
-    //   await increase(time.toNumber());
-    //   await token.update();
-    //   const lastTouched = await token.lastTouched();
-    //   (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
-    // });
-
-    // it('should update lastTouched by period if more x but less than y periods have passed', async () => {
-    //   const time = period.mul(bn(5));
-    //   await increase(time.toNumber() + 500);
-    //   await token.update();
-    //   const lastTouched = await token.lastTouched();
-    //   (lastTouched).should.be.bignumber.equal(bn(deployTime).add(time));
-    // });
+    it('should not update lastTouched if update isnt called', async () => {
+      const time = period.mul(bn(2));
+      await increase(time.toNumber() + 500);
+      const lastTouched = await token.lastTouched();
+      (lastTouched).should.be.bignumber.equal(bn(deployTime));
+    });
   });
 });
