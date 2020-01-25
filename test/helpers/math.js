@@ -11,13 +11,14 @@ const inflate = (init, inf, div, periods) => {
 };
 
 const near = (num, goal, onePayout) => {
+  // console.log(onePayout.toString())
   // console.log(num.toString())
   // console.log(goal.toString())
   // console.log(num.eq(goal))
   // console.log(num.toString())
-  // console.log(goal.add(onePayout).toString())
+  // console.log(goal.sub(onePayout).toString())
   // console.log(num.eq(goal.add(onePayout)))
-  return num.eq(goal) || num.eq(goal.add(onePayout));
+  return num.eq(goal) || num.eq(goal.sub(onePayout));
 };
 
 const ubiPayout = (rate, clock, time, offset, inf, div, period) => {
@@ -46,6 +47,7 @@ const ubiPayout = (rate, clock, time, offset, inf, div, period) => {
 
 module.exports = {
   convertToBaseUnit,
+  inflate,
   bn,
   ubiPayout,
   near,
