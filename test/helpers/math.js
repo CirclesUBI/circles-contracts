@@ -17,8 +17,8 @@ const near = (num, goal, onePayout) => {
   // console.log(num.eq(goal))
   // console.log(num.toString())
   // console.log(goal.sub(onePayout).toString())
-  // console.log(num.eq(goal.add(onePayout)))
-  return num.eq(goal) || num.eq(goal.sub(onePayout));
+  // console.log(num.eq(goal.sub(onePayout)))
+  return num.eq(goal) || num.eq(goal.sub(onePayout)) || num.eq(goal.add(onePayout));
 };
 
 const ubiPayout = (rate, clock, time, offset, inf, div, period) => {
