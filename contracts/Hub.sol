@@ -13,6 +13,7 @@ contract Hub {
     uint256 public period;
     string public symbol; // = 'CRC';
     uint256 public initialPayout;
+    uint256 public startingRate;
     uint256 public deployedAt;
 
     mapping (address => Token) public userToToken;
@@ -37,7 +38,7 @@ contract Hub {
         _;
     }
 
-    constructor(address _owner, uint256 _inflation, uint256 _period, string memory _symbol, uint256 _initialPayout) public {
+    constructor(address _owner, uint256 _inflation, uint256 _period, string memory _symbol, uint256 _initialPayout, uint256 _startingRate) public {
         require (_owner != address(0));
         owner = _owner;
         inflation = _inflation;
@@ -45,6 +46,7 @@ contract Hub {
         period = _period;
         symbol = _symbol;
         initialPayout = _initialPayout;
+        startingRate = _startingRate;
         deployedAt = block.timestamp;
     }
 
@@ -61,7 +63,7 @@ contract Hub {
     }
 
     function issuance() public view returns (uint256) {
-        return inflate(initialPayout, periods());
+        return inflate(startingRate, periods());
     }
 
     function inflate(uint256 _initial, uint256 _periods) public view returns (uint256) {
@@ -94,7 +96,7 @@ contract Hub {
     function signup(string memory _name) public returns (bool) {
         require(address(userToToken[msg.sender]) == address(0));
 
-        Token token = new Token(msg.sender, _name);
+        Token token = new Token(msg.sender, _name, initialPayout);
         userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
         _trust(msg.sender, 100);

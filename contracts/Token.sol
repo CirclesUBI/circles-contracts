@@ -26,7 +26,7 @@ contract Token is ERC20 {
         _;
     }
 
-    constructor(address _owner, string memory _name) public {
+    constructor(address _owner, string memory _name, uint256 initialPayout) public {
         require(_owner != address(0));
         name = _name;
         owner = _owner;
@@ -34,7 +34,7 @@ contract Token is ERC20 {
         lastTouched = time();
         inflationOffset = findInflationOffset();
         currentRate = HubI(hub).issuance();
-        _mint(_owner, currentRate);
+        _mint(_owner, initialPayout);
     }
 
     function time() public view returns (uint) {

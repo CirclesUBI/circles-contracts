@@ -28,7 +28,7 @@ contract('Token payments', ([_, owner, recipient, anotherAccount, systemOwner]) 
   const initialPayout = convertToBaseUnit(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout);
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
 
     safe = await GnosisSafe.new({ from: owner });
     await safe.setup([owner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });

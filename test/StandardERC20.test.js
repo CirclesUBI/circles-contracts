@@ -30,7 +30,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   const initialPayout = convertToBaseUnit(100);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout);
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
   });
 
   describe('total supply', () => {
