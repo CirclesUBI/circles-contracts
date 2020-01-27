@@ -52,10 +52,10 @@ contract Hub {
 
     function findDivisor(uint256 _inf) internal pure returns (uint256) {
         uint256 iter = 0;
-        while (_inf.div(pow(10, iter)) > 10) {
+        while (_inf.div(pow(10, iter)) > 9) {
             iter += 1;
         }
-        return pow(10, iter + 1);
+        return pow(10, iter);
     }
 
     function periods() public view returns (uint256) {
