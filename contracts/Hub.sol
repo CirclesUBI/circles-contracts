@@ -154,7 +154,11 @@ contract Hub {
             return 0;
         }
         uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
-        return max.sub(userToToken[tokenOwner].balanceOf(dest));
+        uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
+        
+        // if trustLimit has already been overriden by a direct transfer, nothing more can be sent
+        if (max < destBalance) return 0;
+        return max.sub(destBalance);
 
         // if (max > srcBalance) return max;
         // return srcBalance;

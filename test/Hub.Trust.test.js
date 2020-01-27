@@ -295,6 +295,14 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           .checkSendLimit(safeOwner, safeOwner, normalUser))
           .should.be.bignumber.equal(bn(0));
       });
+
+      it('returns 0 when more tokens have been sent than the trust limit allows', async () => {
+        const normalUserTS = await token2.totalSupply();
+        await token.transfer(normalUser, normalUserTS, { from: safeOwner, gas });
+        (await hub
+          .checkSendLimit(safeOwner, safeOwner, normalUser))
+          .should.be.bignumber.equal(bn(0));
+      });
     });
   });
 });

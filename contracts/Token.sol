@@ -109,14 +109,4 @@ contract Token is ERC20 {
         }
         return super.transfer(dst, wad);
     }
-
-    function balanceOf(address src) public view returns (uint256) {
-        uint256 balance = super.balanceOf(src);
-
-        // if (src == owner) {
-        //    balance = balance.add(look());
-        // }
-
-        return balance;
-    }
 }
