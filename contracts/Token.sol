@@ -10,12 +10,11 @@ contract Token is ERC20 {
     uint8 public decimals = 18;
 
     string public name;
-    uint public lastTouched;
+    uint256 public lastTouched;
     address public hub;
-    HubI public controller;
     address public owner;
-
-    event TokenIssuance(uint256 amount);
+    uint256 public inflationOffset;
+    uint256 public currentRate;
 
     modifier onlyHub() {
         require(msg.sender == hub);
@@ -33,22 +32,12 @@ contract Token is ERC20 {
         owner = _owner;
         hub = msg.sender;
         lastTouched = time();
+        inflationOffset = findInflationOffset();
+        currentRate = HubI(hub).issuance();
         _mint(_owner, initialPayout);
     }
 
-    function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-        require(_newOwner != address(0));
-        owner = _newOwner;
-        return true;
-    }
-
-    function updateHub(address _hub) public onlyOwner returns (bool) {
-        require(_hub != address(0));
-        hub = _hub;
-        return true;
-    }
-
-    function time() internal view returns (uint) {
+    function time() public view returns (uint) {
         return block.timestamp;
     }
 
@@ -56,19 +45,53 @@ contract Token is ERC20 {
         return HubI(hub).symbol();
     }
 
-    function look() public view returns (uint256) {
-        uint256 period = time().sub(lastTouched);
-        uint256 issuance = HubI(hub).issuanceRate();
-        return issuance.mul(period);
+    function inflation() public view returns (uint256) {
+        return HubI(hub).inflation();
     }
 
-    // the universal basic income part
-    function update() public {
+    function divisor() public view returns (uint256) {
+        return HubI(hub).divisor();
+    }
+
+    function period() public view returns (uint256) {
+        return HubI(hub).period();
+    }
+
+    function periods() public view returns (uint256) {
+        return HubI(hub).periods();
+    }
+
+    function hubDeploy() public view returns (uint256) {
+        return HubI(hub).deployedAt();
+    }
+
+    function findInflationOffset() public view returns (uint256) {
+        return ((period().mul(periods().add(1))).add(hubDeploy())).sub(time());
+    }
+
+    function look() public view returns (uint256) {
+        uint256 payout = 0;
+        uint256 clock = lastTouched;
+        uint256 offset = inflationOffset;
+        uint256 rate = currentRate;
+        while (clock.add(offset) <= time()) {
+            payout = payout.add(offset.mul(rate));
+            clock = clock.add(offset);
+            offset = period();
+            rate = HubI(hub).inflate(rate, 1);
+        }
+        payout = payout.add((time().sub(clock)).mul(rate));
+        return payout;
+    }
+
+    function update() public returns (uint256) {
         uint256 gift = look();
-        //this.mint(cast(gift));
-        //this.push(owner, cast(gift));
-        lastTouched = time();
-        emit TokenIssuance(gift);
+        if (gift > 0) {
+            inflationOffset = findInflationOffset();
+            lastTouched = time();
+            currentRate = HubI(hub).issuance();
+            _mint(owner, gift);
+        }
     }
 
     function hubTransfer(
@@ -78,27 +101,21 @@ contract Token is ERC20 {
     }
 
     function transfer(address dst, uint wad) public returns (bool) {
-        if (msg.sender != address(this)) {
-            update();
+        // this totally redundant code is covering what I believe is weird compiler
+        // eccentricity, making gnosis's revert message not correctly return the gas
+        // when this function only super() calls the inherited contract
+        if (msg.sender == owner) {
+            owner = msg.sender;
         }
         return super.transfer(dst, wad);
-    }
-
-    function approve(address guy, uint wad) public returns (bool) {
-        //update();
-        return super.approve(guy, wad);
-    }
-
-    function totalSupply() public view returns (uint256) {
-        return super.totalSupply();//.add(look());
     }
 
     function balanceOf(address src) public view returns (uint256) {
         uint256 balance = super.balanceOf(src);
 
-        //if (src == owner) {
+        // if (src == owner) {
         //    balance = balance.add(look());
-        //}
+        // }
 
         return balance;
     }

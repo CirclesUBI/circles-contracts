@@ -2,67 +2,74 @@ pragma solidity ^0.5.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./Token.sol";
-import "./Organization.sol";
-
-//role of validators
-//hubfactory?
-//finish update function in token
-//what should initial demurrage rate be? And initial issuance?
-//more events in Token
-//parallel transfer helper
-//organization can transfer, and transitively transfer
-//abstract ownership utils?
-//organization signup
 
 contract Hub {
     using SafeMath for uint256;
 
     address public owner;
 
-    uint256 public issuanceRate; // = 1736111111111111; // ~1050 tokens per week
-    uint256 public demurrageRate; // = 0;
+    uint256 public inflation;
+    uint256 public divisor;
+    uint256 public period;
     string public symbol; // = 'CRC';
-    uint256 initialPayout;
+    uint256 public initialPayout;
+    uint256 public startingRate;
+    uint256 public deployedAt;
 
-    uint256 public LIMIT_EPOCH; // = 3600;
-
-    struct EdgeWeight {
-        uint256 limit;
-        uint256 value;
-        uint256 lastTouched;
-    }
-
-    mapping (address => bool) public relayers;
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
-    mapping (address => bool) public isOrganization;
-    mapping (address => bool) public isValidator;
-    mapping (address => mapping (address => EdgeWeight)) public edges;
+    mapping (address => mapping (address => uint256)) public limits;
 
     event Signup(address indexed user, address token);
-    event OrganizationSignup(address indexed organization);
-    event Trust(address indexed from, address indexed to, uint256 limit);
-    event RegisterValidator(address indexed validator);
-    event UpdateTrustLimit(address indexed from, address indexed to, uint256 limit);
+    event Trust(address indexed canSendTo, address indexed user, uint256 limit);
+    event HubTransfer(address indexed from, address indexed to, uint256 amount);
+
+    struct transferValidator {
+        address identity;
+        uint256 sent;
+        uint256 received;
+    }
+
+    mapping (address => transferValidator) private validation;
+    address[] private seen;
 
     modifier onlyOwner() {
         require (msg.sender == owner);
         _;
     }
 
-    modifier onlyRelayer() {
-        require (relayers[msg.sender]);
-        _;
-    }
-
-    constructor(address _owner, uint256 _issuance, uint256 _demurrage, string memory _symbol, uint256 _limitEpoch, uint256 _initialPayout) public {
+    constructor(address _owner, uint256 _inflation, uint256 _period, string memory _symbol, uint256 _initialPayout, uint256 _startingRate) public {
         require (_owner != address(0));
         owner = _owner;
-        issuanceRate = _issuance;
-        demurrageRate = _demurrage;
+        inflation = _inflation;
+        divisor = findDivisor(_inflation);
+        period = _period;
         symbol = _symbol;
-        LIMIT_EPOCH = _limitEpoch;
         initialPayout = _initialPayout;
+        startingRate = _startingRate;
+        deployedAt = block.timestamp;
+    }
+
+    function findDivisor(uint256 _inf) internal pure returns (uint256) {
+        uint256 iter = 0;
+        while (_inf.div(pow(10, iter)) > 10) {
+            iter += 1;
+        }
+        return pow(10, iter + 1);
+    }
+
+    function periods() public view returns (uint256) {
+        return (block.timestamp.sub(deployedAt)).div(period);
+    }
+
+    function issuance() public view returns (uint256) {
+        return inflate(startingRate, periods());
+    }
+
+    function inflate(uint256 _initial, uint256 _periods) public view returns (uint256) {
+        uint256 q = pow(inflation, _periods);
+        uint256 d = pow(divisor, _periods);
+        return (_initial.mul(q)).div(d);
     }
 
     function changeOwner(address _newOwner) public onlyOwner returns (bool) {
@@ -71,27 +78,9 @@ contract Hub {
         return true;
     }
 
-    function updateRelayer(address _relayer, bool isRelayer) public onlyOwner returns (bool) {
-        require(_relayer != address(0));
-        relayers[_relayer] = isRelayer;
-        return true;
-    }
-
-    function updateIssuance(uint256 _issuance) public onlyOwner returns (bool) {
+    function updateInflation(uint256 _inflation) public onlyOwner returns (bool) {
         // safety checks on issuance go here
-        issuanceRate = _issuance;
-        return true;
-    }
-
-    function updateDemurrage(uint256 _demurrage) public onlyOwner returns (bool) {
-        // safety checks on demurrage go here
-        demurrageRate = _demurrage;
-        return true;
-    }
-
-    function updateLimitEpoch(uint256 _limitEpoch) public onlyOwner returns (bool) {
-        //safetyyyy
-        LIMIT_EPOCH = _limitEpoch;
+        inflation = _inflation;
         return true;
     }
 
@@ -101,126 +90,166 @@ contract Hub {
         return true;
     }
 
-    function time() public view returns (uint) { return block.timestamp; }
-
-    function trustable(address _address) public returns (bool) {
-        return (address(userToToken[_address]) != address(0) || isValidator[_address]) && !isOrganization[_address];
-    }
-
-    function organizationSignup() external returns (bool) {
-        return _organizationSignup(msg.sender);
-    }
-
-    function relayerOrganizationSignup(address sender) external onlyRelayer returns (bool) {
-        return _organizationSignup(msg.sender);
-    }
-
-    function _organizationSignup(address sender) internal returns (bool) {
-        require(address(userToToken[sender]) == address(0));
-        require(!isOrganization[sender]);
-        isOrganization[sender] = true;
-        emit OrganizationSignup(sender);
-        return true;
-    }
-
-    function signup(string calldata _name) external returns (bool) {
-        return _signup(msg.sender, _name);
-    }
-
-    function relayerSignup(address sender, string calldata _name) external onlyRelayer returns (bool) {
-        return _signup(sender, _name);
-    }
+    function time() public view returns (uint256) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function _signup(address sender, string memory _name) internal returns (bool) {
-        require(address(userToToken[sender]) == address(0));
-        require(!isOrganization[sender]);
+    function signup(string memory _name) public returns (bool) {
+        require(address(userToToken[msg.sender]) == address(0));
 
-        Token token = new Token(sender, _name, initialPayout);
-        userToToken[sender] = token;
-        tokenToUser[address(token)] = sender;
+        Token token = new Token(msg.sender, _name, initialPayout);
+        userToToken[msg.sender] = token;
+        tokenToUser[address(token)] = msg.sender;
+        _trust(msg.sender, 100);
 
-        emit Signup(sender, address(token));
+        emit Signup(msg.sender, address(token));
         return true;
-    }
-
-    // no validation on the registering of validators
-    function registerValidator(address validator) external {
-        isValidator[validator] = true;
-        emit RegisterValidator(validator);
     }
 
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
-    function trust(address toTrust, bool yes, uint limit) public {
-        require(trustable(toTrust));
-        edges[msg.sender][toTrust] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
-        emit Trust(msg.sender, toTrust, limit);
+    function trust(address user, uint limit) public {
+        require(msg.sender != user, "You can't untrust yourself");
+        _trust(user, limit);
     }
 
-    function updateTrustLimit(address toUpdate, uint256 limit) public {
-        require(trustable(toUpdate));
-        require(address(tokenToUser[toUpdate]) != address(0));
-        edges[msg.sender][toUpdate] = EdgeWeight(limit, 0, time());
-        emit UpdateTrustLimit(msg.sender, toUpdate, limit);
+    function _trust(address user, uint limit) internal {
+        limits[msg.sender][user] = limit;
+        emit Trust(msg.sender, user, limit);
     }
 
-    // Starts with msg.sender then ,
-    // iterates through the nodes list swapping the nth token for the n+1 token
-    function transferThrough(address[] memory nodes, address[] memory tokens, uint wad) public {
-
-        uint tokenIndex = 0;
-
-        address prevValidator;
-
-        address prevNode;
-
-        for (uint256 x = 0; x < nodes.length; x++) {
-
-            address node = nodes[x];
-            // Cast token to a Token at tokenIndex
-            Token token = Token(tokens[tokenIndex]);
-
-            // If there exist a previous validator
-            if (prevValidator != address(0)) {
-                prevNode = prevValidator;
-                prevValidator = address(0);
-            }
-            else {
-                prevNode = address(token);
-            }
-            // edges[node][prevNode]
-            // assert that a valid trust relationship exists
-            assert(edges[node][prevNode].lastTouched != 0);
-
-            // If the last time the relationship was touched is less than the limit epoch
-            // add the current value of the edge to the transaction value and update the current value
-            edges[node][prevNode].value = time().sub(edges[node][prevNode].lastTouched) < LIMIT_EPOCH
-                ? edges[node][prevNode].value.add(wad)
-                : wad;
-
-            // update lastTouched to reflect this transaction
-            edges[node][prevNode].lastTouched = time();
-
-            // assert that the limit is greater than the proposed value
-            assert(edges[node][prevNode].limit >= edges[node][prevNode].value);
-
-            if (isValidator[node]) {
-                prevValidator = node;
+    function pow(uint256 base, uint256 exponent) public pure returns (uint256) {
+        if (base == 0) {
+            return 0;
+        }
+        if (exponent == 0) {
+            return 1;
+        }
+        if (exponent == 1) {
+            return base;
+        }
+        uint256 y = 1;
+        while(exponent > 1) {
+            if(exponent.mod(2) == 0) {
+                base = base.mul(base);
+                exponent = exponent.div(2);
             } else {
-                // Transfer the current token from the msg.sender to the current node
-                token.transferFrom(msg.sender, node, wad);
-
-                // If this is not the last token in the list transfer the nextToken
-                // from the current node to the msg.sender
-                if (tokenIndex + 1 < tokens.length) {
-
-                    Token nextToken = Token(tokens[tokenIndex + 1]);
-                    nextToken.transferFrom(node, msg.sender, wad);
-                }
-                tokenIndex++;
+                y = base.mul(y);
+                base = base.mul(base);
+                exponent = (exponent.sub(1)).div(2);
             }
         }
+        return base.mul(y);
     }
+
+    function checkSendLimit(address tokenOwner, address src, address dest) public view returns (uint256) {
+        // if the token doesn't exist, nothing can be sent
+        if (address(userToToken[tokenOwner]) == address(0)) {
+            return 0;
+        }
+        // if sending dest's token to dest, src can send 100% of their holdings
+        if (tokenOwner == dest) {
+            return userToToken[tokenOwner].balanceOf(src);
+        }
+        if (limits[dest][tokenOwner] == 0) {
+            return 0;
+        }
+        uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
+        return max.sub(userToToken[tokenOwner].balanceOf(dest));
+    }
+
+    // build the data structures we will use for validation
+    // if we haven't seen the addresses, add them to the validation mapping
+    // if we have, increment their sent/received amounts
+    function buildValidationData(address src, address dest, uint wad) internal {
+        if (validation[src].identity != address(0)) {
+            validation[src].sent = validation[src].sent.add(wad);
+        } else {
+            validation[src].identity = src;
+            validation[src].sent = wad;
+            seen.push(src);
+        }
+        if (validation[dest].identity != address(0)) {
+            validation[dest].received = validation[dest].received.add(wad);
+        } else {
+            validation[dest].identity = dest;
+            validation[dest].received = wad; 
+            seen.push(dest);   
+        }
+    }
+
+    function validateTransferThrough(uint256 steps) internal {
+        // a valid path has only one true sender and reciever, for all other
+        // addresses in the path, sent = received
+        // also, the sender should be msg.sender
+        address src;
+        address dest;
+        for (uint i = 0; i < seen.length; i++) {
+            transferValidator memory curr = validation[seen[i]];
+            if (curr.sent > curr.received) {
+                require(src == address(0), "Path sends from more than one src");
+                require(curr.identity == msg.sender, "Path doesn't send from transaction sender");
+                src = curr.identity;
+            }
+            if (curr.received > curr.sent) {
+                require(dest == address(0), "Path sends to more than one dest");
+                dest = curr.identity;
+            }
+        }
+        require(src != address(0), "Transaction must have a src");
+        require(dest != address(0), "Transaction must have a dest");
+        // sender should not recieve, recipient should not send
+        require(validation[src].received == 0, "Sender is receiving");
+        require(validation[dest].sent == 0, "Recipient is sending");
+        // the total amounts sent and received by src and dest should match
+        require(validation[src].sent == validation[dest].received, "Unequal sent and received amounts");
+        // the maximum amount of addresses we should see is one more than steps in the path
+        require(seen.length <= steps + 1, "Seen too many addresses");
+        emit HubTransfer(src, dest, validation[src].sent);
+        // clean up the validation datastructures
+        for (uint i = seen.length; i >= 1; i--) {
+            validation[seen[i-1]].sent = 0;
+            validation[seen[i-1]].received = 0;
+            validation[seen[i-1]].identity = address(0);
+            seen.pop();
+        }
+        // sanity check that we cleaned everything up correctly
+        require(seen.length == 0, "Seen should be empty");
+    }
+
+    // Walks through tokenOwners, srcs, dests, and amounts array and
+    // executes transtive transfer - also validates path
+    function transferThrough(address[] memory tokenOwners, address[] memory srcs, address[] memory dests, uint[] memory wads) public {
+        require(srcs.length <= 5, "Too complex path");
+        require(dests.length == tokenOwners.length, "Tokens array length must equal dests array");
+        require(srcs.length == tokenOwners.length, "Tokens array length must equal srcs array");
+        require(wads.length == tokenOwners.length, "Tokens array length must equal amounts array");
+        for (uint i = 0; i < srcs.length; i++) {
+            address src = srcs[i];
+            address dest = dests[i];
+            address token = tokenOwners[i];
+            uint256 wad = wads[i];
+            
+            // check that no trust limits are violated
+            // you always trust yourself 100%
+            if (token != dest) {
+                uint256 max = checkSendLimit(token, src, dest);
+                require(userToToken[token].balanceOf(dest) + wad <= max, "Trust limit exceeded");
+            }
+
+            buildValidationData(src, dest, wad);
+
+            userToToken[token].hubTransfer(src, dest, wad);
+        }
+        validateTransferThrough(srcs.length);
+    }
+
+    function getSeen() public view returns (uint256) {
+        return seen.length;
+    }
+
+    function getValidation(address user) public view returns (address, uint256, uint256) {
+        return (validation[user].identity, validation[user].sent, validation[user].received);
+    }
+
 }
 

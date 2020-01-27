@@ -1,12 +1,20 @@
 {
   "name": "circles-contracts",
-  "version": "1.0.0",
-  "preinstall": "nvm use -i 10.15.0 || echo nvm not found: check node version && pause",
+  "version": "1.0.16",
+  "contributors": [
+    "Sarah Friend (https://github.com/ana0)",
+    "Jake Gillberg (https://github.com/Jake-Gillberg)",
+    "David Terry (https://github.com/xwvvvvwx)",
+    "Ed Murphy (https://github.com/edzillion)",
+    "Ashoka Finley (https://github.com/shkfnly)",
+    "Martin Lundfall (https://github.com/MrChico)"
+  ],
+  "license": "AGPL",
   "scripts": {
-    "test": "scripts/test.sh",    
+    "test": "scripts/test.sh",
     "ganache": "ganache-cli -d -i 5777 -m \"enable depend figure right kit daughter job giraffe news window tonight more\"",
     "ganache:detach": "ganache-cli -d -i 5777 -m \"enable depend figure right kit daughter job giraffe news window tonight more\"",
-    "ganache:ci": "nohup ganache-cli -d -i 5777 -m \"enable depend figure right kit daughter job giraffe news window tonight more\" &"  
+    "ganache:ci": "nohup ganache-cli -d -i 5777 -m \"enable depend figure right kit daughter job giraffe news window tonight more\" &"
   },
   "repository": {
     "type": "git",
@@ -21,11 +29,17 @@
     "chai": "^4.1.2",
     "chai-bignumber": "^2.0.2",
     "chai-bn": "^0.1.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
     "ganache-cli": "^6.4.1",
-    "metatx-server": "^1.0.8",
     "openzeppelin-solidity": "2.1.1",
-    "pify": "^4.0.1",
-    "truffle": "^5.0.14"
+    "truffle": "^5.0.35",
+    "truffle-contract": "^4.0.29",
+    "dotenv": "^8.2.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@circles/safe-contracts": "^1.0.6",
+    "bluebird": "^3.7.1",
+    "truffle-hdwallet-provider": "^1.0.17"
+  }
 }

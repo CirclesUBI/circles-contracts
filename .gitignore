@@ -1,8 +1,8 @@
 # Dependency directory
 node_modules
 
-# truffle build directory
-build
-
 *.swp
 *.txt
+
+.env
+.zos.session
