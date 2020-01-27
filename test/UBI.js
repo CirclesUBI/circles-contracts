@@ -4,7 +4,7 @@ const { assertRevert } = require('./helpers/assertRevert');
 const { increase } = require('./helpers/increaseTime');
 const { getTimestampFromTx } = require('./helpers/getTimestamp');
 
-const Hub = artifacts.require('Hub');
+const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
 
 const findPayout = async (_token, init, inf, div, per) => {
@@ -29,6 +29,8 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
   const symbol = 'CRC';
   const tokenName = 'MyCoin';
   const initialPayout = convertToBaseUnit(100);
+
+  const gas = 6721975;
 
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);

@@ -30,8 +30,8 @@ contract Hub {
         uint256 received;
     }
 
-    mapping (address => transferValidator) private validation;
-    address[] private seen;
+    mapping (address => transferValidator) public validation;
+    address[] public seen;
 
     modifier onlyOwner() {
         require (msg.sender == owner);
@@ -242,14 +242,5 @@ contract Hub {
         }
         validateTransferThrough(srcs.length);
     }
-
-    function getSeen() public view returns (uint256) {
-        return seen.length;
-    }
-
-    function getValidation(address user) public view returns (address, uint256, uint256) {
-        return (validation[user].identity, validation[user].sent, validation[user].received);
-    }
-
 }
 

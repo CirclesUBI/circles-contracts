@@ -12,7 +12,7 @@ require('chai')
   .use(require('chai-bn')(BigNumber))
   .should();
 
-const Hub = artifacts.require('Hub');
+const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
 const GnosisSafe = truffleContract(safeArtifacts);
 const ProxyFactory = truffleContract(proxyArtifacts);
