@@ -15,7 +15,7 @@ const Token = artifacts.require('Token');
 const GnosisSafe = truffleContract(safeArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 
-contract('Hub', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
+contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
 

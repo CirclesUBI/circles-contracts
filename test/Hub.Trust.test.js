@@ -3,8 +3,9 @@ const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
-const { getTimestampFromTx } = require('./helpers/getTimestamp');
 const { bn } = require('./helpers/math');
+const { increase } = require('./helpers/increaseTime');
+
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
@@ -219,6 +220,80 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
               .should.be.bignumber.equal(allowable);
           });
         });
+      });
+    });
+  });
+
+  describe('when users sign up at a different time', async () => {
+    const trustLimit = 50;
+    let token;
+    let token2;
+
+    beforeEach(async () => {
+      await hub.signup(tokenName, { from: safeOwner });
+      await hub.trust(normalUser, trustLimit, { from: safeOwner });
+      const tokenAddress = await hub.userToToken(safeOwner);
+      token = await Token.at(tokenAddress);
+      await increase(period.toNumber());
+      await token.update();
+      await hub.signup(tokenName, { from: normalUser });
+      await hub.trust(safeOwner, trustLimit, { from: normalUser });
+      const token2Address = await hub.userToToken(normalUser);
+      token2 = await Token.at(token2Address);
+    });
+
+    describe('from perspective of newer user', async () => {
+      it('returns correct amount when no tokens have been traded', async () => {
+        const safeOwnerTS = await token.totalSupply();
+        const allowable = safeOwnerTS * (trustLimit / 100);
+        (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
+          .should.be.bignumber.equal(bn(allowable));
+      });
+
+      it('returns correct amount when tokens have been traded', async () => {
+        const safeOwnerTS = await token.totalSupply();
+        const amount = bn(25);
+        const allowable = bn(safeOwnerTS * (trustLimit / 100)).sub(amount);
+        await token2.transfer(safeOwner, amount, { from: normalUser, gas });
+        (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
+          .should.be.bignumber.equal(allowable);
+      });
+
+      it('returns correct amount when fewer tokens are tradeable', async () => {
+        const safeOwnerTS = await token.totalSupply();
+        const normalUserTS = await token2.totalSupply();
+        const allowable = bn(safeOwnerTS * (trustLimit / 100)).sub(normalUserTS);
+        await token2.transfer(safeOwner, normalUserTS, { from: normalUser, gas });
+        (await hub
+          .checkSendLimit(normalUser, normalUser, safeOwner))
+          .should.be.bignumber.equal(allowable);
+      });
+    });
+
+    describe('from perspective of older user', async () => {
+      it('returns correct amount when no tokens have been traded', async () => {
+        const totalSupply = await token2.totalSupply();
+        const allowable = totalSupply * (trustLimit / 100);
+        (await hub.checkSendLimit(safeOwner, safeOwner, normalUser))
+          .should.be.bignumber.equal(bn(allowable));
+      });
+
+      it('returns correct amount when tokens have been traded', async () => {
+        const normalUserTS = await token2.totalSupply();
+        const amount = bn(25);
+        const allowable = bn(normalUserTS * (trustLimit / 100)).sub(amount);
+        await token.transfer(normalUser, amount, { from: safeOwner, gas });
+        (await hub.checkSendLimit(safeOwner, safeOwner, normalUser))
+          .should.be.bignumber.equal(allowable);
+      });
+
+      it('returns correct amount when no tokens are tradeable', async () => {
+        const normalUserTS = await token2.totalSupply();
+        const allowable = bn(normalUserTS * (trustLimit / 100));
+        await token.transfer(normalUser, allowable, { from: safeOwner, gas });
+        (await hub
+          .checkSendLimit(safeOwner, safeOwner, normalUser))
+          .should.be.bignumber.equal(bn(0));
       });
     });
   });

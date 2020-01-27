@@ -1,5 +1,5 @@
 const { BigNumber } = require('./helpers/constants');
-const { bn, convertToBaseUnit } = require('./helpers/math');
+const { bn, convertToBaseUnit, inflate } = require('./helpers/math');
 const { assertRevert } = require('./helpers/assertRevert');
 const { increase } = require('./helpers/increaseTime');
 
@@ -105,19 +105,58 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
 
     it('returns the correct issuance after 1 period', async () => {
       await increase(period.toNumber());
-      const q = inflation.pow(bn(1));
-      const d = divisor.pow(bn(1));
-      const compounded = (initialPayout.mul(q)).div(d);
+      const compounded = inflate(initialPayout, inflation, divisor, bn(1));
       (await hub.issuance()).should.be.bignumber.equal(compounded);
     });
 
     it('returns the correct issuance after x period', async () => {
-      const time = period.mul(bn(5));
+      const numPeriods = bn(5);
+      const time = period.mul(numPeriods);
       await increase(time.toNumber());
-      const q = inflation.pow(bn(5));
-      const d = divisor.pow(bn(5));
-      const compounded = (initialPayout.mul(q)).div(d);
+      const compounded = inflate(initialPayout, inflation, divisor, numPeriods);
       (await hub.issuance()).should.be.bignumber.equal(compounded);
+    });
+  });
+
+  describe('inflate', () => {
+    it('returns the correct inflation with no periods passed', async () => {
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+      (await hub.inflate(initialPayout, 0)).should.be.bignumber.equal(initialPayout);
+    });
+
+    it('returns the correct inflation with 1 period passed', async () => {
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+      const compounded = inflate(initialPayout, inflation, divisor, bn(1));
+      (await hub.inflate(initialPayout, 1)).should.be.bignumber.equal(compounded);
+    });
+
+    it('returns the correct inflation with x periods passed', async () => {
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+      const compounded = inflate(initialPayout, inflation, divisor, bn(22));
+      (await hub.inflate(initialPayout, 22)).should.be.bignumber.equal(compounded);
+    });
+
+    it('returns the correct inflation with no periods passed', async () => {
+      const startingRate = bn(52);
+      inflation = bn(1035);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingRate);
+      (await hub.inflate(startingRate, 0)).should.be.bignumber.equal(startingRate);
+    });
+
+    it('returns the correct inflation with 1 period passed', async () => {
+      const startingRate = bn(2);
+      inflation = bn(2035);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingRate);
+      const compounded = inflate(startingRate, inflation, bn(1000), bn(1));
+      (await hub.inflate(startingRate, 1)).should.be.bignumber.equal(compounded);
+    });
+
+    it('returns the correct inflation with x periods passed', async () => {
+      const startingRate = bn(4562);
+      inflation = bn(705);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingRate);
+      const compounded = inflate(startingRate, inflation, bn(100), bn(22));
+      (await hub.inflate(startingRate, 22)).should.be.bignumber.equal(compounded);
     });
   });
 

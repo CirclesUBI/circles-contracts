@@ -145,15 +145,19 @@ contract Hub {
         if (address(userToToken[tokenOwner]) == address(0)) {
             return 0;
         }
+        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
         // if sending dest's token to dest, src can send 100% of their holdings
         if (tokenOwner == dest) {
-            return userToToken[tokenOwner].balanceOf(src);
+            return srcBalance;
         }
         if (limits[dest][tokenOwner] == 0) {
             return 0;
         }
         uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
         return max.sub(userToToken[tokenOwner].balanceOf(dest));
+
+        // if (max > srcBalance) return max;
+        // return srcBalance;
     }
 
     // build the data structures we will use for validation
