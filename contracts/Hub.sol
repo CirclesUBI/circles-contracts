@@ -85,7 +85,6 @@ contract Hub {
     }
 
     function updateSymbol(string memory _symbol) public onlyOwner returns (bool) {
-        //maybe we don't need to validate this one?
         symbol = _symbol;
         return true;
     }

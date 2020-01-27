@@ -56,6 +56,44 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
     });
   });
 
+  describe('periods', () => {
+    beforeEach(async () => {
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+    });
+
+    it('returns the correct period', async () => {
+      (await hub.period()).should.be.bignumber.equal(period);
+    });
+
+    it('returns 0 before a full period has passed', async () => {
+      (await hub.periods()).should.be.bignumber.equal(bn(0));
+    });
+
+    it('returns the correct number of periods after 1 period has passed', async () => {
+      const time = period.mul(bn(1));
+      await increase(time.toNumber());
+      (await hub.periods()).should.be.bignumber.equal(bn(1));
+    });
+
+    it('returns the correct number of periods after 1+x period has passed', async () => {
+      const time = period.mul(bn(1)).toNumber() + 500;
+      await increase(time);
+      (await hub.periods()).should.be.bignumber.equal(bn(1));
+    });
+
+    it('returns the correct number of periods after x period has passed', async () => {
+      const time = period.mul(bn(8));
+      await increase(time.toNumber());
+      (await hub.periods()).should.be.bignumber.equal(bn(8));
+    });
+
+    it('returns the correct number of periods after x-1 period has passed', async () => {
+      const time = period.mul(bn(8)).toNumber() - 1;
+      await increase(time);
+      (await hub.periods()).should.be.bignumber.equal(bn(7));
+    });
+  });
+
   describe('issuance', () => {
     beforeEach(async () => {
       hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
