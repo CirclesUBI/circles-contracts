@@ -7,7 +7,7 @@ const { executeSafeTx } = require('./helpers/executeSafeTx');
 const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
 
-const Hub = artifacts.require('Hub');
+const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
 

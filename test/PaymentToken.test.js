@@ -5,7 +5,7 @@ const { estimateBaseGas, estimateTxGas } = require('./helpers/estimateGas');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
 
-const Hub = artifacts.require('Hub');
+const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
 

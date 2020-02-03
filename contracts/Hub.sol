@@ -30,8 +30,8 @@ contract Hub {
         uint256 received;
     }
 
-    mapping (address => transferValidator) private validation;
-    address[] private seen;
+    mapping (address => transferValidator) public validation;
+    address[] public seen;
 
     modifier onlyOwner() {
         require (msg.sender == owner);
@@ -52,10 +52,10 @@ contract Hub {
 
     function findDivisor(uint256 _inf) internal pure returns (uint256) {
         uint256 iter = 0;
-        while (_inf.div(pow(10, iter)) > 10) {
+        while (_inf.div(pow(10, iter)) > 9) {
             iter += 1;
         }
-        return pow(10, iter + 1);
+        return pow(10, iter);
     }
 
     function periods() public view returns (uint256) {
@@ -85,7 +85,6 @@ contract Hub {
     }
 
     function updateSymbol(string memory _symbol) public onlyOwner returns (bool) {
-        //maybe we don't need to validate this one?
         symbol = _symbol;
         return true;
     }
@@ -146,15 +145,23 @@ contract Hub {
         if (address(userToToken[tokenOwner]) == address(0)) {
             return 0;
         }
+        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
         // if sending dest's token to dest, src can send 100% of their holdings
         if (tokenOwner == dest) {
-            return userToToken[tokenOwner].balanceOf(src);
+            return srcBalance;
         }
         if (limits[dest][tokenOwner] == 0) {
             return 0;
         }
         uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
-        return max.sub(userToToken[tokenOwner].balanceOf(dest));
+        uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
+        
+        // if trustLimit has already been overriden by a direct transfer, nothing more can be sent
+        if (max < destBalance) return 0;
+        return max.sub(destBalance);
+
+        // if (max > srcBalance) return max;
+        // return srcBalance;
     }
 
     // build the data structures we will use for validation
@@ -242,14 +249,5 @@ contract Hub {
         }
         validateTransferThrough(srcs.length);
     }
-
-    function getSeen() public view returns (uint256) {
-        return seen.length;
-    }
-
-    function getValidation(address user) public view returns (address, uint256, uint256) {
-        return (validation[user].identity, validation[user].sent, validation[user].received);
-    }
-
 }
 
