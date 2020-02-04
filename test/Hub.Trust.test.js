@@ -37,6 +37,15 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
   describe('user can set trust limits', async () => {
     const trustLimit = 50;
 
+    describe('cannot trust someone before youve signed up', async () => {
+      it('should throw', async () => assertRevert(hub.trust(normalUser, trustLimit, { from: safeOwner })));
+
+      it('checkSendLimit should return zero', async () => {
+        (await hub.checkSendLimit(safeOwner, safeOwner, normalUser))
+          .should.be.bignumber.equal(bn(0));
+      });
+    });
+
     describe('when user tries to adjust their trust for themselves', async () => {
       beforeEach(async () => {
         await hub.signup(tokenName, { from: safeOwner });
@@ -85,6 +94,15 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
       it('correctly sets the trust limit', async () => {
         (await hub.limits(safeOwner, normalUser))
           .should.be.bignumber.equal(new BigNumber(trustLimit));
+      });
+
+      it('checkSendLimit returns correct amount', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        const totalSupply = await token.totalSupply();
+        const allowable = totalSupply * (trustLimit / 100);
+        (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
+          .should.be.bignumber.equal(new BigNumber(allowable));
       });
     });
 

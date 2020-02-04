@@ -107,6 +107,7 @@ contract Hub {
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address user, uint limit) public {
+        require(address(userToToken[msg.sender]) != address(0), "You can only trust people after you've signed up!");
         require(msg.sender != user, "You can't untrust yourself");
         _trust(user, limit);
     }
@@ -141,27 +142,31 @@ contract Hub {
     }
 
     function checkSendLimit(address tokenOwner, address src, address dest) public view returns (uint256) {
-        // if the token doesn't exist, nothing can be sent
-        if (address(userToToken[tokenOwner]) == address(0)) {
-            return 0;
-        }
-        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
-        // if sending dest's token to dest, src can send 100% of their holdings
-        if (tokenOwner == dest) {
-            return srcBalance;
-        }
+        // there is no trust
         if (limits[dest][tokenOwner] == 0) {
             return 0;
         }
+        // if dest hasn't signed up, they cannot trust anyone
+        if (address(userToToken[dest]) == address(0)) {
+            return 0;
+        }
+
+        // if the token doesn't exist, return max
         uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
+        if (address(userToToken[tokenOwner]) == address(0)) {
+            return max;
+        }
+
+        // if sending dest's token to dest, src can send 100% of their holdings
+        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
+        if (tokenOwner == dest) {
+            return srcBalance;
+        }
         uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
         
         // if trustLimit has already been overriden by a direct transfer, nothing more can be sent
         if (max < destBalance) return 0;
         return max.sub(destBalance);
-
-        // if (max > srcBalance) return max;
-        // return srcBalance;
     }
 
     // build the data structures we will use for validation
