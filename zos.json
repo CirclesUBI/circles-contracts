@@ -1,9 +1,0 @@
-{
-  "zosversion": "2.2",
-  "contracts": {},
-  "dependencies": {
-    "gnosis-safe": "^0.1.0"
-  },
-  "name": "circles",
-  "version": "1.0.0"
-}
