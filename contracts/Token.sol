@@ -61,6 +61,10 @@ contract Token is ERC20 {
         return HubI(hub).periods();
     }
 
+    function periodsLastTouched() public view returns (uint256) {
+        return (lastTouched.sub(hubDeploy())).div(period());
+    }
+
     function hubDeploy() public view returns (uint256) {
         return HubI(hub).deployedAt();
     }
@@ -74,13 +78,17 @@ contract Token is ERC20 {
         uint256 clock = lastTouched;
         uint256 offset = inflationOffset;
         uint256 rate = currentRate;
+        uint256 p = periodsLastTouched();
         while (clock.add(offset) <= time()) {
             payout = payout.add(offset.mul(rate));
             clock = clock.add(offset);
             offset = period();
-            rate = HubI(hub).inflate(rate, 1);
+            // rate = HubI(hub).inflate(rate, 1);
+            p = p.add(1);
+            rate = HubI(hub).issuanceStep(p);
         }
-        payout = payout.add((time().sub(clock)).mul(rate));
+        uint256 timePassed = time().sub(clock);
+        payout = payout.add(timePassed.mul(rate));
         return payout;
     }
 

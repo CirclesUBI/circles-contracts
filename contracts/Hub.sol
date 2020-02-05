@@ -66,6 +66,10 @@ contract Hub {
         return inflate(startingRate, periods());
     }
 
+    function issuanceStep(uint256 _periods) public view returns (uint256) {
+        return inflate(startingRate, _periods);
+    }
+
     function inflate(uint256 _initial, uint256 _periods) public view returns (uint256) {
         uint256 q = pow(inflation, _periods);
         uint256 d = pow(divisor, _periods);
