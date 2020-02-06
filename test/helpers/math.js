@@ -11,28 +11,26 @@ const inflate = (init, inf, div, periods) => {
 };
 
 const near = (num, goal, onePayout) => {
-  // console.log(onePayout.toString())
-  // console.log(num.toString())
-  // console.log(goal.toString())
-  // console.log(num.eq(goal))
-  // console.log(num.toString())
-  // console.log(goal.sub(onePayout).toString())v/
-  // console.log(num.eq(goal.sub(onePayout)))
   return num.eq(goal) || num.eq(goal.sub(onePayout)) || num.eq(goal.add(onePayout));
 };
 
-const ubiPayout = (rate, clock, time, offset, inf, div, period) => {
+const periodsLastTouched = (clock, hubDeploy, period) => clock.sub(hubDeploy).div(period);
+
+const ubiPayout = (rate, clock, time, offset, inf, div, period, hubDeploy) => {
   let payout = bn(0);
   let c = clock;
   let o = offset;
   let r = rate;
+  let p = periodsLastTouched(c, hubDeploy, period);
   while (c.add(o).lte(bn(time))) {
     payout = payout.add(o.mul(r));
     c = c.add(o);
     o = period;
-    r = inflate(r, inf, div, 1);
+    p = p.add(bn(1));
+    r = inflate(rate, inf, div, p);
   }
-  payout = payout.add(bn(time).sub(c).mul(r));
+  const timePassed = bn(time).sub(c);
+  payout = payout.add(timePassed.mul(r));
   return payout;
 };
 

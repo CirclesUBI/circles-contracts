@@ -13,7 +13,7 @@ contract Hub {
     uint256 public period;
     string public symbol; // = 'CRC';
     uint256 public initialPayout;
-    uint256 public startingRate;
+    uint256 public initialIssuance;
     uint256 public deployedAt;
 
     mapping (address => Token) public userToToken;
@@ -38,7 +38,7 @@ contract Hub {
         _;
     }
 
-    constructor(address _owner, uint256 _inflation, uint256 _period, string memory _symbol, uint256 _initialPayout, uint256 _startingRate) public {
+    constructor(address _owner, uint256 _inflation, uint256 _period, string memory _symbol, uint256 _initialPayout, uint256 _initialIssuance) public {
         require (_owner != address(0));
         owner = _owner;
         inflation = _inflation;
@@ -46,7 +46,7 @@ contract Hub {
         period = _period;
         symbol = _symbol;
         initialPayout = _initialPayout;
-        startingRate = _startingRate;
+        initialIssuance = _initialIssuance;
         deployedAt = block.timestamp;
     }
 
@@ -63,7 +63,11 @@ contract Hub {
     }
 
     function issuance() public view returns (uint256) {
-        return inflate(startingRate, periods());
+        return inflate(initialIssuance, periods());
+    }
+
+    function issuanceStep(uint256 _periods) public view returns (uint256) {
+        return inflate(initialIssuance, _periods);
     }
 
     function inflate(uint256 _initial, uint256 _periods) public view returns (uint256) {
@@ -79,8 +83,12 @@ contract Hub {
     }
 
     function updateInflation(uint256 _inflation) public onlyOwner returns (bool) {
-        // safety checks on issuance go here
         inflation = _inflation;
+        return true;
+    }
+
+    function updateRate(uint256 _initialIssuance) public onlyOwner returns (bool) {
+        initialIssuance = _initialIssuance;
         return true;
     }
 
@@ -107,6 +115,7 @@ contract Hub {
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address user, uint limit) public {
+        require(address(userToToken[msg.sender]) != address(0), "You can only trust people after you've signed up!");
         require(msg.sender != user, "You can't untrust yourself");
         _trust(user, limit);
     }
@@ -141,27 +150,31 @@ contract Hub {
     }
 
     function checkSendLimit(address tokenOwner, address src, address dest) public view returns (uint256) {
-        // if the token doesn't exist, nothing can be sent
-        if (address(userToToken[tokenOwner]) == address(0)) {
-            return 0;
-        }
-        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
-        // if sending dest's token to dest, src can send 100% of their holdings
-        if (tokenOwner == dest) {
-            return srcBalance;
-        }
+        // there is no trust
         if (limits[dest][tokenOwner] == 0) {
             return 0;
         }
+        // if dest hasn't signed up, they cannot trust anyone
+        if (address(userToToken[dest]) == address(0)) {
+            return 0;
+        }
+
+        // if the token doesn't exist, return max
         uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
+        if (address(userToToken[tokenOwner]) == address(0)) {
+            return max;
+        }
+
+        // if sending dest's token to dest, src can send 100% of their holdings
+        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
+        if (tokenOwner == dest) {
+            return srcBalance;
+        }
         uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
         
         // if trustLimit has already been overriden by a direct transfer, nothing more can be sent
         if (max < destBalance) return 0;
         return max.sub(destBalance);
-
-        // if (max > srcBalance) return max;
-        // return srcBalance;
     }
 
     // build the data structures we will use for validation

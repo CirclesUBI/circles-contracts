@@ -29,13 +29,23 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
   const gas = 6721975;
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
+      { from: systemOwner, gas: 0xfffffffffff });
     safe = await GnosisSafe.new({ from: systemOwner });
     await safe.setup([systemOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
   });
 
   describe('user can set trust limits', async () => {
     const trustLimit = 50;
+
+    describe('cannot trust someone before youve signed up', async () => {
+      it('should throw', async () => assertRevert(hub.trust(normalUser, trustLimit, { from: safeOwner })));
+
+      it('checkSendLimit should return zero', async () => {
+        (await hub.checkSendLimit(safeOwner, safeOwner, normalUser))
+          .should.be.bignumber.equal(bn(0));
+      });
+    });
 
     describe('when user tries to adjust their trust for themselves', async () => {
       beforeEach(async () => {
@@ -86,6 +96,15 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
         (await hub.limits(safeOwner, normalUser))
           .should.be.bignumber.equal(new BigNumber(trustLimit));
       });
+
+      it('checkSendLimit returns correct amount', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        const totalSupply = await token.totalSupply();
+        const allowable = totalSupply * (trustLimit / 100);
+        (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
+          .should.be.bignumber.equal(new BigNumber(allowable));
+      });
     });
 
     describe('when trust destination is a circles token', async () => {
@@ -113,7 +132,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
 
       describe('calculates the tradeable amount', async () => {
         it('returns correct amount when no tokens have been traded', async () => {
-          const tokenAddress = await hub.userToToken(normalUser);
+          const tokenAddress = await hub.userToToken(safeOwner);
           const token = await Token.at(tokenAddress);
           const totalSupply = await token.totalSupply();
           const allowable = totalSupply * (trustLimit / 100);

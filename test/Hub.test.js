@@ -28,12 +28,14 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
   const period = bn(7885000000);
   const symbol = 'CRC';
   const initialPayout = bn(100);
+  const initialIssuance = bn(100);
   const tokenName = 'testToken';
 
   const gas = 6721975;
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialIssuance,
+      { from: systemOwner, gas: 0xfffffffffff });
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
     await safe.setup([systemOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
@@ -55,6 +57,14 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
     await assertRevert(hub.updateInflation(42, { from: attacker }));
   });
 
+  it('has an starting rate', async () => {
+    (await hub.initialIssuance()).should.be.bignumber.equal(initialIssuance);
+  });
+
+  it('attacker cannot change initialIssuance', async () => {
+    await assertRevert(hub.updateRate(42, { from: attacker }));
+  });
+
   it('has a symbol', async () => {
     (await hub.symbol()).should.be.equal(symbol);
   });
@@ -73,8 +83,13 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
     after(async () => {
       await hub.updateInflation(inflation, { from: systemOwner });
       await hub.updateSymbol(symbol, { from: systemOwner });
+      await hub.updateRate(initialIssuance, { from: systemOwner });
     });
 
+    it('owner can change inflation', async () => {
+      await hub.updateRate(1, { from: systemOwner });
+      (await hub.initialIssuance()).should.be.bignumber.equal(bn(1));
+    });
 
     it('owner can change inflation', async () => {
       await hub.updateInflation(1, { from: systemOwner });
