@@ -31,14 +31,11 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
   const tokenName = 'MyCoin';
   let initialPayout = convertToBaseUnit(100);
 
-  // beforeEach(async () => {
-  //   hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
-  // });
-
   describe('issuance', () => {
     beforeEach(async () => {
       initialPayout = convertToBaseUnit(100);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
+        { from: systemOwner, gas: 0xfffffffffff });
     });
 
     it('returns the correct issuance at deployment', async () => {
@@ -67,7 +64,8 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     let deployTime;
 
     beforeEach(async () => {
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
+        { from: systemOwner, gas: 0xfffffffffff });
       const signup = await hub.signup(tokenName, { from: owner });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);
@@ -213,44 +211,45 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
   describe('ubi payouts - with different config params', () => {
     let deployTime;
-    let startingRate;
+    let startingIssuance;
 
     beforeEach(async () => {
       period = bn(86400);
       divisor = bn(1000);
       inflation = bn(1035);
       initialPayout = convertToBaseUnit(100);
-      startingRate = bn(80);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingRate);
+      startingIssuance = bn(80);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingIssuance,
+        { from: systemOwner, gas: 0xfffffffffff });
       const signup = await hub.signup(tokenName, { from: owner, gas: 6721975 });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);
     });
 
     it('correctly calculates the ubi payout at deployment', async () => {
-      const goal = await findPayout(token, startingRate, inflation, divisor, period);
+      const goal = await findPayout(token, startingIssuance, inflation, divisor, period);
       const bal = await token.look();
-      bal.should.bignumber.satisfy(() => near(bal, goal, startingRate));
+      bal.should.bignumber.satisfy(() => near(bal, goal, startingIssuance));
     });
 
     it('doesnt change balance at deployment', async () => {
       await token.update();
       const balance = await token.balanceOf(owner);
-      (balance).should.bignumber.satisfy(() => near(balance, initialPayout, startingRate));
+      (balance).should.bignumber.satisfy(() => near(balance, initialPayout, startingIssuance));
     });
 
     it('correctly calculates the ubi payout after 1 period', async () => {
       await increase(period.toNumber());
-      const inf = inflate(startingRate, inflation, divisor, bn(1));
-      const goal = await findPayout(token, startingRate, inflation, divisor, period);
+      const inf = inflate(startingIssuance, inflation, divisor, bn(1));
+      const goal = await findPayout(token, startingIssuance, inflation, divisor, period);
       const bal = await token.look();
       bal.should.bignumber.satisfy(() => near(bal, goal, inf));
     });
 
     it('updates owners balance with payout after 1 period', async () => {
       await increase(period.toNumber());
-      const inf = inflate(startingRate, inflation, divisor, bn(1));
-      const goal = (await findPayout(token, startingRate, inflation, divisor, period))
+      const inf = inflate(startingIssuance, inflation, divisor, bn(1));
+      const goal = (await findPayout(token, startingIssuance, inflation, divisor, period))
         .add(initialPayout);
       await token.update();
       const balance = await token.balanceOf(owner);
@@ -259,8 +258,8 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
     it('should update owners balance even if called by attacker', async () => {
       await increase(period.toNumber());
-      const inf = inflate(startingRate, inflation, divisor, bn(1));
-      const goal = (await findPayout(token, startingRate, inflation, divisor, period))
+      const inf = inflate(startingIssuance, inflation, divisor, bn(1));
+      const goal = (await findPayout(token, startingIssuance, inflation, divisor, period))
         .add(initialPayout);
       await token.update({ from: attacker });
       const balance = await token.balanceOf(owner);
@@ -294,18 +293,18 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
     it('correctly calculates the ubi payout after x periods', async () => {
       const time = period.mul(bn(5));
-      const inf = inflate(startingRate, inflation, divisor, bn(5));
+      const inf = inflate(startingIssuance, inflation, divisor, bn(5));
       await increase(time.toNumber());
-      const goal = await findPayout(token, startingRate, inflation, divisor, period);
+      const goal = await findPayout(token, startingIssuance, inflation, divisor, period);
       const balance = await token.look();
       balance.should.bignumber.satisfy(() => near(balance, goal, inf));
     });
 
     it('updates owners balance with payout after x periods', async () => {
       const time = period.mul(bn(5));
-      const inf = inflate(startingRate, inflation, divisor, bn(5));
+      const inf = inflate(startingIssuance, inflation, divisor, bn(5));
       await increase(time.toNumber());
-      const goal = (await findPayout(token, startingRate, inflation, divisor, period))
+      const goal = (await findPayout(token, startingIssuance, inflation, divisor, period))
         .add(initialPayout);
       await token.update();
       const balance = await token.balanceOf(owner);
@@ -314,7 +313,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
     it('updates owners balance with payout after x periods when update is called multiple times', async () => {
       const lastTouched = await token.lastTouched();
-      const inf = inflate(startingRate, inflation, divisor, bn(4));
+      const inf = inflate(startingIssuance, inflation, divisor, bn(4));
       const offset = await token.inflationOffset();
       const hubDeploy = await token.hubDeploy();
       await increase(period.toNumber());
@@ -327,7 +326,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       await token.update();
       const blocktime = await token.time();
       const goal = (ubiPayout(
-        startingRate, lastTouched, blocktime, offset, inflation, divisor, period, hubDeploy))
+        startingIssuance, lastTouched, blocktime, offset, inflation, divisor, period, hubDeploy))
         .add(initialPayout);
       const balance = await token.balanceOf(owner);
       balance.should.bignumber.satisfy(() => near(balance, goal, inf));

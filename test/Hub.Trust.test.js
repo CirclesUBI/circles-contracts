@@ -29,7 +29,8 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
   const gas = 6721975;
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout);
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
+      { from: systemOwner, gas: 0xfffffffffff });
     safe = await GnosisSafe.new({ from: systemOwner });
     await safe.setup([systemOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
   });
