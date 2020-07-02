@@ -2,6 +2,7 @@ const truffleContract = require('truffle-contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
+const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
 const { getTimestampFromTx } = require('./helpers/getTimestamp');
 const { bn } = require('./helpers/math');
@@ -13,11 +14,16 @@ require('chai')
 const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
 const GnosisSafe = truffleContract(safeArtifacts);
+const ProxyFactory = truffleContract(proxyArtifacts);
+
 GnosisSafe.setProvider(web3.currentProvider);
+ProxyFactory.setProvider(web3.currentProvider);
 
 contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
+  let proxyFactory = null;
+  let userSafe = null;
 
   const inflation = bn(275);
   const period = bn(7885000000);
@@ -31,7 +37,20 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
     hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
       { from: systemOwner, gas: 0xfffffffffff });
     safe = await GnosisSafe.new({ from: systemOwner });
-    await safe.setup([systemOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
+    proxyFactory = await ProxyFactory.new({ from: systemOwner });
+
+    const proxyData = safe.contract
+      .methods.setup([safeOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, ZERO_ADDRESS, 0, ZERO_ADDRESS)
+      .encodeABI();
+
+    const tx = await proxyFactory
+      .createProxy(safe.address, proxyData, { from: safeOwner, gas });
+
+    const { logs } = tx;
+
+    const userSafeAddress = logs[0].args.proxy;
+
+    userSafe = await GnosisSafe.at(userSafeAddress);
   });
 
   describe('user can transact transitively when there is a valid path', async () => {

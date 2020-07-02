@@ -1,6 +1,6 @@
 {
   "name": "circles-contracts",
-  "version": "1.0.16",
+  "version": "1.0.18",
   "contributors": [
     "Sarah Friend (https://github.com/ana0)",
     "Jake Gillberg (https://github.com/Jake-Gillberg)",
@@ -25,7 +25,6 @@
   },
   "homepage": "https://github.com/CirclesUBI/circles-contracts",
   "devDependencies": {
-    "bignumber.js": "^8.1.1",
     "chai": "^4.1.2",
     "chai-bignumber": "^2.0.2",
     "chai-bn": "^0.1.1",
@@ -38,7 +37,7 @@
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
-    "@circles/safe-contracts": "^1.0.6",
+    "@circles/safe-contracts": "^1.0.7",
     "bluebird": "^3.7.1",
     "truffle-hdwallet-provider": "^1.0.17"
   }

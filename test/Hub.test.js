@@ -16,6 +16,7 @@ const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
 const GnosisSafe = truffleContract(safeArtifacts);
 const ProxyFactory = truffleContract(proxyArtifacts);
+
 GnosisSafe.setProvider(web3.currentProvider);
 ProxyFactory.setProvider(web3.currentProvider);
 
@@ -23,6 +24,7 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
   let hub = null;
   let safe = null;
   let proxyFactory = null;
+  let userSafe = null;
 
   const inflation = bn(275);
   const period = bn(7885000000);
@@ -38,7 +40,19 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
       { from: systemOwner, gas: 0xfffffffffff });
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
-    await safe.setup([systemOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
+
+    const proxyData = safe.contract
+      .methods.setup([safeOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, ZERO_ADDRESS, 0, ZERO_ADDRESS)
+      .encodeABI();
+
+    const tx = await proxyFactory
+      .createProxy(safe.address, proxyData, { from: safeOwner, gas });
+
+    const { logs } = tx;
+
+    const userSafeAddress = logs[0].args.proxy;
+
+    userSafe = await GnosisSafe.at(userSafeAddress);
   });
 
   it('has the correct owner', async () => {
@@ -151,36 +165,36 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
         to: hub.address,
         data: await hub.contract.methods.signup(tokenName).encodeABI(),
       };
-      await executeSafeTx(safe, txParams, systemOwner, gas, systemOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, gas, safeOwner, web3);
     });
 
     it('signup emits an event with correct sender', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
 
       const event = expectEvent.inLogs(logs, 'Signup', {
-        user: safe.address,
+        user: userSafe.address,
       });
 
-      return event.args.user.should.equal(safe.address);
+      return event.args.user.should.equal(userSafe.address);
     });
 
     it('token is owned by correct sender', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
 
       const event = expectEvent.inLogs(logs, 'Signup', {
-        user: safe.address,
+        user: userSafe.address,
       });
 
       tokenAddress = event.args.token;
       token = await Token.at(tokenAddress);
-      (await token.owner()).should.be.equal(safe.address);
+      (await token.owner()).should.be.equal(userSafe.address);
     });
 
     it('token has the correct name', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
 
       const event = expectEvent.inLogs(logs, 'Signup', {
-        user: safe.address,
+        user: userSafe.address,
       });
 
       tokenAddress = event.args.token;
@@ -193,21 +207,20 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
         to: hub.address,
         data: await hub.contract.methods.signup(tokenName).encodeABI(),
       };
-      await executeSafeTx(safe, txParams, systemOwner, gas, systemOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, gas, safeOwner, web3);
 
-      const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
+      const logs = await userSafe.getPastEvents('ExecutionFailure', { fromBlock: 0, toBlock: 'latest' });
 
       return expect(logs).to.have.lengthOf(1);
     });
   });
 
   describe('new user can signup, when user is a safe proxy', async () => {
-    let userSafe = null;
     let token = null;
 
     beforeEach(async () => {
       const proxyData = safe.contract
-        .methods.setup([safeOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS)
+        .methods.setup([safeOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, ZERO_ADDRESS, 0, ZERO_ADDRESS)
         .encodeABI();
 
       const tx = await proxyFactory
@@ -268,7 +281,7 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
       };
       await executeSafeTx(userSafe, txParams, safeOwner, gas, safeOwner, web3);
 
-      const logs = await userSafe.getPastEvents('ExecutionFailed', { fromBlock: 0, toBlock: 'latest' });
+      const logs = await userSafe.getPastEvents('ExecutionFailure', { fromBlock: 0, toBlock: 'latest' });
 
       return expect(logs).to.have.lengthOf(1);
     });

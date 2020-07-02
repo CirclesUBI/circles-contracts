@@ -4,3 +4,5 @@ node_modules/
 *.yml
 *.txt
 *.swp
+.env
+test/*
