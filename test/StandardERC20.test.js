@@ -1,11 +1,20 @@
 // https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/test/token/ERC20/ERC20.test.js
 const truffleContract = require('truffle-contract');
-
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
-const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
+const {
+  BigNumber,
+  maxGas,
+  inflation,
+  period,
+  symbol,
+  initialPayout,
+  tokenName,
+  ZERO_ADDRESS,
+} = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
+const { createSafeWithProxy } = require('./helpers/createSafeWithProxy');
 
 const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
@@ -28,18 +37,13 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   let token = null;
   let proxyFactory = null;
   let userSafe = null;
+  const decimals = bn(18);
 
-  const inflation = bn(275);
-  const period = bn(7885000000);
-  const symbol = 'CRC';
-  const tokenName = 'MyCoin';
-  const initialPayout = convertToBaseUnit(100);
-
-  const gas = 6721975;
+  const initialConverted = convertToBaseUnit(initialPayout);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-      { from: systemOwner, gas: 0xfffffffffff });
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+      { from: systemOwner, gas: maxGas });
   });
 
   describe('total supply', () => {
@@ -140,18 +144,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
       safe = await GnosisSafe.new({ from: systemOwner });
       proxyFactory = await ProxyFactory.new({ from: systemOwner });
 
-      const proxyData = safe.contract
-        .methods.setup([owner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, ZERO_ADDRESS, 0, ZERO_ADDRESS)
-        .encodeABI();
-
-      const tx = await proxyFactory
-        .createProxy(safe.address, proxyData, { from: owner, gas });
-
-      const { logs } = tx;
-
-      const userSafeAddress = logs[0].args.proxy;
-
-      userSafe = await GnosisSafe.at(userSafeAddress);
+      userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, owner);
 
       const txParams = {
         to: hub.address,

@@ -3,9 +3,19 @@ const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
 const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
-const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
-const { getTimestampFromTx } = require('./helpers/getTimestamp');
+const {
+  BigNumber,
+  extraGas,
+  maxGas,
+  inflation,
+  period,
+  symbol,
+  initialPayout,
+  tokenName,
+  ZERO_ADDRESS,
+} = require('./helpers/constants');
 const { bn } = require('./helpers/math');
+const { createSafeWithProxy } = require('./helpers/createSafeWithProxy');
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
@@ -25,32 +35,12 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
   let proxyFactory = null;
   let userSafe = null;
 
-  const inflation = bn(275);
-  const period = bn(7885000000);
-  const symbol = 'CRC';
-  const initialPayout = bn(100);
-  const tokenName = 'testToken';
-
-  const gas = 6721975;
-
   beforeEach(async () => {
     hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-      { from: systemOwner, gas: 0xfffffffffff });
+      { from: systemOwner, gas: maxGas });
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
-
-    const proxyData = safe.contract
-      .methods.setup([safeOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, ZERO_ADDRESS, 0, ZERO_ADDRESS)
-      .encodeABI();
-
-    const tx = await proxyFactory
-      .createProxy(safe.address, proxyData, { from: safeOwner, gas });
-
-    const { logs } = tx;
-
-    const userSafeAddress = logs[0].args.proxy;
-
-    userSafe = await GnosisSafe.at(userSafeAddress);
+    userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
   });
 
   describe('user can transact transitively when there is a valid path', async () => {
@@ -70,7 +60,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas });
+            { from: safeOwner, gas: extraGas });
       });
 
       it('deducts senders balance of own token', async () => {
@@ -164,7 +154,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser, fourthUser, safeOwner],
             [normalUser, thirdUser, thirdUser, fourthUser],
             [15, 15, 10, 10],
-            { from: safeOwner, gas });
+            { from: safeOwner, gas: extraGas });
       });
 
       it('deducts senders balance of own token', async () => {
@@ -278,7 +268,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas }));
       });
 
       it('should throw when trust limit is too low', async () => {
@@ -290,7 +280,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas }));
       });
 
       it('should throw when passed too many srcs', async () => {
@@ -302,7 +292,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser, thirdUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas  }));
       });
 
       it('should throw when passed too many tokenOwners', async () => {
@@ -314,7 +304,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas  }));
       });
 
       it('should throw when passed too many dests', async () => {
@@ -326,7 +316,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, thirdUser, safeOwner],
             [amount, amount],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas  }));
       });
 
       it('should throw when passed too many amounts', async () => {
@@ -338,7 +328,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, amount, amount],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas  }));
       });
 
       it('should throw when sender is not sending enough', async () => {
@@ -350,7 +340,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [15, amount],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas  }));
       });
 
       it('should throw when sender is sending too much', async () => {
@@ -362,7 +352,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, thirdUser],
             [amount, 15],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas  }));
       });
 
       it('should throw when sender is receiving', async () => {
@@ -374,7 +364,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner, normalUser],
             [normalUser, safeOwner],
             [amount, amount],
-            { from: safeOwner, gas }));
+            { from: safeOwner, gas: extraGas  }));
       });
     });
 
@@ -398,7 +388,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
             [safeOwner],
             [normalUser],
             [amount],
-            { from: safeOwner, gas });
+            { from: safeOwner, gas: extraGas });
       });
 
       it('correctly set senders balance', async () => {
