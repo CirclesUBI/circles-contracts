@@ -11,7 +11,7 @@ contract Hub {
     uint256 public inflation;
     uint256 public divisor;
     uint256 public period;
-    string public symbol; // = 'CRC';
+    string public symbol;
     uint256 public initialPayout;
     uint256 public initialIssuance;
     uint256 public deployedAt;
@@ -103,6 +103,7 @@ contract Hub {
     function trust(address user, uint limit) public {
         require(address(userToToken[msg.sender]) != address(0), "You can only trust people after you've signed up!");
         require(msg.sender != user, "You can't untrust yourself");
+        require(limit <= 100, "Limit must be a percentage out of 100");
         _trust(user, limit);
     }
 
