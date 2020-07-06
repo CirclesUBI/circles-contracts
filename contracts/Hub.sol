@@ -38,7 +38,14 @@ contract Hub {
         _;
     }
 
-    constructor(address _owner, uint256 _inflation, uint256 _period, string memory _symbol, uint256 _initialPayout, uint256 _initialIssuance) public {
+    constructor(
+        address _owner,
+        uint256 _inflation,
+        uint256 _period,
+        string memory _symbol,
+        uint256 _initialPayout,
+        uint256 _initialIssuance
+    ) public {
         require (_owner != address(0));
         owner = _owner;
         inflation = _inflation;
@@ -74,27 +81,6 @@ contract Hub {
         uint256 q = pow(inflation, _periods);
         uint256 d = pow(divisor, _periods);
         return (_initial.mul(q)).div(d);
-    }
-
-    function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-        require(_newOwner != address(0));
-        owner = _newOwner;
-        return true;
-    }
-
-    function updateInflation(uint256 _inflation) public onlyOwner returns (bool) {
-        inflation = _inflation;
-        return true;
-    }
-
-    function updateRate(uint256 _initialIssuance) public onlyOwner returns (bool) {
-        initialIssuance = _initialIssuance;
-        return true;
-    }
-
-    function updateSymbol(string memory _symbol) public onlyOwner returns (bool) {
-        symbol = _symbol;
-        return true;
     }
 
     function time() public view returns (uint256) { return block.timestamp; }
@@ -238,7 +224,12 @@ contract Hub {
 
     // Walks through tokenOwners, srcs, dests, and amounts array and
     // executes transtive transfer - also validates path
-    function transferThrough(address[] memory tokenOwners, address[] memory srcs, address[] memory dests, uint[] memory wads) public {
+    function transferThrough(
+        address[] memory tokenOwners,
+        address[] memory srcs,
+        address[] memory dests,
+        uint[] memory wads
+    ) public {
         require(srcs.length <= 5, "Too complex path");
         require(dests.length == tokenOwners.length, "Tokens array length must equal dests array");
         require(srcs.length == tokenOwners.length, "Tokens array length must equal srcs array");
@@ -253,7 +244,10 @@ contract Hub {
             // you always trust yourself 100%
             if (token != dest) {
                 uint256 max = checkSendLimit(token, src, dest);
-                require(userToToken[token].balanceOf(dest) + wad <= max, "Trust limit exceeded");
+                require(
+                    userToToken[token].balanceOf(dest) + wad <= max,
+                    "Trust limit exceeded"
+                );
             }
 
             buildValidationData(src, dest, wad);
