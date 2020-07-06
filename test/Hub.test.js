@@ -31,7 +31,7 @@ const ProxyFactory = truffleContract(proxyArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 ProxyFactory.setProvider(web3.currentProvider);
 
-contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
+contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
   let proxyFactory = null;
@@ -49,61 +49,22 @@ contract('Hub - signup and permissions', ([_, systemOwner, attacker, safeOwner, 
     (await hub.owner()).should.be.equal(systemOwner);
   });
 
-  it('attacker cannot change owner', async () => {
-    await assertRevert(hub.changeOwner(attacker, { from: attacker }));
-  });
-
   it('has an inflation rate', async () => {
     (await hub.inflation()).should.be.bignumber.equal(inflation);
-  });
-
-  it('attacker cannot change inflation', async () => {
-    await assertRevert(hub.updateInflation(42, { from: attacker }));
   });
 
   it('has an starting rate', async () => {
     (await hub.initialIssuance()).should.be.bignumber.equal(initialIssuance);
   });
 
-  it('attacker cannot change initialIssuance', async () => {
-    await assertRevert(hub.updateRate(42, { from: attacker }));
-  });
-
   it('has a symbol', async () => {
     (await hub.symbol()).should.be.equal(symbol);
-  });
-
-  it('attacker cannot change symbol', async () => {
-    await assertRevert(hub.updateSymbol('PLUM', { from: attacker }));
   });
 
   it('has the right deployed time', async () => {
     const timestamp = await getTimestampFromTx(hub.transactionHash, web3);
     const deployed = await hub.deployedAt();
     (bn(timestamp)).should.be.bignumber.equal(deployed);
-  });
-
-  describe('owner can change system vars', async () => {
-    after(async () => {
-      await hub.updateInflation(inflation, { from: systemOwner });
-      await hub.updateSymbol(symbol, { from: systemOwner });
-      await hub.updateRate(initialIssuance, { from: systemOwner });
-    });
-
-    it('owner can change inflation', async () => {
-      await hub.updateRate(1, { from: systemOwner });
-      (await hub.initialIssuance()).should.be.bignumber.equal(bn(1));
-    });
-
-    it('owner can change inflation', async () => {
-      await hub.updateInflation(1, { from: systemOwner });
-      (await hub.inflation()).should.be.bignumber.equal(bn(1));
-    });
-
-    it('owner can change symbol', async () => {
-      await hub.updateSymbol('PLUM', { from: systemOwner });
-      (await hub.symbol()).should.be.equal('PLUM');
-    });
   });
 
   describe('new user can signup, when user is an external account', async () => {
