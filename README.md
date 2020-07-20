@@ -23,7 +23,7 @@ This is the initial smart contract implementation for the Circles universal basi
 
 **Note:** This is not yet intended for deployment in a production system.
 
-[Website](http://www.joincircles.net) // [Whitepaper](https://github.com/CirclesUBI/docs/blob/master/Circles.md) // [Chat](https://chat.joincircles.net)
+[Website](http://www.joincircles.net) // [Whitepaper](https://github.com/CirclesUBI/circles-handbook/blob/master/docs/about/whitepaper.md) // [Chat](https://chat.joincircles.net)
 
 ## Basic design
 
