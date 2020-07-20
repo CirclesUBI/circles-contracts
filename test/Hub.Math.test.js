@@ -1,4 +1,10 @@
-const { BigNumber } = require('./helpers/constants');
+const {
+  BigNumber,
+  period,
+  symbol,
+  initialPayout,
+  maxGas,
+} = require('./helpers/constants');
 const { bn, convertToBaseUnit, inflate } = require('./helpers/math');
 const { assertRevert } = require('./helpers/assertRevert');
 const { increase } = require('./helpers/increaseTime');
@@ -12,15 +18,13 @@ require('chai')
 contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-disable-line no-unused-vars
   let hub = null;
 
-  let inflation = bn(107);
+  let inflation = bn(275);
   const divisor = bn(100);
-  const period = bn(7885000000);
-  const symbol = 'CRC';
-  const initialPayout = convertToBaseUnit(100);
+  const initialConverted = convertToBaseUnit(initialPayout);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-      { from: systemOwner, gas: 0xfffffffffff });
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+      { from: systemOwner, gas: maxGas });
   });
 
   describe('power', () => {
@@ -98,7 +102,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
 
     it('returns the correct issuance after 1 period', async () => {
       await increase(period.toNumber());
-      const compounded = inflate(initialPayout, inflation, divisor, bn(1));
+      const compounded = inflate(initialConverted, inflation, divisor, bn(1));
       (await hub.issuance()).should.be.bignumber.equal(compounded);
     });
 
@@ -106,45 +110,45 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       const numPeriods = bn(5);
       const time = period.mul(numPeriods);
       await increase(time.toNumber());
-      const compounded = inflate(initialPayout, inflation, divisor, numPeriods);
+      const compounded = inflate(initialConverted, inflation, divisor, numPeriods);
       (await hub.issuance()).should.be.bignumber.equal(compounded);
     });
   });
 
   describe('inflate', () => {
     it('returns the correct inflation with no periods passed', async () => {
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
-      (await hub.inflate(initialPayout, 0)).should.be.bignumber.equal(initialPayout);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+        { from: systemOwner, gas: maxGas });
+      (await hub.inflate(initialConverted, 0)).should.be.bignumber.equal(initialConverted);
     });
 
     it('returns the correct inflation with 1 period passed', async () => {
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
-      const compounded = inflate(initialPayout, inflation, divisor, bn(1));
-      (await hub.inflate(initialPayout, 1)).should.be.bignumber.equal(compounded);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+        { from: systemOwner, gas: maxGas });
+      const compounded = inflate(initialConverted, inflation, divisor, bn(1));
+      (await hub.inflate(initialConverted, 1)).should.be.bignumber.equal(compounded);
     });
 
     it('returns the correct inflation with x periods passed', async () => {
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
-      const compounded = inflate(initialPayout, inflation, divisor, bn(22));
-      (await hub.inflate(initialPayout, 22)).should.be.bignumber.equal(compounded);
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+        { from: systemOwner, gas: maxGas });
+      const compounded = inflate(initialConverted, inflation, divisor, bn(22));
+      (await hub.inflate(initialConverted, 22)).should.be.bignumber.equal(compounded);
     });
 
     it('returns the correct inflation with no periods passed', async () => {
       const startingRate = bn(52);
       inflation = bn(1035);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingRate,
-        { from: systemOwner, gas: 0xfffffffffff });
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, startingRate,
+        { from: systemOwner, gas: maxGas });
       (await hub.inflate(startingRate, 0)).should.be.bignumber.equal(startingRate);
     });
 
     it('returns the correct inflation with 1 period passed', async () => {
       const startingRate = bn(2);
       inflation = bn(2035);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingRate,
-        { from: systemOwner, gas: 0xfffffffffff });
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, startingRate,
+        { from: systemOwner, gas: maxGas });
       const compounded = inflate(startingRate, inflation, bn(1000), bn(1));
       (await hub.inflate(startingRate, 1)).should.be.bignumber.equal(compounded);
     });
@@ -152,8 +156,8 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
     it('returns the correct inflation with x periods passed', async () => {
       const startingRate = bn(4562);
       inflation = bn(705);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingRate,
-        { from: systemOwner, gas: 0xfffffffffff });
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, startingRate,
+        { from: systemOwner, gas: maxGas });
       const compounded = inflate(startingRate, inflation, bn(100), bn(22));
       (await hub.inflate(startingRate, 22)).should.be.bignumber.equal(compounded);
     });
@@ -162,36 +166,36 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
   describe('finds correct divisor', () => {
     it('returns the correct divisor for 6790007', async () => {
       inflation = bn(6790007);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+        { from: systemOwner, gas: maxGas });
       (await hub.divisor()).should.be.bignumber.equal(bn(1000000));
     });
 
     it('returns the correct divisor for 7', async () => {
       inflation = bn(7);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+        { from: systemOwner, gas: maxGas });
       (await hub.divisor()).should.be.bignumber.equal(bn(1));
     });
 
     it('returns the correct divisor for 10', async () => {
       inflation = bn(10);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+        { from: systemOwner, gas: maxGas });
       (await hub.divisor()).should.be.bignumber.equal(bn(10));
     });
 
     it('returns the correct divisor for 0', async () => {
       inflation = bn(0);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+        { from: systemOwner, gas: maxGas });
       (await hub.divisor()).should.be.bignumber.equal(bn(1));
     });
 
     it('returns the correct divisor for 10000', async () => {
       inflation = bn(10000);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
+      hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+        { from: systemOwner, gas: maxGas });
       (await hub.divisor()).should.be.bignumber.equal(bn(10000));
     });
   });

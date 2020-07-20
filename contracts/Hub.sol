@@ -11,7 +11,7 @@ contract Hub {
     uint256 public inflation;
     uint256 public divisor;
     uint256 public period;
-    string public symbol; // = 'CRC';
+    string public symbol;
     uint256 public initialPayout;
     uint256 public initialIssuance;
     uint256 public deployedAt;
@@ -38,7 +38,14 @@ contract Hub {
         _;
     }
 
-    constructor(address _owner, uint256 _inflation, uint256 _period, string memory _symbol, uint256 _initialPayout, uint256 _initialIssuance) public {
+    constructor(
+        address _owner,
+        uint256 _inflation,
+        uint256 _period,
+        string memory _symbol,
+        uint256 _initialPayout,
+        uint256 _initialIssuance
+    ) public {
         require (_owner != address(0));
         owner = _owner;
         inflation = _inflation;
@@ -76,27 +83,6 @@ contract Hub {
         return (_initial.mul(q)).div(d);
     }
 
-    function changeOwner(address _newOwner) public onlyOwner returns (bool) {
-        require(_newOwner != address(0));
-        owner = _newOwner;
-        return true;
-    }
-
-    function updateInflation(uint256 _inflation) public onlyOwner returns (bool) {
-        inflation = _inflation;
-        return true;
-    }
-
-    function updateRate(uint256 _initialIssuance) public onlyOwner returns (bool) {
-        initialIssuance = _initialIssuance;
-        return true;
-    }
-
-    function updateSymbol(string memory _symbol) public onlyOwner returns (bool) {
-        symbol = _symbol;
-        return true;
-    }
-
     function time() public view returns (uint256) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
@@ -117,6 +103,7 @@ contract Hub {
     function trust(address user, uint limit) public {
         require(address(userToToken[msg.sender]) != address(0), "You can only trust people after you've signed up!");
         require(msg.sender != user, "You can't untrust yourself");
+        require(limit <= 100, "Limit must be a percentage out of 100");
         _trust(user, limit);
     }
 
@@ -238,7 +225,12 @@ contract Hub {
 
     // Walks through tokenOwners, srcs, dests, and amounts array and
     // executes transtive transfer - also validates path
-    function transferThrough(address[] memory tokenOwners, address[] memory srcs, address[] memory dests, uint[] memory wads) public {
+    function transferThrough(
+        address[] memory tokenOwners,
+        address[] memory srcs,
+        address[] memory dests,
+        uint[] memory wads
+    ) public {
         require(srcs.length <= 5, "Too complex path");
         require(dests.length == tokenOwners.length, "Tokens array length must equal dests array");
         require(srcs.length == tokenOwners.length, "Tokens array length must equal srcs array");
@@ -253,7 +245,10 @@ contract Hub {
             // you always trust yourself 100%
             if (token != dest) {
                 uint256 max = checkSendLimit(token, src, dest);
-                require(userToToken[token].balanceOf(dest) + wad <= max, "Trust limit exceeded");
+                require(
+                    userToToken[token].balanceOf(dest) + wad <= max,
+                    "Trust limit exceeded"
+                );
             }
 
             buildValidationData(src, dest, wad);

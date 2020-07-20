@@ -1,6 +1,10 @@
-const { BigNumber } = require('./helpers/constants');
+const {
+  BigNumber,
+  maxGas,
+  symbol,
+  tokenName,
+} = require('./helpers/constants');
 const { bn, convertToBaseUnit, ubiPayout, near, inflate } = require('./helpers/math');
-const { assertRevert } = require('./helpers/assertRevert');
 const { increase } = require('./helpers/increaseTime');
 const { getTimestampFromTx } = require('./helpers/getTimestamp');
 
@@ -24,18 +28,16 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
   let hub = null;
   let token = null;
 
-  let inflation = bn(107);
   let divisor = bn(100);
-  let period = bn(7885000000);
-  const symbol = 'CRC';
-  const tokenName = 'MyCoin';
+  let inflation = new BigNumber(275);
+  let period = new BigNumber(7885000000);
   let initialPayout = convertToBaseUnit(100);
 
   describe('issuance', () => {
     beforeEach(async () => {
       initialPayout = convertToBaseUnit(100);
       hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
+        { from: systemOwner, gas: maxGas });
     });
 
     it('returns the correct issuance at deployment', async () => {
@@ -65,7 +67,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
 
     beforeEach(async () => {
       hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: 0xfffffffffff });
+        { from: systemOwner, gas: maxGas });
       const signup = await hub.signup(tokenName, { from: owner });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);
@@ -220,7 +222,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       initialPayout = convertToBaseUnit(100);
       startingIssuance = bn(80);
       hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingIssuance,
-        { from: systemOwner, gas: 0xfffffffffff });
+        { from: systemOwner, gas: maxGas });
       const signup = await hub.signup(tokenName, { from: owner, gas: 6721975 });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);

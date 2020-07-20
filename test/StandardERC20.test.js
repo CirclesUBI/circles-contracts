@@ -1,18 +1,31 @@
 // https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/test/token/ERC20/ERC20.test.js
 const truffleContract = require('truffle-contract');
-
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
-const { BigNumber, ZERO_ADDRESS, decimals } = require('./helpers/constants');
+const {
+  BigNumber,
+  maxGas,
+  inflation,
+  period,
+  symbol,
+  initialPayout,
+  tokenName,
+  ZERO_ADDRESS,
+} = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
+const { createSafeWithProxy } = require('./helpers/createSafeWithProxy');
 
 const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
+const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 
 const GnosisSafe = truffleContract(safeArtifacts);
+const ProxyFactory = truffleContract(proxyArtifacts);
+
 GnosisSafe.setProvider(web3.currentProvider);
+ProxyFactory.setProvider(web3.currentProvider);
 
 require('chai')
   .use(require('chai-bn')(BigNumber))
@@ -22,16 +35,15 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   let hub = null;
   let safe = null;
   let token = null;
+  let proxyFactory = null;
+  let userSafe = null;
+  const decimals = bn(18);
 
-  const inflation = bn(275);
-  const period = bn(7885000000);
-  const symbol = 'CRC';
-  const tokenName = 'MyCoin';
-  const initialPayout = convertToBaseUnit(100);
+  const initialConverted = convertToBaseUnit(initialPayout);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-      { from: systemOwner, gas: 0xfffffffffff });
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+      { from: systemOwner, gas: maxGas });
   });
 
   describe('total supply', () => {
@@ -129,19 +141,21 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   describe('transfer when owner is a safe', () => {
     beforeEach(async () => {
-      safe = await GnosisSafe.new({ from: owner });
-      await safe.setup([owner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, 0, ZERO_ADDRESS, { from: systemOwner });
+      safe = await GnosisSafe.new({ from: systemOwner });
+      proxyFactory = await ProxyFactory.new({ from: systemOwner });
+
+      userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, owner);
 
       const txParams = {
         to: hub.address,
         data: await hub.contract.methods.signup(tokenName).encodeABI(),
       };
-      await executeSafeTx(safe, txParams, owner, 17721975, owner, web3);
+      await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
 
       const blockNumber = await web3.eth.getBlockNumber();
-      const logs = await hub.getPastEvents('Signup', { fromBlock: blockNumber - 1, toBlock: 'latest' });
+      const signUpLogs = await hub.getPastEvents('Signup', { fromBlock: blockNumber - 1, toBlock: 'latest' });
 
-      token = await Token.at(logs[0].args.token);
+      token = await Token.at(signUpLogs[0].args.token);
     });
 
     describe('when the recipient is not the zero address', () => {
@@ -155,10 +169,10 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
               .transfer(recipient, amount.toString())
               .encodeABI(),
           };
-          await executeSafeTx(safe, txParams, owner, 17721975, owner, web3);
+          await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
 
           const blockNumber = await web3.eth.getBlockNumber();
-          const logs = await safe.getPastEvents('ExecutionFailed', { fromBlock: blockNumber - 1, toBlock: 'latest' });
+          const logs = await userSafe.getPastEvents('ExecutionFailure', { fromBlock: blockNumber - 1, toBlock: 'latest' });
 
           return expect(logs).to.have.lengthOf(1);
         });
@@ -174,9 +188,9 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
               .transfer(recipient, amount.toString())
               .encodeABI(),
           };
-          await executeSafeTx(safe, txParams, owner, 17721975, owner, web3);
+          await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
 
-          (await token.balanceOf(safe.address))
+          (await token.balanceOf(userSafe.address))
             .should.be.bignumber.equal(new BigNumber(0));
 
           (await token.balanceOf(recipient)).should.be.bignumber.equal(amount);
@@ -189,13 +203,13 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
               .transfer(recipient, amount.toString())
               .encodeABI(),
           };
-          await executeSafeTx(safe, txParams, owner, 17721975, owner, web3);
+          await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
 
           const blockNumber = await web3.eth.getBlockNumber();
           const logs = await token.getPastEvents('Transfer', { fromBlock: blockNumber - 1, toBlock: 'latest' });
 
           const event = expectEvent.inLogs(logs, 'Transfer', {
-            from: safe.address,
+            from: userSafe.address,
             to: recipient,
           });
 
