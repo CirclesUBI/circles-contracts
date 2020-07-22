@@ -69,10 +69,12 @@ contract Token is ERC20 {
         return HubI(hub).deployedAt();
     }
 
+    /// @return the amount of seconds until the next inflation step
     function findInflationOffset() public view returns (uint256) {
         return ((period().mul(periods().add(1))).add(hubDeploy())).sub(time());
     }
 
+    /// @return how much ubi this token holder should receive
     function look() public view returns (uint256) {
         uint256 payout = 0;
         uint256 clock = lastTouched;
@@ -91,7 +93,8 @@ contract Token is ERC20 {
         return payout;
     }
 
-    function update() public returns (uint256) {
+    /// actually updates storage with new token balance
+    function update() public {
         uint256 gift = look();
         if (gift > 0) {
             inflationOffset = findInflationOffset();

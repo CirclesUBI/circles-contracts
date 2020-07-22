@@ -65,18 +65,22 @@ contract Hub {
         return pow(10, iter);
     }
 
+    /// @return the amount of periods since hub was deployed
     function periods() public view returns (uint256) {
         return (block.timestamp.sub(deployedAt)).div(period);
     }
 
+    /// @return current issuance rate
     function issuance() public view returns (uint256) {
         return inflate(initialIssuance, periods());
     }
 
+    /// @return what the issuance would be at a particular amount of periods
     function issuanceStep(uint256 _periods) public view returns (uint256) {
         return inflate(initialIssuance, _periods);
     }
 
+    /// @return initial issuance rate as if interest (inflation) has been compounded period times
     function inflate(uint256 _initial, uint256 _periods) public view returns (uint256) {
         uint256 q = pow(inflation, _periods);
         uint256 d = pow(divisor, _periods);
@@ -86,7 +90,7 @@ contract Hub {
     function time() public view returns (uint256) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function signup(string memory _name) public returns (bool) {
+    function signup(string memory _name) public {
         require(address(userToToken[msg.sender]) == address(0));
 
         Token token = new Token(msg.sender, _name, initialPayout);
@@ -95,7 +99,6 @@ contract Hub {
         _trust(msg.sender, 100);
 
         emit Signup(msg.sender, address(token));
-        return true;
     }
 
     // Trust does not have to be reciprocated.
@@ -136,6 +139,7 @@ contract Hub {
         return base.mul(y);
     }
 
+    /// @return the amount of tokenowner's token src can send to dest
     function checkSendLimit(address tokenOwner, address src, address dest) public view returns (uint256) {
         // there is no trust
         if (limits[dest][tokenOwner] == 0) {
@@ -246,7 +250,7 @@ contract Hub {
             if (token != dest) {
                 uint256 max = checkSendLimit(token, src, dest);
                 require(
-                    userToToken[token].balanceOf(dest) + wad <= max,
+                    userToToken[token].balanceOf(dest).add(wad) <= max,
                     "Trust limit exceeded"
                 );
             }

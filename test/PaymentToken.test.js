@@ -1,14 +1,23 @@
 const truffleContract = require('truffle-contract');
-
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const { estimateBaseGas, estimateTxGas } = require('./helpers/estimateGas');
-const { BigNumber, ZERO_ADDRESS } = require('./helpers/constants');
+const {
+  BigNumber,
+  maxGas,
+  inflation,
+  period,
+  symbol,
+  initialPayout,
+  tokenName,
+  ZERO_ADDRESS,
+} = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
+const { createSafeWithProxy } = require('./helpers/createSafeWithProxy');
+const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
+const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 
 const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
-const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
-const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 
 const GnosisSafe = truffleContract(safeArtifacts);
 const ProxyFactory = truffleContract(proxyArtifacts);
@@ -27,33 +36,16 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
   let proxyFactory = null;
   let userSafe = null;
 
-  const inflation = bn(275);
-  const period = bn(7885000000);
-  const symbol = 'CRC';
-  const tokenName = 'MyCoin';
-  const initialPayout = convertToBaseUnit(100);
-
-  const gas = 6721975;
+  const initialConverted = convertToBaseUnit(initialPayout);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-      { from: systemOwner, gas: 0xfffffffffff });
+    hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
+      { from: systemOwner, gas: maxGas });
 
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
 
-    const proxyData = safe.contract
-      .methods.setup([safeOwner], 1, ZERO_ADDRESS, '0x', ZERO_ADDRESS, ZERO_ADDRESS, 0, ZERO_ADDRESS)
-      .encodeABI();
-
-    const tx = await proxyFactory
-      .createProxy(safe.address, proxyData, { from: safeOwner, gas });
-
-    const { logs } = tx;
-
-    const userSafeAddress = logs[0].args.proxy;
-
-    userSafe = await GnosisSafe.at(userSafeAddress);
+    userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
 
     const txParams = {
       to: hub.address,
