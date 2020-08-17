@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 import "../Hub.sol";
 
 contract MockHub is Hub {
@@ -11,7 +11,7 @@ contract MockHub is Hub {
         uint256 _startingRate
     )
     Hub(_owner, _inflation, _period, _symbol, _initialPayout, _startingRate)
-    public {
+    {
 
     }
 

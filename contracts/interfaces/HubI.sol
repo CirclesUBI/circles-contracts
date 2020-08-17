@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 interface HubI {
     function issuance() external view returns (uint256);

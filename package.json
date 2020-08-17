@@ -32,13 +32,12 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "ganache-cli": "^6.4.1",
-    "openzeppelin-solidity": "2.1.1",
     "truffle": "^5.1.39",
     "truffle-contract": "^4.0.29"
   },
   "dependencies": {
     "@circles/safe-contracts": "^1.0.7",
-    "@openzeppelin/contracts": "^3.1.0",
+    "@openzeppelin/contracts": "^3.1.0-solc-0.7",
     "bluebird": "^3.7.1",
     "truffle-hdwallet-provider": "^1.0.17"
   }

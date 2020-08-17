@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Token.sol";
@@ -45,7 +45,7 @@ contract Hub {
         string memory _symbol,
         uint256 _initialPayout,
         uint256 _initialIssuance
-    ) public {
+    ) {
         require (_owner != address(0));
         owner = _owner;
         inflation = _inflation;

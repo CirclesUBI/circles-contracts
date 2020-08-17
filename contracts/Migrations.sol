@@ -1,10 +1,10 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 contract Migrations {
   address public owner;
   uint public last_completed_migration;
 
-  constructor() public {
+  constructor() {
     owner = msg.sender;
   }
 

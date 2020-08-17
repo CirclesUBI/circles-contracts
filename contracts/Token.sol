@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./ERC20.sol";
@@ -25,7 +25,7 @@ contract Token is ERC20 {
         _;
     }
 
-    constructor(address _owner, uint256 initialPayout) public {
+    constructor(address _owner, uint256 initialPayout) {
         require(_owner != address(0));
         owner = _owner;
         hub = msg.sender;
