@@ -1,4 +1,4 @@
-const truffleContract = require('truffle-contract');
+const truffleContract = require('@truffle/contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');

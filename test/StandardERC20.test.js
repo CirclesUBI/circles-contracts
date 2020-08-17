@@ -1,5 +1,5 @@
 // https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/test/token/ERC20/ERC20.test.js
-const truffleContract = require('truffle-contract');
+const truffleContract = require('@truffle/contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const { executeSafeTx } = require('./helpers/executeSafeTx');

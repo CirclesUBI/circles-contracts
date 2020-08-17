@@ -1,4 +1,4 @@
-const truffleContract = require('truffle-contract');
+const truffleContract = require('@truffle/contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const expectEvent = require('./helpers/expectEvent');

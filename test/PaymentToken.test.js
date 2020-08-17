@@ -1,4 +1,4 @@
-const truffleContract = require('truffle-contract');
+const truffleContract = require('@truffle/contract');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const { estimateBaseGas, estimateTxGas } = require('./helpers/estimateGas');
 const {

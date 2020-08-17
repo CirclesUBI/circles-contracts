@@ -61,7 +61,7 @@ if [ "$SOLC_NIGHTLY" = true ]; then
   wget -q https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-nightly.js -O /tmp/soljson.js && find . -name soljson.js -exec cp /tmp/soljson.js {} \;
 fi
 
-truffle version
+node_modules/.bin/truffle version
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BUILD_DIR=$SCRIPT_DIR/../build/
@@ -78,5 +78,5 @@ if [ "$SOLIDITY_COVERAGE" = true ]; then
     cat coverage/lcov.info | node_modules/.bin/coveralls
   fi
 else
-  truffle test "$@"
+  node_modules/.bin/truffle test "$@"
 fi
