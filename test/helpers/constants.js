@@ -10,7 +10,6 @@ const period = new BigNumber(7885000000);
 const symbol = 'CRC';
 const initialPayout = new BigNumber(100);
 const initialIssuance = new BigNumber(100);
-const tokenName = 'testToken';
 
 module.exports = {
   ZERO_ADDRESS,
@@ -23,5 +22,4 @@ module.exports = {
   symbol,
   initialPayout,
   initialIssuance,
-  tokenName,
 };

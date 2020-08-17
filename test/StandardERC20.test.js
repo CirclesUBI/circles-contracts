@@ -10,7 +10,6 @@ const {
   period,
   symbol,
   initialPayout,
-  tokenName,
   ZERO_ADDRESS,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
@@ -48,7 +47,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   describe('total supply', () => {
     beforeEach(async () => {
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
     });
 
@@ -60,7 +59,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   describe('decimals', () => {
     beforeEach(async () => {
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
     });
 
@@ -71,7 +70,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   describe('balanceOf', () => {
     beforeEach(async () => {
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
     });
 
@@ -91,7 +90,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   describe('transfer', () => {
     beforeEach(async () => {
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
     });
 
@@ -148,7 +147,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
       const txParams = {
         to: hub.address,
-        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+        data: await hub.contract.methods.signup().encodeABI(),
       };
       await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
 
@@ -229,7 +228,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   describe('approve', () => {
     beforeEach(async () => {
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
     });
 
@@ -319,7 +318,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     const spender = recipient;
 
     beforeEach(async () => {
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
     });
 
@@ -408,7 +407,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
 
   describe('decrease allowance', () => {
     beforeEach(async () => {
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
     });
 
@@ -486,7 +485,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
     let amount = convertToBaseUnit(100);
 
     beforeEach(async () => {
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
     });
 

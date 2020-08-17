@@ -8,7 +8,6 @@ const {
   period,
   symbol,
   initialPayout,
-  tokenName,
   ZERO_ADDRESS,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
@@ -49,7 +48,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
 
     const txParams = {
       to: hub.address,
-      data: await hub.contract.methods.signup(tokenName).encodeABI(),
+      data: await hub.contract.methods.signup().encodeABI(),
     };
     await executeSafeTx(userSafe, txParams, safeOwner, 17721975, safeOwner, web3);
 

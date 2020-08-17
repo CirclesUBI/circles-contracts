@@ -13,7 +13,6 @@ const {
   symbol,
   initialPayout,
   initialIssuance,
-  tokenName,
 } = require('./helpers/constants');
 const { getTimestampFromTx } = require('./helpers/getTimestamp');
 const { bn } = require('./helpers/math');
@@ -69,7 +68,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
   describe('new user can signup, when user is an external account', async () => {
     beforeEach(async () => {
-      await hub.signup(tokenName, { from: safeOwner });
+      await hub.signup({ from: safeOwner });
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -93,20 +92,8 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
       (await token.owner()).should.be.equal(safeOwner);
     });
 
-    it('token has the correct name', async () => {
-      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
-
-      const event = expectEvent.inLogs(logs, 'Signup', {
-        user: safeOwner,
-      });
-
-      tokenAddress = event.args.token;
-      token = await Token.at(tokenAddress);
-      (await token.name()).should.be.equal(tokenName);
-    });
-
     it('throws if sender tries to sign up twice', async () => {
-      await assertRevert(hub.signup(tokenName, { from: safeOwner }));
+      await assertRevert(hub.signup({ from: safeOwner }));
     });
   });
 
@@ -115,7 +102,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
       userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
       const txParams = {
         to: hub.address,
-        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+        data: await hub.contract.methods.signup().encodeABI(),
       };
       await executeSafeTx(userSafe, txParams, safeOwner, extraGas, safeOwner, web3);
     });
@@ -142,22 +129,10 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
       (await token.owner()).should.be.equal(userSafe.address);
     });
 
-    it('token has the correct name', async () => {
-      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
-
-      const event = expectEvent.inLogs(logs, 'Signup', {
-        user: userSafe.address,
-      });
-
-      tokenAddress = event.args.token;
-      token = await Token.at(tokenAddress);
-      (await token.name()).should.be.equal(tokenName);
-    });
-
     it('throws if sender tries to sign up twice', async () => {
       const txParams = {
         to: hub.address,
-        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+        data: await hub.contract.methods.signup().encodeABI(),
       };
       await executeSafeTx(userSafe, txParams, safeOwner, extraGas, safeOwner, web3);
 
@@ -174,7 +149,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
       userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
       const txParams = {
         to: hub.address,
-        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+        data: await hub.contract.methods.signup().encodeABI(),
       };
       await executeSafeTx(userSafe, txParams, safeOwner, extraGas, safeOwner, web3);
     });
@@ -202,22 +177,10 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
       (await token.owner()).should.be.equal(userSafe.address);
     });
 
-    it('token has the correct name', async () => {
-      const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
-
-      const event = expectEvent.inLogs(logs, 'Signup', {
-        user: userSafe.address,
-      });
-
-      tokenAddress = event.args.token;
-      token = await Token.at(tokenAddress);
-      (await token.name()).should.be.equal(tokenName);
-    });
-
     it('throws if sender tries to sign up twice', async () => {
       const txParams = {
         to: hub.address,
-        data: await hub.contract.methods.signup(tokenName).encodeABI(),
+        data: await hub.contract.methods.signup().encodeABI(),
       };
       await executeSafeTx(userSafe, txParams, safeOwner, extraGas, safeOwner, web3);
 
