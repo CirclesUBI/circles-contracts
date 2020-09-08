@@ -68,7 +68,6 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
         .transfer(recipient, amount.toString())
         .encodeABI();
       const safeTxGas = await estimateTxGas(userSafe, to, 0, data, 0);
-      console.log(safeTxGas);
       const gasToken = token.address;
       const nonce = (await userSafe.nonce()).toNumber();
       const baseGas = await estimateBaseGas(userSafe, to, 0, data, 0,
@@ -92,7 +91,6 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
         .transfer(recipient, amount.toString())
         .encodeABI();
       const safeTxGas = await estimateTxGas(userSafe, to, 0, data, 0);
-      console.log(safeTxGas);
       const gasToken = token.address;
       const nonce = (await userSafe.nonce()).toNumber();
       const baseGas = await estimateBaseGas(userSafe, to, 0, data, 0,
@@ -116,7 +114,6 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
         .transfer(recipient, amount.toString())
         .encodeABI();
       const safeTxGas = await estimateTxGas(userSafe, to, 0, data, 0);
-      console.log(safeTxGas);
       const gasToken = token.address;
       const nonce = (await userSafe.nonce()).toNumber();
       const baseGas = await estimateBaseGas(userSafe, to, 0, data, 0,
