@@ -1,4 +1,4 @@
-const truffleContract = require('truffle-contract');
+const truffleContract = require('@truffle/contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
@@ -11,7 +11,6 @@ const {
   period,
   symbol,
   initialPayout,
-  tokenName,
   ZERO_ADDRESS,
 } = require('./helpers/constants');
 const { bn } = require('./helpers/math');
@@ -58,7 +57,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
 
     describe('when user tries to adjust their trust for themselves', async () => {
       beforeEach(async () => {
-        await hub.signup(tokenName, { from: safeOwner });
+        await hub.signup({ from: safeOwner });
       });
 
       it('should throw', async () => assertRevert(hub.trust(safeOwner, trustLimit, { from: safeOwner })));
@@ -86,7 +85,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
 
     describe('when trust destination is not a circles token', async () => {
       beforeEach(async () => {
-        await hub.signup(tokenName, { from: safeOwner });
+        await hub.signup({ from: safeOwner });
         await hub.trust(normalUser, trustLimit, { from: safeOwner });
       });
 
@@ -118,8 +117,8 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
 
     describe('when trust destination is a circles token', async () => {
       beforeEach(async () => {
-        await hub.signup(tokenName, { from: safeOwner });
-        await hub.signup(tokenName, { from: normalUser });
+        await hub.signup({ from: safeOwner });
+        await hub.signup({ from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: safeOwner });
       });
 
@@ -325,13 +324,13 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
     let token2;
 
     beforeEach(async () => {
-      await hub.signup(tokenName, { from: safeOwner });
+      await hub.signup({ from: safeOwner });
       await hub.trust(normalUser, trustLimit, { from: safeOwner });
       const tokenAddress = await hub.userToToken(safeOwner);
       token = await Token.at(tokenAddress);
       await increase(period.toNumber());
       await token.update();
-      await hub.signup(tokenName, { from: normalUser });
+      await hub.signup({ from: normalUser });
       await hub.trust(safeOwner, trustLimit, { from: normalUser });
       const token2Address = await hub.userToToken(normalUser);
       token2 = await Token.at(token2Address);

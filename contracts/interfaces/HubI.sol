@@ -1,16 +1,16 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: AGPL
+pragma solidity ^0.7.0;
 
-contract HubI {
-    function issuance() public view returns (uint256);
-    function issuanceStep(uint256) public view returns (uint256);
-    function inflation() public view returns (uint256);
-    function divisor() public view returns (uint256);
-    function period() public view returns (uint256);
-    function periods() public view returns (uint256);
-    function pow(uint256, uint256) public view returns (uint256);
-    function totalSupply() public view returns (uint256);
-    function decimals() public view returns (uint8);
-    function symbol() public view returns (string memory);
-    function deployedAt() public view returns (uint256);
-    function inflate(uint256, uint256) public view returns (uint256);
+interface HubI {
+    function issuance() external view returns (uint256);
+    function issuanceStep(uint256) external view returns (uint256);
+    function inflation() external view returns (uint256);
+    function divisor() external view returns (uint256);
+    function period() external view returns (uint256);
+    function periods() external view returns (uint256);
+    function pow(uint256, uint256) external view returns (uint256);
+    function totalSupply() external view returns (uint256);
+    function symbol() external view returns (string memory);
+    function deployedAt() external view returns (uint256);
+    function inflate(uint256, uint256) external view returns (uint256);
 }

@@ -1,4 +1,5 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: AGPL
+pragma solidity ^0.7.0;
 import "../Hub.sol";
 
 contract MockHub is Hub {
@@ -11,7 +12,7 @@ contract MockHub is Hub {
         uint256 _startingRate
     )
     Hub(_owner, _inflation, _period, _symbol, _initialPayout, _startingRate)
-    public {
+    {
 
     }
 

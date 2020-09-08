@@ -2,7 +2,6 @@ const {
   BigNumber,
   maxGas,
   symbol,
-  tokenName,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit, ubiPayout, near, inflate } = require('./helpers/math');
 const { increase } = require('./helpers/increaseTime');
@@ -68,7 +67,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     beforeEach(async () => {
       hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
         { from: systemOwner, gas: maxGas });
-      const signup = await hub.signup(tokenName, { from: owner });
+      const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);
     });
@@ -223,7 +222,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       startingIssuance = bn(80);
       hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingIssuance,
         { from: systemOwner, gas: maxGas });
-      const signup = await hub.signup(tokenName, { from: owner, gas: 6721975 });
+      const signup = await hub.signup({ from: owner, gas: 6721975 });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);
     });

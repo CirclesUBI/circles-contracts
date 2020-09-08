@@ -1,15 +1,15 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: AGPL
+pragma solidity ^0.7.0;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "./ERC20.sol";
 import "./interfaces/HubI.sol";
 
 contract Token is ERC20 {
     using SafeMath for uint256;
 
-    uint8 public decimals = 18;
+    uint8 public override decimals = 18;
 
-    string public name;
     uint256 public lastTouched;
     address public hub;
     address public owner;
@@ -26,9 +26,8 @@ contract Token is ERC20 {
         _;
     }
 
-    constructor(address _owner, string memory _name, uint256 initialPayout) public {
+    constructor(address _owner, uint256 initialPayout) {
         require(_owner != address(0));
-        name = _name;
         owner = _owner;
         hub = msg.sender;
         lastTouched = time();
@@ -41,7 +40,7 @@ contract Token is ERC20 {
         return block.timestamp;
     }
 
-    function symbol() public view returns (string memory) {
+    function symbol() public view override returns (string memory) {
         return HubI(hub).symbol();
     }
 
@@ -110,7 +109,7 @@ contract Token is ERC20 {
         _transfer(from, to, amount);
     }
 
-    function transfer(address dst, uint wad) public returns (bool) {
+    function transfer(address dst, uint wad) public override returns (bool) {
         // this totally redundant code is covering what I believe is weird compiler
         // eccentricity, making gnosis's revert message not correctly return the gas
         // when this function only super() calls the inherited contract

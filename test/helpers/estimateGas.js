@@ -27,7 +27,7 @@ const estimateBaseGas = async (safe, to, value, data, operation,
   // (array count (3 -> r, s, v) + ecrecover costs) * signature count
   const signatureCost = signatureCount * (68 + 2176 + 2176 + 6000);
   const payload = await safe.contract.methods.execTransaction(
-    to, value, data, operation, txGasEstimate, 0, GAS_PRICE.toNumber(), gasToken, refundReceiver, "0x"
+    to, value, data, operation, txGasEstimate, 0, GAS_PRICE.toNumber(), gasToken, refundReceiver, '0x',
   ).encodeABI();
   const baseGasEstimate = estimatebaseGasCosts(payload) + signatureCost + (nonce > 0
     ? 5000
@@ -41,7 +41,7 @@ const estimateTxGas = async (safe, to, value, data, operation) => {
   let txGasEstimate;
   try {
     txGasEstimate = await safe.contract.methods
-      .requiredTxGas(to, value, data, operation).call({ from: safe.address });
+      .requiredTxGas(to, value, data, operation).call({ from: safe.address, gas: 0xfffffffffff });
   } catch (err) {
     // requiredTxRevert returns the gas estimate in the revert message
     // Add 10k else we will fail in case of nested calls

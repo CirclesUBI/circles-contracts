@@ -1,4 +1,4 @@
-const truffleContract = require('truffle-contract');
+const truffleContract = require('@truffle/contract');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const { estimateBaseGas, estimateTxGas } = require('./helpers/estimateGas');
 const {
@@ -8,7 +8,6 @@ const {
   period,
   symbol,
   initialPayout,
-  tokenName,
   ZERO_ADDRESS,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
@@ -49,7 +48,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
 
     const txParams = {
       to: hub.address,
-      data: await hub.contract.methods.signup(tokenName).encodeABI(),
+      data: await hub.contract.methods.signup().encodeABI(),
     };
     await executeSafeTx(userSafe, txParams, safeOwner, 17721975, safeOwner, web3);
 
@@ -61,7 +60,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
 
   describe('user can use their token as payment token', () => {
     const amount = convertToBaseUnit(50);
-    const gasCosts = bn(35123);
+    const gasCosts = bn(89897);
 
     it('should transfer tokens', async () => {
       const to = token.address;

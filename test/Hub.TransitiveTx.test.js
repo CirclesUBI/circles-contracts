@@ -1,4 +1,4 @@
-const truffleContract = require('truffle-contract');
+const truffleContract = require('@truffle/contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
@@ -11,7 +11,6 @@ const {
   period,
   symbol,
   initialPayout,
-  tokenName,
   ZERO_ADDRESS,
 } = require('./helpers/constants');
 const { bn } = require('./helpers/math');
@@ -48,9 +47,9 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
       const trustLimit = 50;
 
       beforeEach(async () => {
-        await hub.signup(tokenName, { from: safeOwner });
-        await hub.signup(tokenName, { from: normalUser });
-        await hub.signup(tokenName, { from: thirdUser });
+        await hub.signup({ from: safeOwner });
+        await hub.signup({ from: normalUser });
+        await hub.signup({ from: thirdUser });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: thirdUser });
         const amount = bn(25);
@@ -140,10 +139,10 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
       const trustLimit = 50;
 
       beforeEach(async () => {
-        await hub.signup(tokenName, { from: safeOwner });
-        await hub.signup(tokenName, { from: normalUser });
-        await hub.signup(tokenName, { from: thirdUser });
-        await hub.signup(tokenName, { from: fourthUser });
+        await hub.signup({ from: safeOwner });
+        await hub.signup({ from: normalUser });
+        await hub.signup({ from: thirdUser });
+        await hub.signup({ from: fourthUser });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(safeOwner, trustLimit, { from: fourthUser });
         await hub.trust(normalUser, trustLimit, { from: thirdUser });
@@ -254,9 +253,9 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
       const trustLimit = 50;
 
       beforeEach(async () => {
-        await hub.signup(tokenName, { from: safeOwner });
-        await hub.signup(tokenName, { from: normalUser });
-        await hub.signup(tokenName, { from: thirdUser });
+        await hub.signup({ from: safeOwner });
+        await hub.signup({ from: normalUser });
+        await hub.signup({ from: thirdUser });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
       });
 
@@ -372,9 +371,9 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
       const trustLimit = 50;
 
       beforeEach(async () => {
-        await hub.signup(tokenName, { from: safeOwner });
-        await hub.signup(tokenName, { from: normalUser });
-        await hub.signup(tokenName, { from: thirdUser });
+        await hub.signup({ from: safeOwner });
+        await hub.signup({ from: normalUser });
+        await hub.signup({ from: thirdUser });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: safeOwner });
         await hub.trust(normalUser, trustLimit, { from: thirdUser });

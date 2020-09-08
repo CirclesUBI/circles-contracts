@@ -1,4 +1,5 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: AGPL
+pragma solidity ^0.7.0;
 
 // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
 

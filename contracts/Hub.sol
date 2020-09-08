@@ -1,6 +1,7 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: AGPL
+pragma solidity ^0.7.0;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Token.sol";
 
 contract Hub {
@@ -45,7 +46,7 @@ contract Hub {
         string memory _symbol,
         uint256 _initialPayout,
         uint256 _initialIssuance
-    ) public {
+    ) {
         require (_owner != address(0));
         owner = _owner;
         inflation = _inflation;
@@ -90,10 +91,10 @@ contract Hub {
     function time() public view returns (uint256) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function signup(string memory _name) public {
+    function signup() public {
         require(address(userToToken[msg.sender]) == address(0));
 
-        Token token = new Token(msg.sender, _name, initialPayout);
+        Token token = new Token(msg.sender, initialPayout);
         userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
         _trust(msg.sender, 100);

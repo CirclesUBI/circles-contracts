@@ -1,4 +1,4 @@
-const truffleContract = require('truffle-contract');
+const truffleContract = require('@truffle/contract');
 const proxyArtifacts = require("@circles/safe-contracts/build/contracts/ProxyFactory.json");
 const safeArtifacts = require("@circles/safe-contracts/build/contracts/GnosisSafe.json");
 const { executeSafeTx } = require('../test/helpers/executeSafeTx')
