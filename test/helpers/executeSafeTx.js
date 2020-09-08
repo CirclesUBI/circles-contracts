@@ -18,9 +18,6 @@ const executeSafeTx = async (safe, txParams, from, gas, signer, web3) => {
     to, value, data, operation, safeTxGas, baseGas, gasPrice,
     gasToken, refundReceiver, nonce, safe.address);
 
-  console.log('actual gas is:', gas)
-  console.log('actual safeTxGas is:', safeTxGas)
-
   const signatureBytes = await signTypedData(signer, typedData, web3);
   await safe.execTransaction(
     to, value, data, operation, safeTxGas, baseGas, gasPrice,
