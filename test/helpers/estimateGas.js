@@ -41,10 +41,11 @@ const estimateTxGas = async (safe, to, value, data, operation) => {
   let txGasEstimate;
   try {
     txGasEstimate = await safe.contract.methods
-      .requiredTxGas(to, value, data, operation).call({ from: safe.address });
+      .requiredTxGas(to, value, data, operation).call({ from: safe.address, gas: 0xfffffffffff });
   } catch (err) {
     // requiredTxRevert returns the gas estimate in the revert message
     // Add 10k else we will fail in case of nested calls
+    console.log(err)
     txGasEstimate = parseRevert(err.message);
     txGasEstimate = txGasEstimate.toNumber() + 10000;
     return txGasEstimate;
