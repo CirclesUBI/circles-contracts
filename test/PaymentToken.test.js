@@ -4,6 +4,7 @@ const { estimateBaseGas, estimateTxGas } = require('./helpers/estimateGas');
 const {
   BigNumber,
   maxGas,
+  extraGas,
   inflation,
   period,
   symbol,
@@ -50,7 +51,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
       to: hub.address,
       data: await hub.contract.methods.signup().encodeABI(),
     };
-    await executeSafeTx(userSafe, txParams, safeOwner, 17721975, safeOwner, web3);
+    await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
 
     const blockNumber = await web3.eth.getBlockNumber();
     const signUpLogs = await hub.getPastEvents('Signup', { fromBlock: blockNumber - 1, toBlock: 'latest' });
@@ -80,7 +81,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
         safeTxGas,
         baseGas,
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, safeTxGas + baseGas, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, baseGas, safeTxGas, safeOwner, web3);
 
       (await token.balanceOf(recipient)).should.be.bignumber.equal(amount);
     });
@@ -103,7 +104,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
         safeTxGas,
         baseGas,
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, safeTxGas + baseGas, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, baseGas, safeTxGas, safeOwner, web3);
 
       (await token.balanceOf(safeOwner)).should.be.bignumber.equal(gasCosts);
     });
@@ -126,7 +127,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
         safeTxGas,
         baseGas,
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, safeTxGas + baseGas, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, baseGas, safeTxGas, safeOwner, web3);
 
       (await token.balanceOf(userSafe.address)).should.be.bignumber.equal(amount.sub(gasCosts));
     });
