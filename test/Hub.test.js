@@ -104,7 +104,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, extraGas, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -134,7 +134,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, extraGas, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
 
       const logs = await userSafe.getPastEvents('ExecutionFailure', { fromBlock: 0, toBlock: 'latest' });
 
@@ -151,7 +151,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, extraGas, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
     });
 
     it('signup emits an event with correct sender', async () => {
@@ -182,7 +182,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
       };
-      await executeSafeTx(userSafe, txParams, safeOwner, extraGas, safeOwner, web3);
+      await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
 
       const logs = await userSafe.getPastEvents('ExecutionFailure', { fromBlock: 0, toBlock: 'latest' });
 

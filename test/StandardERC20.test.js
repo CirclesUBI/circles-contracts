@@ -6,6 +6,7 @@ const { executeSafeTx } = require('./helpers/executeSafeTx');
 const {
   BigNumber,
   maxGas,
+  extraGas,
   inflation,
   period,
   symbol,
@@ -149,7 +150,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
       };
-      await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
+      await executeSafeTx(userSafe, txParams, owner, 0, extraGas, owner, web3);
 
       const blockNumber = await web3.eth.getBlockNumber();
       const signUpLogs = await hub.getPastEvents('Signup', { fromBlock: blockNumber - 1, toBlock: 'latest' });
@@ -168,7 +169,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
               .transfer(recipient, amount.toString())
               .encodeABI(),
           };
-          await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
+          await executeSafeTx(userSafe, txParams, owner, 0, extraGas, owner, web3);
 
           const blockNumber = await web3.eth.getBlockNumber();
           const logs = await userSafe.getPastEvents('ExecutionFailure', { fromBlock: blockNumber - 1, toBlock: 'latest' });
@@ -187,7 +188,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
               .transfer(recipient, amount.toString())
               .encodeABI(),
           };
-          await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
+          await executeSafeTx(userSafe, txParams, owner, 0, extraGas, owner, web3);
 
           (await token.balanceOf(userSafe.address))
             .should.be.bignumber.equal(new BigNumber(0));
@@ -202,7 +203,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
               .transfer(recipient, amount.toString())
               .encodeABI(),
           };
-          await executeSafeTx(userSafe, txParams, owner, 17721975, owner, web3);
+          await executeSafeTx(userSafe, txParams, owner, 0, extraGas, owner, web3);
 
           const blockNumber = await web3.eth.getBlockNumber();
           const logs = await token.getPastEvents('Transfer', { fromBlock: blockNumber - 1, toBlock: 'latest' });
