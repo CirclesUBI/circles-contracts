@@ -47,7 +47,7 @@ Illustrated here are some of the main available calls:
 
 ## Getting started
 
-Requires [node version 10](https://nodejs.org/en/download/)
+Requires [node version 12](https://nodejs.org/en/download/)
 
 Clone down this repo and `npm install`
 
