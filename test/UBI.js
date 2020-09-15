@@ -2,6 +2,7 @@ const {
   BigNumber,
   maxGas,
   symbol,
+  timeout,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit, ubiPayout, near, inflate } = require('./helpers/math');
 const { increase } = require('./helpers/increaseTime');
@@ -35,8 +36,17 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
   describe('issuance', () => {
     beforeEach(async () => {
       initialPayout = convertToBaseUnit(100);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: maxGas });
+      hub = await Hub
+        .new(
+          systemOwner,
+          inflation,
+          period,
+          symbol,
+          initialPayout,
+          initialPayout,
+          timeout,
+          { from: systemOwner, gas: maxGas },
+        );
     });
 
     it('returns the correct issuance at deployment', async () => {
@@ -65,8 +75,17 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     let deployTime;
 
     beforeEach(async () => {
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: maxGas });
+      hub = await Hub
+        .new(
+          systemOwner,
+          inflation,
+          period,
+          symbol,
+          initialPayout,
+          initialPayout,
+          period.mul(bn(10)),
+          { from: systemOwner, gas: maxGas },
+        );
       const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);
@@ -134,6 +153,15 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       time.should.bignumber.satisfy(() => near(time, goal, bn(1)));
     });
 
+    it('should not update inflationOffset if exactly one period has passed', async () => {
+      const goal = await token.inflationOffset();
+      const timechange = period.toNumber();
+      await increase(timechange);
+      await token.update();
+      const offset = await token.inflationOffset();
+      offset.should.bignumber.satisfy(() => near(offset, goal, bn(1)));
+    });
+
     it('should update lastTouched by period+x if more than a period but less than two has passed', async () => {
       const timechange = period.toNumber() + 500;
       await increase(timechange);
@@ -141,6 +169,15 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       const time = await token.lastTouched();
       const goal = bn(deployTime).add(bn(timechange));
       time.should.bignumber.satisfy(() => near(time, goal, bn(1)));
+    });
+
+    it('should update inflationOffset by x if period+x has passed', async () => {
+      const goal = (await token.inflationOffset()).sub(bn(500));
+      const timechange = period.toNumber() + 500;
+      await increase(timechange);
+      await token.update();
+      const offset = await token.inflationOffset();
+      offset.should.bignumber.satisfy(() => near(offset, goal, bn(1)));
     });
 
     it('correctly calculates the ubi payout after x periods', async () => {
@@ -208,6 +245,51 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       const lastTouched = await token.lastTouched();
       (lastTouched).should.be.bignumber.equal(bn(deployTime));
     });
+
+    it('should show no payable ubi if manually stopped', async () => {
+      const time = period.mul(bn(2));
+      await increase(time.toNumber() + 500);
+      await token.stop({ from: owner });
+      const bal = await token.look();
+      bal.should.be.bignumber.equal(bn(0));
+    });
+
+    it('should return that it is stopped when it has been manually stopped', async () => {
+      await token.stop({ from: owner });
+      const isStopped = await token.stopped();
+      isStopped.should.be.equal(true);
+    });
+
+    it('should not payout ubi if manually stopped', async () => {
+      const time = period.mul(bn(2));
+      await increase(time.toNumber() + 500);
+      const bal = await token.balanceOf(owner);
+      await token.stop({ from: owner });
+      await token.update();
+      (await token.balanceOf(owner)).should.be.bignumber.equal(bal);
+    });
+
+    it('should show no payable ubi if expired', async () => {
+      const time = period.mul(bn(11));
+      await increase(time.toNumber());
+      const bal = await token.look();
+      bal.should.be.bignumber.equal(bn(0));
+    });
+
+    it('should return that it is stopped when it has expired', async () => {
+      const time = period.mul(bn(11));
+      await increase(time.toNumber());
+      const isStopped = await token.stopped();
+      isStopped.should.be.equal(true);
+    });
+
+    it('should not payout ubi if expired', async () => {
+      const time = period.mul(bn(11));
+      await increase(time.toNumber());
+      const bal = await token.balanceOf(owner);
+      await token.update();
+      (await token.balanceOf(owner)).should.be.bignumber.equal(bal);
+    });
   });
 
   describe('ubi payouts - with different config params', () => {
@@ -220,8 +302,17 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       inflation = bn(1035);
       initialPayout = convertToBaseUnit(100);
       startingIssuance = bn(80);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingIssuance,
-        { from: systemOwner, gas: maxGas });
+      hub = await Hub
+        .new(
+          systemOwner,
+          inflation,
+          period,
+          symbol,
+          initialPayout,
+          startingIssuance,
+          timeout,
+          { from: systemOwner, gas: maxGas },
+        );
       const signup = await hub.signup({ from: owner, gas: 6721975 });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);

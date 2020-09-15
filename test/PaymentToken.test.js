@@ -10,6 +10,7 @@ const {
   symbol,
   initialPayout,
   ZERO_ADDRESS,
+  timeout,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
 const { createSafeWithProxy } = require('./helpers/createSafeWithProxy');
@@ -39,9 +40,17 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
   const initialConverted = convertToBaseUnit(initialPayout);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
-      { from: systemOwner, gas: maxGas });
-
+    hub = await Hub
+      .new(
+        systemOwner,
+        inflation,
+        period,
+        symbol,
+        initialConverted,
+        initialConverted,
+        timeout,
+        { from: systemOwner, gas: maxGas },
+      );
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
 
@@ -61,7 +70,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
 
   describe('user can use their token as payment token', () => {
     const amount = convertToBaseUnit(50);
-    const gasCosts = bn(89897);
+    const gasCosts = bn(89705);
 
     it('should transfer tokens', async () => {
       const to = token.address;

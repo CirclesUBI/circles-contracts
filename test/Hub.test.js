@@ -13,6 +13,7 @@ const {
   symbol,
   initialPayout,
   initialIssuance,
+  timeout,
 } = require('./helpers/constants');
 const { getTimestampFromTx } = require('./helpers/getTimestamp');
 const { bn } = require('./helpers/math');
@@ -37,8 +38,17 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
   let userSafe = null;
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialIssuance,
-      { from: systemOwner, gas: maxGas });
+    hub = await Hub
+      .new(
+        systemOwner,
+        inflation,
+        period,
+        symbol,
+        initialPayout,
+        initialIssuance,
+        timeout,
+        { from: systemOwner, gas: maxGas },
+      );
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
     userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);

@@ -10,6 +10,7 @@ const period = new BigNumber(7885000000);
 const symbol = 'CRC';
 const initialPayout = new BigNumber(100);
 const initialIssuance = new BigNumber(100);
+const timeout = new BigNumber(315400000000);
 
 module.exports = {
   ZERO_ADDRESS,
@@ -22,4 +23,5 @@ module.exports = {
   symbol,
   initialPayout,
   initialIssuance,
+  timeout,
 };

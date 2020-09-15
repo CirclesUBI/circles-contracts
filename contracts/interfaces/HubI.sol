@@ -13,4 +13,5 @@ interface HubI {
     function symbol() external view returns (string memory);
     function deployedAt() external view returns (uint256);
     function inflate(uint256, uint256) external view returns (uint256);
+    function timeout() external view returns (uint256);
 }

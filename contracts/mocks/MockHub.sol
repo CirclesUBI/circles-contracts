@@ -9,9 +9,10 @@ contract MockHub is Hub {
         uint256 _period,
         string memory _symbol,
         uint256 _initialPayout,
-        uint256 _startingRate
+        uint256 _startingRate,
+        uint256 _timeout
     )
-    Hub(_owner, _inflation, _period, _symbol, _initialPayout, _startingRate)
+    Hub(_owner, _inflation, _period, _symbol, _initialPayout, _startingRate, _timeout)
     {
 
     }
