@@ -85,6 +85,8 @@ contract Token is ERC20 {
     /// @return how much ubi this token holder should receive
     function look() public view returns (uint256) {
         if (stopped) return 0;
+        uint256 secondsSinceLastTouched = time().sub(lastTouched);
+        if (secondsSinceLastTouched > timeout()) return 0;
         uint256 payout = 0;
         uint256 clock = lastTouched;
         uint256 offset = inflationOffset;

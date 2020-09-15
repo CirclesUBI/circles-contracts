@@ -2,6 +2,7 @@ const {
   BigNumber,
   maxGas,
   symbol,
+  timeout,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit, ubiPayout, near, inflate } = require('./helpers/math');
 const { increase } = require('./helpers/increaseTime');
@@ -35,8 +36,17 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
   describe('issuance', () => {
     beforeEach(async () => {
       initialPayout = convertToBaseUnit(100);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: maxGas });
+      hub = await Hub
+        .new(
+          systemOwner,
+          inflation,
+          period,
+          symbol,
+          initialPayout,
+          initialPayout,
+          timeout,
+          { from: systemOwner, gas: maxGas },
+        );
     });
 
     it('returns the correct issuance at deployment', async () => {
@@ -65,8 +75,17 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     let deployTime;
 
     beforeEach(async () => {
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-        { from: systemOwner, gas: maxGas });
+      hub = await Hub
+        .new(
+          systemOwner,
+          inflation,
+          period,
+          symbol,
+          initialPayout,
+          initialPayout,
+          timeout,
+          { from: systemOwner, gas: maxGas },
+        );
       const signup = await hub.signup({ from: owner });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);
@@ -220,8 +239,17 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       inflation = bn(1035);
       initialPayout = convertToBaseUnit(100);
       startingIssuance = bn(80);
-      hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, startingIssuance,
-        { from: systemOwner, gas: maxGas });
+      hub = await Hub
+        .new(
+          systemOwner,
+          inflation,
+          period,
+          symbol,
+          initialPayout,
+          startingIssuance,
+          timeout,
+          { from: systemOwner, gas: maxGas },
+        );
       const signup = await hub.signup({ from: owner, gas: 6721975 });
       token = await Token.at(signup.logs[1].args.token);
       deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);

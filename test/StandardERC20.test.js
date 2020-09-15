@@ -12,6 +12,7 @@ const {
   symbol,
   initialPayout,
   ZERO_ADDRESS,
+  timeout,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit } = require('./helpers/math');
 const { createSafeWithProxy } = require('./helpers/createSafeWithProxy');
@@ -42,8 +43,17 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   const initialConverted = convertToBaseUnit(initialPayout);
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialConverted, initialConverted,
-      { from: systemOwner, gas: maxGas });
+    hub = await Hub
+      .new(
+        systemOwner,
+        inflation,
+        period,
+        symbol,
+        initialConverted,
+        initialConverted,
+        timeout,
+        { from: systemOwner, gas: maxGas },
+      );
   });
 
   describe('total supply', () => {

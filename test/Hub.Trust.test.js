@@ -12,6 +12,7 @@ const {
   symbol,
   initialPayout,
   ZERO_ADDRESS,
+  timeout,
 } = require('./helpers/constants');
 const { bn } = require('./helpers/math');
 const { increase } = require('./helpers/increaseTime');
@@ -36,8 +37,17 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
   let userSafe = null;
 
   beforeEach(async () => {
-    hub = await Hub.new(systemOwner, inflation, period, symbol, initialPayout, initialPayout,
-      { from: systemOwner, gas: maxGas });
+    hub = await Hub
+      .new(
+        systemOwner,
+        inflation,
+        period,
+        symbol,
+        initialPayout,
+        initialPayout,
+        timeout,
+        { from: systemOwner, gas: maxGas },
+      );
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
     userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
