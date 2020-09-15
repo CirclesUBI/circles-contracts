@@ -153,6 +153,15 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       time.should.bignumber.satisfy(() => near(time, goal, bn(1)));
     });
 
+    it('should not update inflationOffset if exactly one period has passed', async () => {
+      const goal = await token.inflationOffset();
+      const timechange = period.toNumber();
+      await increase(timechange);
+      await token.update();
+      const offset = await token.inflationOffset();
+      offset.should.bignumber.satisfy(() => near(offset, goal, bn(1)));
+    });
+
     it('should update lastTouched by period+x if more than a period but less than two has passed', async () => {
       const timechange = period.toNumber() + 500;
       await increase(timechange);
@@ -160,6 +169,15 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       const time = await token.lastTouched();
       const goal = bn(deployTime).add(bn(timechange));
       time.should.bignumber.satisfy(() => near(time, goal, bn(1)));
+    });
+
+    it('should update inflationOffset by x if period+x has passed', async () => {
+      const goal = (await token.inflationOffset()).sub(bn(500));
+      const timechange = period.toNumber() + 500;
+      await increase(timechange);
+      await token.update();
+      const offset = await token.inflationOffset();
+      offset.should.bignumber.satisfy(() => near(offset, goal, bn(1)));
     });
 
     it('correctly calculates the ubi payout after x periods', async () => {

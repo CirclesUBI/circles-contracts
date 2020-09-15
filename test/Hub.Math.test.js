@@ -98,8 +98,10 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       (await hub.periods()).should.be.bignumber.equal(bn(8));
     });
 
-    it('returns the correct number of periods after x-1 period has passed', async () => {
-      const time = period.mul(bn(8)).toNumber() - 1;
+    it('returns the correct number of periods after x-2 period has passed', async () => {
+      // testing this to one-second accuracy turns out the have the same indeterminacy problems
+      // that effect the ubi payout tests
+      const time = period.mul(bn(8)).toNumber() - 2;
       await increase(time);
       (await hub.periods()).should.be.bignumber.equal(bn(7));
     });
