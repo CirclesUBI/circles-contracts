@@ -16,6 +16,7 @@ contract Hub {
     uint256 public initialPayout;
     uint256 public initialIssuance;
     uint256 public deployedAt;
+    uint256 public timeout;
 
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
@@ -45,7 +46,8 @@ contract Hub {
         uint256 _period,
         string memory _symbol,
         uint256 _initialPayout,
-        uint256 _initialIssuance
+        uint256 _initialIssuance,
+        uint256 _timeout
     ) {
         require (_owner != address(0));
         owner = _owner;
@@ -56,6 +58,7 @@ contract Hub {
         initialPayout = _initialPayout;
         initialIssuance = _initialIssuance;
         deployedAt = block.timestamp;
+        timeout = _timeout;
     }
 
     function findDivisor(uint256 _inf) internal pure returns (uint256) {
