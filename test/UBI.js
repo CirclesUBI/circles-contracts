@@ -227,6 +227,23 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       const lastTouched = await token.lastTouched();
       (lastTouched).should.be.bignumber.equal(bn(deployTime));
     });
+
+    it('should show no payable ubi if stopped', async () => {
+      const time = period.mul(bn(2));
+      await increase(time.toNumber() + 500);
+      await token.stop({ from: owner });
+      const bal = await token.look();
+      bal.should.be.bignumber.equal(bn(0));
+    });
+
+    it('should not payout ubi if stopped', async () => {
+      const time = period.mul(bn(2));
+      await increase(time.toNumber() + 500);
+      const bal = await token.balanceOf(owner);
+      await token.stop({ from: owner });
+      await token.update();
+      (await token.balanceOf(owner)).should.be.bignumber.equal(bal);
+    });
   });
 
   describe('ubi payouts - with different config params', () => {
