@@ -83,7 +83,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
           symbol,
           initialPayout,
           initialPayout,
-          timeout,
+          period.mul(bn(10)),
           { from: systemOwner, gas: maxGas },
         );
       const signup = await hub.signup({ from: owner });
@@ -228,7 +228,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       (lastTouched).should.be.bignumber.equal(bn(deployTime));
     });
 
-    it('should show no payable ubi if stopped', async () => {
+    it('should show no payable ubi if manually stopped', async () => {
       const time = period.mul(bn(2));
       await increase(time.toNumber() + 500);
       await token.stop({ from: owner });
@@ -236,11 +236,39 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       bal.should.be.bignumber.equal(bn(0));
     });
 
-    it('should not payout ubi if stopped', async () => {
+    it('should return that it is stopped when it has been manually stopped', async () => {
+      await token.stop({ from: owner });
+      const isStopped = await token.stopped();
+      isStopped.should.be.equal(true);
+    });
+
+    it('should not payout ubi if manually stopped', async () => {
       const time = period.mul(bn(2));
       await increase(time.toNumber() + 500);
       const bal = await token.balanceOf(owner);
       await token.stop({ from: owner });
+      await token.update();
+      (await token.balanceOf(owner)).should.be.bignumber.equal(bal);
+    });
+
+    it('should show no payable ubi if expired', async () => {
+      const time = period.mul(bn(11));
+      await increase(time.toNumber());
+      const bal = await token.look();
+      bal.should.be.bignumber.equal(bn(0));
+    });
+
+    it('should return that it is stopped when it has expired', async () => {
+      const time = period.mul(bn(11));
+      await increase(time.toNumber());
+      const isStopped = await token.stopped();
+      isStopped.should.be.equal(true);
+    });
+
+    it('should not payout ubi if expired', async () => {
+      const time = period.mul(bn(11));
+      await increase(time.toNumber());
+      const bal = await token.balanceOf(owner);
       await token.update();
       (await token.balanceOf(owner)).should.be.bignumber.equal(bal);
     });

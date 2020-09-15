@@ -15,7 +15,7 @@ contract Token is ERC20 {
     address public owner;
     uint256 public inflationOffset;
     uint256 public currentIssuance;
-    bool public stopped;
+    bool private manuallyStopped;
 
     modifier onlyHub() {
         require(msg.sender == hub);
@@ -74,7 +74,13 @@ contract Token is ERC20 {
     }
 
     function stop() public onlyOwner {
-        stopped = true;
+        manuallyStopped = true;
+    }
+
+    function stopped() public view returns (bool) {
+        if (manuallyStopped) return true;
+        uint256 secondsSinceLastTouched = time().sub(lastTouched);
+        if (secondsSinceLastTouched > timeout()) return true;
     }
 
     /// @return the amount of seconds until the next inflation step
@@ -84,9 +90,7 @@ contract Token is ERC20 {
 
     /// @return how much ubi this token holder should receive
     function look() public view returns (uint256) {
-        if (stopped) return 0;
-        uint256 secondsSinceLastTouched = time().sub(lastTouched);
-        if (secondsSinceLastTouched > timeout()) return 0;
+        if (stopped()) return 0;
         uint256 payout = 0;
         uint256 clock = lastTouched;
         uint256 offset = inflationOffset;
