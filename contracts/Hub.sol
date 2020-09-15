@@ -239,7 +239,6 @@ contract Hub {
         address[] memory dests,
         uint[] memory wads
     ) public {
-        require(srcs.length <= 5, "Too complex path");
         require(dests.length == tokenOwners.length, "Tokens array length must equal dests array");
         require(srcs.length == tokenOwners.length, "Tokens array length must equal srcs array");
         require(wads.length == tokenOwners.length, "Tokens array length must equal amounts array");
