@@ -30,7 +30,7 @@ const ProxyFactory = truffleContract(proxyArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 ProxyFactory.setProvider(web3.currentProvider);
 
-contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
+contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser, organization]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
   let proxyFactory = null;
@@ -93,7 +93,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
       });
     });
 
-    describe('when trust destination is not a circles token', async () => {
+    describe('when trust destination is not a circles token or organization', async () => {
       beforeEach(async () => {
         await hub.signup({ from: safeOwner });
         await hub.trust(normalUser, trustLimit, { from: safeOwner });
@@ -116,12 +116,50 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
       });
 
       it('checkSendLimit returns correct amount', async () => {
+        // const tokenAddress = await hub.userToToken(safeOwner);
+        // const token = await Token.at(tokenAddress);
+        // const totalSupply = await token.totalSupply();
+        // const allowable = totalSupply * (trustLimit / 100);
+        (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
+          .should.be.bignumber.equal(new BigNumber(0));
+      });
+    });
+
+    describe('when trust destination is an organization', async () => {
+      beforeEach(async () => {
+        await hub.signup({ from: safeOwner });
+        await hub.organizationSignup({ from: organization });
+      });
+
+      it('throws when trusting organization', async () => {
+        await assertRevert(hub.trust(organization, trustLimit, { from: safeOwner }));
+      });
+
+      it('creates a trust event when organization trust user', async () => {
+        await hub.trust(safeOwner, trustLimit, { from: organization });
+        const logs = await hub.getPastEvents('Trust', { fromBlock: 0, toBlock: 'latest' });
+
+        const event = expectEvent.inLogs(logs, 'Trust', {
+          canSendTo: organization,
+          user: safeOwner,
+        });
+
+        return event.args.limit.should.be.bignumber.equal(new BigNumber(trustLimit));
+      });
+
+      it('correctly sets the trust limit', async () => {
+        await hub.trust(safeOwner, trustLimit, { from: organization });
+        (await hub.limits(organization, safeOwner))
+          .should.be.bignumber.equal(new BigNumber(trustLimit));
+      });
+
+      it('checkSendLimit returns correct amount', async () => {
+        await hub.trust(safeOwner, trustLimit, { from: organization });
         const tokenAddress = await hub.userToToken(safeOwner);
         const token = await Token.at(tokenAddress);
-        const totalSupply = await token.totalSupply();
-        const allowable = totalSupply * (trustLimit / 100);
-        (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
-          .should.be.bignumber.equal(new BigNumber(allowable));
+        const balance = await token.balanceOf(safeOwner);
+        (await hub.checkSendLimit(safeOwner, safeOwner, organization))
+          .should.be.bignumber.equal(new BigNumber(balance));
       });
     });
 

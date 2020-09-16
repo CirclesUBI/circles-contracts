@@ -167,10 +167,10 @@ contract Hub {
             return 0;
         }
 
-        // if the token doesn't exist, return max
-        uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
+        //if the token doesn't exist, return 0
+        // uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
         if (address(userToToken[tokenOwner]) == address(0)) {
-            return max;
+             return 0;
         }
 
         uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
@@ -181,6 +181,7 @@ contract Hub {
         }
         uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
         
+        uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
         // if trustLimit has already been overriden by a direct transfer, nothing more can be sent
         if (max < destBalance) return 0;
         return max.sub(destBalance);
