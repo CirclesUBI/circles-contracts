@@ -116,10 +116,6 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
       });
 
       it('checkSendLimit returns correct amount', async () => {
-        // const tokenAddress = await hub.userToToken(safeOwner);
-        // const token = await Token.at(tokenAddress);
-        // const totalSupply = await token.totalSupply();
-        // const allowable = totalSupply * (trustLimit / 100);
         (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
           .should.be.bignumber.equal(new BigNumber(0));
       });
