@@ -156,19 +156,14 @@ contract Hub {
 
     /// @return the amount of tokenowner's token src can send to dest
     function checkSendLimit(address tokenOwner, address src, address dest) public view returns (uint256) {
-        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
 
         // there is no trust
         if (limits[dest][tokenOwner] == 0) {
             return 0;
         }
 
-        if (organizations[dest]) {
-            return srcBalance;
-        }
-
         // if dest hasn't signed up, they cannot trust anyone
-        if (address(userToToken[dest]) == address(0)) {
+        if (address(userToToken[dest]) == address(0) && !organizations[dest] ) {
             return 0;
         }
 
@@ -178,8 +173,10 @@ contract Hub {
             return max;
         }
 
+        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
+
         // if sending dest's token to dest, src can send 100% of their holdings
-        if (tokenOwner == dest) {
+        if (tokenOwner == dest || organizations[dest]) {
             return srcBalance;
         }
         uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
