@@ -20,9 +20,11 @@ contract Hub {
 
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
+    mapping (address => bool) public organizations;
     mapping (address => mapping (address => uint256)) public limits;
 
     event Signup(address indexed user, address token);
+    event OrganizationSignup(address indexed organization);
     event Trust(address indexed canSendTo, address indexed user, uint256 limit);
     event HubTransfer(address indexed from, address indexed to, uint256 amount);
 
@@ -93,7 +95,6 @@ contract Hub {
 
     function time() public view returns (uint256) { return block.timestamp; }
 
-    // No exit allowed. Once you create a personal token, you're in for good.
     function signup() public {
         require(address(userToToken[msg.sender]) == address(0));
 
@@ -105,11 +106,21 @@ contract Hub {
         emit Signup(msg.sender, address(token));
     }
 
+    function organizationSignup() public {
+        require(organizations[msg.sender] == false);
+
+        organizations[msg.sender] = true;
+        _trust(msg.sender, 100);
+
+        emit OrganizationSignup(msg.sender);
+    }
+
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address user, uint limit) public {
-        require(address(userToToken[msg.sender]) != address(0), "You can only trust people after you've signed up!");
+        require(address(userToToken[msg.sender]) != address(0) || organizations[msg.sender], "You can only trust people after you've signed up!");
         require(msg.sender != user, "You can't untrust yourself");
+        require(organizations[user] == false, "You can't trust an organization");
         require(limit <= 100, "Limit must be a percentage out of 100");
         _trust(user, limit);
     }
@@ -145,10 +156,17 @@ contract Hub {
 
     /// @return the amount of tokenowner's token src can send to dest
     function checkSendLimit(address tokenOwner, address src, address dest) public view returns (uint256) {
+        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
+
         // there is no trust
         if (limits[dest][tokenOwner] == 0) {
             return 0;
         }
+
+        if (organizations[dest]) {
+            return srcBalance;
+        }
+
         // if dest hasn't signed up, they cannot trust anyone
         if (address(userToToken[dest]) == address(0)) {
             return 0;
@@ -161,7 +179,6 @@ contract Hub {
         }
 
         // if sending dest's token to dest, src can send 100% of their holdings
-        uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
         if (tokenOwner == dest) {
             return srcBalance;
         }
