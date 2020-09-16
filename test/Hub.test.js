@@ -31,7 +31,7 @@ const ProxyFactory = truffleContract(proxyArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 ProxyFactory.setProvider(web3.currentProvider);
 
-contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
+contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser, organization]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
   let proxyFactory = null;
@@ -104,6 +104,23 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
     it('throws if sender tries to sign up twice', async () => {
       await assertRevert(hub.signup({ from: safeOwner }));
+    });
+  });
+
+  describe('new user can signup as an organization', async () => {
+    beforeEach(async () => {
+      await hub.organizationSignup({ from: organization });
+    });
+
+    it('signup emits an event with correct sender', async () => {
+      const logs = await hub.getPastEvents('OrganizationSignup', { fromBlock: 0, toBlock: 'latest' });
+      const event = expectEvent.inLogs(logs, 'OrganizationSignup');
+
+      return event.args.organization.should.equal(organization);
+    });
+
+    it('throws if sender tries to sign up twice', async () => {
+      await assertRevert(hub.organizationSignup({ from: organization }));
     });
   });
 

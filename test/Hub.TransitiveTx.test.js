@@ -29,7 +29,7 @@ const ProxyFactory = truffleContract(proxyArtifacts);
 GnosisSafe.setProvider(web3.currentProvider);
 ProxyFactory.setProvider(web3.currentProvider);
 
-contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser]) => { // eslint-disable-line no-unused-vars
+contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser, organization]) => { // eslint-disable-line no-unused-vars
   let hub = null;
   let safe = null;
   let proxyFactory = null;
@@ -453,6 +453,198 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
         const event = expectEvent.inLogs(logs, 'HubTransfer', {
           from: safeOwner,
           to: normalUser,
+        });
+
+        return event.args.amount.should.be.bignumber.equal(bn(25));
+      });
+    });
+
+    describe('when each final destination is an organization', async () => {
+      const trustLimit = 50;
+
+      beforeEach(async () => {
+        await hub.signup({ from: safeOwner });
+        await hub.signup({ from: normalUser });
+        await hub.organizationSignup({ from: organization });
+        await hub.trust(safeOwner, trustLimit, { from: normalUser });
+        await hub.trust(normalUser, trustLimit, { from: safeOwner });
+        await hub.trust(normalUser, trustLimit, { from: organization });
+        const amount = bn(25);
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        await token.transfer(safeOwner, amount, { from: normalUser });
+        await hub
+          .transferThrough(
+            [normalUser],
+            [safeOwner],
+            [organization],
+            [amount],
+            { from: safeOwner, gas: extraGas });
+      });
+
+      it('correctly set senders balance', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(safeOwner))
+          .should.be.bignumber.equal(bn(100));
+      });
+
+      it('normalUser has no tokens back', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(normalUser))
+          .should.be.bignumber.equal(bn(0));
+      });
+
+      it('correctly sets normalUsers balance', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(normalUser))
+          .should.be.bignumber.equal(bn(75));
+      });
+
+      it('safeOwner has no tokens at normalUser tokens', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(safeOwner))
+          .should.be.bignumber.equal(bn(0));
+      });
+
+      it('organization has no safeOwner tokens', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(organization))
+          .should.be.bignumber.equal(bn(0));
+      });
+
+      it('organization has the correct balance of normalUser tokens', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(organization))
+          .should.be.bignumber.equal(bn(25));
+      });
+
+      it('cleans up the seen array', async () => {
+        const seen = await hub.getSeen();
+        seen.should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for safeOwner', async () => {
+        const validation = await hub.getValidation(safeOwner);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for normalUser', async () => {
+        const validation = await hub.getValidation(normalUser);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('creates a HubTransfer event', async () => {
+        const logs = await hub.getPastEvents('HubTransfer', { fromBlock: 0, toBlock: 'latest' });
+
+        const event = expectEvent.inLogs(logs, 'HubTransfer', {
+          from: safeOwner,
+          to: organization,
+        });
+
+        return event.args.amount.should.be.bignumber.equal(bn(25));
+      });
+    });
+
+    describe('when sender is an organization', async () => {
+      const trustLimit = 50;
+
+      beforeEach(async () => {
+        await hub.signup({ from: safeOwner });
+        await hub.signup({ from: normalUser });
+        await hub.organizationSignup({ from: organization });
+        await hub.trust(safeOwner, trustLimit, { from: normalUser });
+        await hub.trust(normalUser, trustLimit, { from: safeOwner });
+        await hub.trust(normalUser, trustLimit, { from: organization });
+        const amount = bn(25);
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        await token.transfer(organization, amount, { from: normalUser });
+        await hub
+          .transferThrough(
+            [normalUser],
+            [organization],
+            [safeOwner],
+            [amount],
+            { from: organization, gas: extraGas });
+      });
+
+      it('safeOwners tokens are not touched', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(safeOwner))
+          .should.be.bignumber.equal(bn(100));
+      });
+
+      it('correctly sets safeOwners balance of normalUsers token', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(safeOwner))
+          .should.be.bignumber.equal(bn(25));
+      });
+
+      it('normalUsers balance of own tokens are untouched', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(normalUser))
+          .should.be.bignumber.equal(bn(75));
+      });
+
+      it('normalUser has no tokens of safeOwner', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(normalUser))
+          .should.be.bignumber.equal(bn(0));
+      });
+
+      it('organization has no safeOwner tokens', async () => {
+        const tokenAddress = await hub.userToToken(safeOwner);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(organization))
+          .should.be.bignumber.equal(bn(0));
+      });
+
+      it('organization has no normalUser tokens', async () => {
+        const tokenAddress = await hub.userToToken(normalUser);
+        const token = await Token.at(tokenAddress);
+        (await token.balanceOf(organization))
+          .should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the seen array', async () => {
+        const seen = await hub.getSeen();
+        seen.should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for safeOwner', async () => {
+        const validation = await hub.getValidation(safeOwner);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('cleans up the validation mapping for normalUser', async () => {
+        const validation = await hub.getValidation(normalUser);
+        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['1'].should.be.bignumber.equal(bn(0));
+        validation['2'].should.be.bignumber.equal(bn(0));
+      });
+
+      it('creates a HubTransfer event', async () => {
+        const logs = await hub.getPastEvents('HubTransfer', { fromBlock: 0, toBlock: 'latest' });
+
+        const event = expectEvent.inLogs(logs, 'HubTransfer', {
+          from: organization,
+          to: safeOwner,
         });
 
         return event.args.amount.should.be.bignumber.equal(bn(25));
