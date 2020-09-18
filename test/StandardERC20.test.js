@@ -20,7 +20,7 @@ const { createSafeWithProxy } = require('./helpers/createSafeWithProxy');
 const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
-const proxyArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafeProxyFactory.json');
+const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 
 const GnosisSafe = truffleContract(safeArtifacts);
 const ProxyFactory = truffleContract(proxyArtifacts);

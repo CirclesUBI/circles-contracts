@@ -15,7 +15,7 @@ const {
 const { bn, convertToBaseUnit } = require('./helpers/math');
 const { createSafeWithProxy } = require('./helpers/createSafeWithProxy');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
-const proxyArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafeProxyFactory.json');
+const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 
 const Hub = artifacts.require('MockHub');
 const Token = artifacts.require('Token');
@@ -70,7 +70,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
 
   describe('user can use their token as payment token', () => {
     const amount = convertToBaseUnit(50);
-    const gasCosts = bn(89685);
+    const gasCosts = bn(89705);
 
     it('should transfer tokens', async () => {
       const to = token.address;

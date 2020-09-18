@@ -3,7 +3,7 @@ const { assertRevert } = require('./helpers/assertRevert');
 const { executeSafeTx } = require('./helpers/executeSafeTx');
 const expectEvent = require('./helpers/expectEvent');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
-const proxyArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafeProxyFactory.json');
+const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
 const {
   BigNumber,
   extraGas,
