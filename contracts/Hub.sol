@@ -7,16 +7,14 @@ import "./Token.sol";
 contract Hub {
     using SafeMath for uint256;
 
-    address public owner;
-
-    uint256 public inflation;
-    uint256 public divisor;
-    uint256 public period;
+    uint256 public inflation; // the inflation rate
+    uint256 public divisor; // the largest power of 10 the inflation rate can be divided by
+    uint256 public period; // the amount of sections between inflation steps
     string public symbol;
-    uint256 public initialPayout;
-    uint256 public initialIssuance;
-    uint256 public deployedAt;
-    uint256 public timeout;
+    uint256 public signupBonus; // a one-time payout made immediately on signup
+    uint256 public initialIssuance; // the starting payout per second, this gets inflated by the inflation rate
+    uint256 public deployedAt; // the timestamp this contract was deployed at
+    uint256 public timeout; // longest a token can go without a ubi payout before it gets deactivated
 
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
@@ -28,36 +26,28 @@ contract Hub {
     event Trust(address indexed canSendTo, address indexed user, uint256 limit);
     event HubTransfer(address indexed from, address indexed to, uint256 amount);
 
+    // some data types used for validating transitive transfers
     struct transferValidator {
         address identity;
         uint256 sent;
         uint256 received;
     }
-
     mapping (address => transferValidator) public validation;
     address[] public seen;
 
-    modifier onlyOwner() {
-        require (msg.sender == owner);
-        _;
-    }
-
     constructor(
-        address _owner,
         uint256 _inflation,
         uint256 _period,
         string memory _symbol,
-        uint256 _initialPayout,
+        uint256 _signupBonus,
         uint256 _initialIssuance,
         uint256 _timeout
     ) {
-        require (_owner != address(0));
-        owner = _owner;
         inflation = _inflation;
         divisor = findDivisor(_inflation);
         period = _period;
         symbol = _symbol;
-        initialPayout = _initialPayout;
+        signupBonus = _signupBonus;
         initialIssuance = _initialIssuance;
         deployedAt = block.timestamp;
         timeout = _timeout;
@@ -98,7 +88,7 @@ contract Hub {
     function signup() public {
         require(address(userToToken[msg.sender]) == address(0));
 
-        Token token = new Token(msg.sender, initialPayout);
+        Token token = new Token(msg.sender);
         userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
         _trust(msg.sender, 100);

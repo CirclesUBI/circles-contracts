@@ -10,7 +10,7 @@ const {
   inflation,
   period,
   symbol,
-  initialPayout,
+  signupBonus,
   ZERO_ADDRESS,
   timeout,
 } = require('./helpers/constants');
@@ -38,12 +38,11 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
   beforeEach(async () => {
     hub = await Hub
       .new(
-        systemOwner,
         inflation,
         period,
         symbol,
-        initialPayout,
-        initialPayout,
+        signupBonus,
+        signupBonus,
         timeout,
         { from: systemOwner, gas: maxGas },
       );

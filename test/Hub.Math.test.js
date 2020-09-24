@@ -2,7 +2,7 @@ const {
   BigNumber,
   period,
   symbol,
-  initialPayout,
+  signupBonus,
   maxGas,
   timeout,
 } = require('./helpers/constants');
@@ -21,17 +21,16 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
 
   let inflation = bn(275);
   const divisor = bn(100);
-  const initialConverted = convertToBaseUnit(initialPayout);
+  const signupBonusConverted = convertToBaseUnit(signupBonus);
 
   beforeEach(async () => {
     hub = await Hub
       .new(
-        systemOwner,
         inflation,
         period,
         symbol,
-        initialConverted,
-        initialConverted,
+        signupBonusConverted,
+        signupBonusConverted,
         timeout,
         { from: systemOwner, gas: maxGas },
       );
@@ -114,7 +113,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
 
     it('returns the correct issuance after 1 period', async () => {
       await increase(period.toNumber());
-      const compounded = inflate(initialConverted, inflation, divisor, bn(1));
+      const compounded = inflate(signupBonusConverted, inflation, divisor, bn(1));
       (await hub.issuance()).should.be.bignumber.equal(compounded);
     });
 
@@ -122,7 +121,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       const numPeriods = bn(5);
       const time = period.mul(numPeriods);
       await increase(time.toNumber());
-      const compounded = inflate(initialConverted, inflation, divisor, numPeriods);
+      const compounded = inflate(signupBonusConverted, inflation, divisor, numPeriods);
       (await hub.issuance()).should.be.bignumber.equal(compounded);
     });
   });
@@ -131,48 +130,45 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
     it('returns the correct inflation with no periods passed', async () => {
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
-          initialConverted,
+          signupBonusConverted,
+          signupBonusConverted,
           timeout,
           { from: systemOwner, gas: maxGas },
         );
-      (await hub.inflate(initialConverted, 0)).should.be.bignumber.equal(initialConverted);
+      (await hub.inflate(signupBonusConverted, 0)).should.be.bignumber.equal(signupBonusConverted);
     });
 
     it('returns the correct inflation with 1 period passed', async () => {
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
-          initialConverted,
+          signupBonusConverted,
+          signupBonusConverted,
           timeout,
           { from: systemOwner, gas: maxGas },
         );
-      const compounded = inflate(initialConverted, inflation, divisor, bn(1));
-      (await hub.inflate(initialConverted, 1)).should.be.bignumber.equal(compounded);
+      const compounded = inflate(signupBonusConverted, inflation, divisor, bn(1));
+      (await hub.inflate(signupBonusConverted, 1)).should.be.bignumber.equal(compounded);
     });
 
     it('returns the correct inflation with x periods passed', async () => {
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
-          initialConverted,
+          signupBonusConverted,
+          signupBonusConverted,
           timeout,
           { from: systemOwner, gas: maxGas },
         );
-      const compounded = inflate(initialConverted, inflation, divisor, bn(22));
-      (await hub.inflate(initialConverted, 22)).should.be.bignumber.equal(compounded);
+      const compounded = inflate(signupBonusConverted, inflation, divisor, bn(22));
+      (await hub.inflate(signupBonusConverted, 22)).should.be.bignumber.equal(compounded);
     });
 
     it('returns the correct inflation with no periods passed', async () => {
@@ -180,11 +176,10 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       inflation = bn(1035);
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
+          signupBonusConverted,
           startingRate,
           timeout,
           { from: systemOwner, gas: maxGas },
@@ -197,11 +192,10 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       inflation = bn(2035);
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
+          signupBonusConverted,
           startingRate,
           timeout,
           { from: systemOwner, gas: maxGas },
@@ -215,11 +209,10 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       inflation = bn(705);
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
+          signupBonusConverted,
           startingRate,
           timeout,
           { from: systemOwner, gas: maxGas },
@@ -234,12 +227,11 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       inflation = bn(6790007);
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
-          initialConverted,
+          signupBonusConverted,
+          signupBonusConverted,
           timeout,
           { from: systemOwner, gas: maxGas },
         );
@@ -250,12 +242,11 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       inflation = bn(7);
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
-          initialConverted,
+          signupBonusConverted,
+          signupBonusConverted,
           timeout,
           { from: systemOwner, gas: maxGas },
         );
@@ -266,12 +257,11 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       inflation = bn(10);
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
-          initialConverted,
+          signupBonusConverted,
+          signupBonusConverted,
           timeout,
           { from: systemOwner, gas: maxGas },
         );
@@ -282,12 +272,11 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       inflation = bn(0);
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
-          initialConverted,
+          signupBonusConverted,
+          signupBonusConverted,
           timeout,
           { from: systemOwner, gas: maxGas },
         );
@@ -298,12 +287,11 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
       inflation = bn(10000);
       hub = await Hub
         .new(
-          systemOwner,
           inflation,
           period,
           symbol,
-          initialConverted,
-          initialConverted,
+          signupBonusConverted,
+          signupBonusConverted,
           timeout,
           { from: systemOwner, gas: maxGas },
         );

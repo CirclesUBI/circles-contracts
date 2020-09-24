@@ -10,7 +10,7 @@ const {
   inflation,
   period,
   symbol,
-  initialPayout,
+  signupBonus,
   ZERO_ADDRESS,
   timeout,
 } = require('./helpers/constants');
@@ -40,12 +40,11 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
   let userSafe = null;
   const decimals = bn(18);
 
-  const initialConverted = convertToBaseUnit(initialPayout);
+  const initialConverted = convertToBaseUnit(signupBonus);
 
   beforeEach(async () => {
     hub = await Hub
       .new(
-        systemOwner,
         inflation,
         period,
         symbol,
@@ -201,7 +200,7 @@ contract('ERC20', ([_, owner, recipient, anotherAccount, systemOwner]) => { // e
           await executeSafeTx(userSafe, txParams, owner, 0, extraGas, owner, web3);
 
           (await token.balanceOf(userSafe.address))
-            .should.be.bignumber.equal(new BigNumber(0));
+            .should.be.bignumber.equal(bn(0));
 
           (await token.balanceOf(recipient)).should.be.bignumber.equal(amount);
         });

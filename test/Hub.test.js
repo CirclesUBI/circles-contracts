@@ -11,7 +11,7 @@ const {
   inflation,
   period,
   symbol,
-  initialPayout,
+  signupBonus,
   initialIssuance,
   timeout,
 } = require('./helpers/constants');
@@ -40,11 +40,10 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
   beforeEach(async () => {
     hub = await Hub
       .new(
-        systemOwner,
         inflation,
         period,
         symbol,
-        initialPayout,
+        signupBonus,
         initialIssuance,
         timeout,
         { from: systemOwner, gas: maxGas },
@@ -52,10 +51,6 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
     safe = await GnosisSafe.new({ from: systemOwner });
     proxyFactory = await ProxyFactory.new({ from: systemOwner });
     userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
-  });
-
-  it('has the correct owner', async () => {
-    (await hub.owner()).should.be.equal(systemOwner);
   });
 
   it('has an inflation rate', async () => {

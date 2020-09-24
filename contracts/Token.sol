@@ -27,14 +27,14 @@ contract Token is ERC20 {
         _;
     }
 
-    constructor(address _owner, uint256 initialPayout) {
+    constructor(address _owner) {
         require(_owner != address(0));
         owner = _owner;
         hub = msg.sender;
         lastTouched = time();
         inflationOffset = findInflationOffset();
         currentIssuance = HubI(hub).issuance();
-        _mint(_owner, initialPayout);
+        _mint(_owner, HubI(hub).signupBonus());
     }
 
     function time() public view returns (uint) {
@@ -65,11 +65,11 @@ contract Token is ERC20 {
         return HubI(hub).timeout();
     }
 
-    function periodsLastTouched() public view returns (uint256) {
-        return (lastTouched.sub(hubDeploy())).div(period());
+    function periodsSinceLastTouched() public view returns (uint256) {
+        return (lastTouched.sub(hubDeployedAt())).div(period());
     }
 
-    function hubDeploy() public view returns (uint256) {
+    function hubDeployedAt() public view returns (uint256) {
         return HubI(hub).deployedAt();
     }
 
@@ -85,7 +85,7 @@ contract Token is ERC20 {
 
     /// @return the amount of seconds until the next inflation step
     function findInflationOffset() public view returns (uint256) {
-        return ((period().mul(periods().add(1))).add(hubDeploy())).sub(time());
+        return ((period().mul(periods().add(1))).add(hubDeployedAt())).sub(time());
     }
 
     /// @return how much ubi this token holder should receive
@@ -95,7 +95,7 @@ contract Token is ERC20 {
         uint256 clock = lastTouched;
         uint256 offset = inflationOffset;
         uint256 rate = currentIssuance;
-        uint256 p = periodsLastTouched();
+        uint256 p = periodsSinceLastTouched();
         while (clock.add(offset) <= time()) {
             payout = payout.add(offset.mul(rate));
             clock = clock.add(offset);
@@ -126,12 +126,6 @@ contract Token is ERC20 {
     }
 
     function transfer(address dst, uint wad) public override returns (bool) {
-        // this totally redundant code is covering what I believe is weird compiler
-        // eccentricity, making gnosis's revert message not correctly return the gas
-        // when this function only super() calls the inherited contract
-        if (msg.sender == owner) {
-            owner = msg.sender;
-        }
-        return super.transfer(dst, wad);
+         return super.transfer(dst, wad);
     }
 }

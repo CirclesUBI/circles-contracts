@@ -8,7 +8,7 @@ const {
   inflation,
   period,
   symbol,
-  initialPayout,
+  signupBonus,
   ZERO_ADDRESS,
   timeout,
 } = require('./helpers/constants');
@@ -37,12 +37,11 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
   let proxyFactory = null;
   let userSafe = null;
 
-  const initialConverted = convertToBaseUnit(initialPayout);
+  const initialConverted = convertToBaseUnit(signupBonus);
 
   beforeEach(async () => {
     hub = await Hub
       .new(
-        systemOwner,
         inflation,
         period,
         symbol,
@@ -70,7 +69,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
 
   describe('user can use their token as payment token', () => {
     const amount = convertToBaseUnit(50);
-    const gasCosts = bn(89705);
+    const gasCosts = bn(87269);
 
     it('should transfer tokens', async () => {
       const to = token.address;

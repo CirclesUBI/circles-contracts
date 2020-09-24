@@ -10,7 +10,7 @@ const {
   inflation,
   period,
   symbol,
-  initialPayout,
+  signupBonus,
   ZERO_ADDRESS,
   timeout,
 } = require('./helpers/constants');
@@ -39,12 +39,11 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
   beforeEach(async () => {
     hub = await Hub
       .new(
-        systemOwner,
         inflation,
         period,
         symbol,
-        initialPayout,
-        initialPayout,
+        signupBonus,
+        signupBonus,
         timeout,
         { from: systemOwner, gas: maxGas },
       );
@@ -74,7 +73,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
 
       it('correctly sets the trust limit on signup', async () => {
         (await hub.limits(safeOwner, safeOwner))
-          .should.be.bignumber.equal(new BigNumber(100));
+          .should.be.bignumber.equal(bn(100));
       });
 
       it('checkSendLimit returns the correct amount for an untrusted user', async () => {
@@ -107,17 +106,17 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           user: normalUser,
         });
 
-        return event.args.limit.should.be.bignumber.equal(new BigNumber(trustLimit));
+        return event.args.limit.should.be.bignumber.equal(bn(trustLimit));
       });
 
       it('correctly sets the trust limit', async () => {
         (await hub.limits(safeOwner, normalUser))
-          .should.be.bignumber.equal(new BigNumber(trustLimit));
+          .should.be.bignumber.equal(bn(trustLimit));
       });
 
       it('checkSendLimit returns correct amount', async () => {
         (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
-          .should.be.bignumber.equal(new BigNumber(0));
+          .should.be.bignumber.equal(bn(0));
       });
     });
 
@@ -140,13 +139,13 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           user: safeOwner,
         });
 
-        return event.args.limit.should.be.bignumber.equal(new BigNumber(trustLimit));
+        return event.args.limit.should.be.bignumber.equal(bn(trustLimit));
       });
 
       it('correctly sets the trust limit', async () => {
         await hub.trust(safeOwner, trustLimit, { from: organization });
         (await hub.limits(organization, safeOwner))
-          .should.be.bignumber.equal(new BigNumber(trustLimit));
+          .should.be.bignumber.equal(bn(trustLimit));
       });
 
       it('checkSendLimit returns correct amount', async () => {
@@ -155,7 +154,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
         const token = await Token.at(tokenAddress);
         const balance = await token.balanceOf(safeOwner);
         (await hub.checkSendLimit(safeOwner, safeOwner, organization))
-          .should.be.bignumber.equal(new BigNumber(balance));
+          .should.be.bignumber.equal(bn(balance));
       });
     });
 
@@ -174,18 +173,18 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           user: normalUser,
         });
 
-        return event.args.limit.should.be.bignumber.equal(new BigNumber(trustLimit));
+        return event.args.limit.should.be.bignumber.equal(bn(trustLimit));
       });
 
       it('correctly sets the trust limit', async () => {
         (await hub.limits(safeOwner, normalUser))
-          .should.be.bignumber.equal(new BigNumber(trustLimit));
+          .should.be.bignumber.equal(bn(trustLimit));
       });
 
       it('correctly sets the trust limit at 100', async () => {
         await hub.trust(normalUser, 100, { from: safeOwner });
         (await hub.limits(safeOwner, normalUser))
-          .should.be.bignumber.equal(new BigNumber(100));
+          .should.be.bignumber.equal(bn(100));
       });
 
       it('does not allow trust limit higher than 100', async () => {
@@ -199,7 +198,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           const totalSupply = await token.totalSupply();
           const allowable = totalSupply * (trustLimit / 100);
           (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
-            .should.be.bignumber.equal(new BigNumber(allowable));
+            .should.be.bignumber.equal(bn(allowable));
         });
 
         it('returns correct amount when tokens have been traded', async () => {
@@ -208,7 +207,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           const token = await Token.at(tokenAddress);
           await token.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
           const totalSupply = await token.totalSupply();
-          const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
+          const allowable = bn(totalSupply * (trustLimit / 100)).sub(amount);
           (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
             .should.be.bignumber.equal(allowable);
         });
@@ -229,7 +228,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           const token = await Token.at(tokenAddress);
           await token.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
           const totalSupply = await token.totalSupply();
-          const allowable = new BigNumber(totalSupply * (trustLimit / 100)).sub(amount);
+          const allowable = bn(totalSupply * (trustLimit / 100)).sub(amount);
           (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
             .should.be.bignumber.equal(allowable);
         });

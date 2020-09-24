@@ -8,7 +8,7 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 200, // Optimize for how many times you intend to run the code
+          runs: 50, // Optimize for how many times you intend to run the code
         },
       },
     },
@@ -43,13 +43,13 @@ module.exports = {
       gasPrice: 12500000000,
     },
     xdai: {
-      provider: function () {
+      provider: function() {
         return new HDWalletProvider(
-          process.env.MNEMONIC,
-          'https://dai.poa.network');
+        process.env.MNEMONIC,
+        "https://dai.poa.network")
       },
       network_id: 100,
-      gas: 10000000,
+      gas: 12500000,
       gasPrice: 1000000000,
     },
   },
