@@ -101,7 +101,7 @@ contract Token is ERC20 {
             clock = clock.add(offset);
             offset = period();
             p = p.add(1);
-            rate = HubI(hub).issuanceStep(p);
+            rate = HubI(hub).issuanceByStep(p);
         }
         uint256 timePassed = time().sub(clock);
         payout = payout.add(timePassed.mul(rate));

@@ -53,6 +53,10 @@ contract Hub {
         timeout = _timeout;
     }
 
+    /// @notice calculates the correct divisor for the given inflation rate
+    /// @dev the divisor is used to maintain precision when doing math with percentages
+    /// @param _inf the inflation rate
+    /// @return the largest power of ten the inflation rate can be divided by
     function findDivisor(uint256 _inf) internal pure returns (uint256) {
         uint256 iter = 0;
         while (_inf.div(pow(10, iter)) > 9) {
@@ -61,18 +65,22 @@ contract Hub {
         return pow(10, iter);
     }
 
+    /// @notice helper function for finding the amount of inflation periods since this hub was deployed
     /// @return the amount of periods since hub was deployed
     function periods() public view returns (uint256) {
         return (block.timestamp.sub(deployedAt)).div(period);
     }
 
+    /// @notice calculates the current issuance rate per second
+    /// @dev current issuance is the initial issuance inflated by the amount of inflation periods since the hub was deployed
     /// @return current issuance rate
     function issuance() public view returns (uint256) {
         return inflate(initialIssuance, periods());
     }
 
-    /// @return what the issuance would be at a particular amount of periods
-    function issuanceStep(uint256 _periods) public view returns (uint256) {
+    /// @notice finds the inflation rate at a given inflation period
+    /// @return inflation rate as of the given period
+    function issuanceByStep(uint256 _periods) public view returns (uint256) {
         return inflate(initialIssuance, _periods);
     }
 
