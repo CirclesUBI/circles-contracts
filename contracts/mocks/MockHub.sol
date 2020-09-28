@@ -20,7 +20,7 @@ contract MockHub is Hub {
         return seen.length;
     }
 
-    function getValidation(address user) public view returns (address, uint256, uint256) {
-        return (validation[user].identity, validation[user].sent, validation[user].received);
+    function getValidation(address user) public view returns (bool, uint256, uint256) {
+        return (validation[user].seen, validation[user].sent, validation[user].received);
     }
 }

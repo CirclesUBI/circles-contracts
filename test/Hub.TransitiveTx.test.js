@@ -11,7 +11,6 @@ const {
   period,
   symbol,
   signupBonus,
-  ZERO_ADDRESS,
   timeout,
 } = require('./helpers/constants');
 const { bn } = require('./helpers/math');
@@ -113,21 +112,21 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
 
       it('cleans up the validation mapping for safeOwner', async () => {
         const validation = await hub.getValidation(safeOwner);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
 
       it('cleans up the validation mapping for normalUser', async () => {
         const validation = await hub.getValidation(normalUser);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
 
       it('cleans up the validation mapping for thirdUser', async () => {
         const validation = await hub.getValidation(thirdUser);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
@@ -220,28 +219,28 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
 
       it('cleans up the validation mapping for safeOwner', async () => {
         const validation = await hub.getValidation(safeOwner);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
 
       it('cleans up the validation mapping for normalUser', async () => {
         const validation = await hub.getValidation(normalUser);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
 
       it('cleans up the validation mapping for thirdUser', async () => {
         const validation = await hub.getValidation(thirdUser);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
 
       it('cleans up the validation mapping for fourthUser', async () => {
         const validation = await hub.getValidation(fourthUser);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
@@ -434,14 +433,14 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
 
       it('cleans up the validation mapping for safeOwner', async () => {
         const validation = await hub.getValidation(safeOwner);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
 
       it('cleans up the validation mapping for normalUser', async () => {
         const validation = await hub.getValidation(normalUser);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
@@ -530,14 +529,14 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
 
       it('cleans up the validation mapping for safeOwner', async () => {
         const validation = await hub.getValidation(safeOwner);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
 
       it('cleans up the validation mapping for normalUser', async () => {
         const validation = await hub.getValidation(normalUser);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
@@ -626,14 +625,14 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
 
       it('cleans up the validation mapping for safeOwner', async () => {
         const validation = await hub.getValidation(safeOwner);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
 
       it('cleans up the validation mapping for normalUser', async () => {
         const validation = await hub.getValidation(normalUser);
-        validation['0'].should.be.equal(ZERO_ADDRESS);
+        validation['0'].should.be.equal(false);
         validation['1'].should.be.bignumber.equal(bn(0));
         validation['2'].should.be.bignumber.equal(bn(0));
       });
