@@ -4,7 +4,6 @@ import "../Hub.sol";
 
 contract MockHub is Hub {
     constructor(
-        address _owner,
         uint256 _inflation,
         uint256 _period,
         string memory _symbol,
@@ -12,7 +11,7 @@ contract MockHub is Hub {
         uint256 _startingRate,
         uint256 _timeout
     )
-    Hub(_owner, _inflation, _period, _symbol, _initialPayout, _startingRate, _timeout)
+    Hub(_inflation, _period, _symbol, _initialPayout, _startingRate, _timeout)
     {
 
     }
@@ -21,7 +20,7 @@ contract MockHub is Hub {
         return seen.length;
     }
 
-    function getValidation(address user) public view returns (address, uint256, uint256) {
-        return (validation[user].identity, validation[user].sent, validation[user].received);
+    function getValidation(address user) public view returns (bool, uint256, uint256) {
+        return (validation[user].seen, validation[user].sent, validation[user].received);
     }
 }

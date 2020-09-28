@@ -14,14 +14,16 @@ const near = (num, goal, onePayout) => {
   return num.eq(goal) || num.eq(goal.sub(onePayout)) || num.eq(goal.add(onePayout));
 };
 
-const periodsLastTouched = (clock, hubDeploy, period) => clock.sub(hubDeploy).div(period);
+const periodsWhenLastTouched = (clock, hubDeployedAt, period) => {
+  return clock.sub(hubDeployedAt).div(period);
+};
 
-const ubiPayout = (rate, clock, time, offset, inf, div, period, hubDeploy) => {
+const ubiPayout = (rate, clock, time, offset, inf, div, period, hubDeployedAt) => {
   let payout = bn(0);
   let c = clock;
   let o = offset;
   let r = rate;
-  let p = periodsLastTouched(c, hubDeploy, period);
+  let p = periodsWhenLastTouched(c, hubDeployedAt, period);
   while (c.add(o).lte(bn(time))) {
     payout = payout.add(o.mul(r));
     c = c.add(o);

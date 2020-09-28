@@ -1,10 +1,9 @@
 const Hub = artifacts.require('./Hub.sol');
 const { convertToBaseUnit } = require('../test/helpers/math');
 
-module.exports = async function (deployer, network, accounts) {
+module.exports = async function (deployer) {
   await deployer.deploy(
     Hub,
-    accounts[0],
     107,
     31556952,
     'CRC',
