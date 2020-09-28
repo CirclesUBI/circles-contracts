@@ -7,7 +7,7 @@ import "./Token.sol";
 contract Hub {
     using SafeMath for uint256;
 
-    uint256 public inflation; // the inflation rate
+    uint256 public inflation; // the inflation rate expressed as 1 + percentage inflation, aka 7% inflation is 107
     uint256 public divisor; // the largest power of 10 the inflation rate can be divided by
     uint256 public period; // the amount of sections between inflation steps
     string public symbol;
@@ -91,6 +91,9 @@ contract Hub {
     /// @param _periods the step to calculate the issuance rate as of
     /// @return initial issuance rate as if interest (inflation) has been compounded period times
     function inflate(uint256 _initial, uint256 _periods) public view returns (uint256) {
+        // this returns P * (1 + r) ** t - which is a the formula for compound interest if 
+        // interest is compounded only once per period
+        // in our case, currentIssuanceRate = initialIssuance * (inflation) ** periods
         uint256 q = pow(inflation, _periods);
         uint256 d = pow(divisor, _periods);
         return (_initial.mul(q)).div(d);

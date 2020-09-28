@@ -14,7 +14,7 @@ const near = (num, goal, onePayout) => {
   return num.eq(goal) || num.eq(goal.sub(onePayout)) || num.eq(goal.add(onePayout));
 };
 
-const periodsSinceLastTouched = (clock, hubDeployedAt, period) => {
+const periodsWhenLastTouched = (clock, hubDeployedAt, period) => {
   return clock.sub(hubDeployedAt).div(period);
 };
 
@@ -23,7 +23,7 @@ const ubiPayout = (rate, clock, time, offset, inf, div, period, hubDeployedAt) =
   let c = clock;
   let o = offset;
   let r = rate;
-  let p = periodsSinceLastTouched(c, hubDeployedAt, period);
+  let p = periodsWhenLastTouched(c, hubDeployedAt, period);
   while (c.add(o).lte(bn(time))) {
     payout = payout.add(o.mul(r));
     c = c.add(o);
