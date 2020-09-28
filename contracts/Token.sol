@@ -71,7 +71,7 @@ contract Token is ERC20 {
     }
 
     /// @notice find the inflation step when ubi was last payed out
-    /// @dev ie. if ubi was last payed out after issuance rate had been inflated twice, returns two
+    /// @dev ie. if ubi was last payed out during the second inflation step, returns two
     /// @return the inflation step by count
     function periodsWhenLastTouched() public view returns (uint256) {
         return (lastTouched.sub(hubDeployedAt())).div(period());
