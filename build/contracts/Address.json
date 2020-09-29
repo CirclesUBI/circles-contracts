@@ -5533,7 +5533,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.3",
-  "updatedAt": "2020-09-29T17:43:53.920Z",
+  "updatedAt": "2020-09-29T17:52:54.474Z",
   "devdoc": {
     "details": "Collection of functions related to the address type",
     "kind": "dev",
