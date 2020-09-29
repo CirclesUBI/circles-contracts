@@ -406,6 +406,24 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           .should.be.bignumber.equal(allowable);
       });
 
+      it('returns correct amount when ubi has been paid out', async () => {
+        await increase(period.toNumber());
+        await safeOwnerToken.update();
+        const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
+        const allowable = bn(safeOwnerBalance * (trustLimit / 100));
+        (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
+          .should.be.bignumber.equal(allowable);
+      });
+
+      it('returns correct amount when ubi has been paid out to trust recipient', async () => {
+        await increase(period.toNumber());
+        await normalUserToken.update();
+        const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
+        const allowable = bn(safeOwnerBalance * (trustLimit / 100));
+        (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
+          .should.be.bignumber.equal(allowable);
+      });
+
       it('returns correct amount when fewer tokens are tradeable', async () => {
         const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
         const normalUserBalance = await normalUserToken.balanceOf(normalUser);
@@ -438,6 +456,24 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
       it('returns correct amount when user has sent tokens', async () => {
         const amount = bn(25);
         await normalUserToken.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
+        const normalUserBalance = await normalUserToken.balanceOf(normalUser);
+        const allowable = bn(normalUserBalance * (trustLimit / 100));
+        (await hub.checkSendLimit(safeOwner, safeOwner, normalUser))
+          .should.be.bignumber.equal(allowable);
+      });
+
+      it('returns correct amount when ubi has been paid out', async () => {
+        await increase(period.toNumber());
+        await normalUserToken.update();
+        const normalUserBalance = await normalUserToken.balanceOf(normalUser);
+        const allowable = bn(normalUserBalance * (trustLimit / 100));
+        (await hub.checkSendLimit(safeOwner, safeOwner, normalUser))
+          .should.be.bignumber.equal(allowable);
+      });
+
+      it('returns correct amount when ubi has been paid out to trust recipient', async () => {
+        await increase(period.toNumber());
+        await safeOwnerToken.update();
         const normalUserBalance = await normalUserToken.balanceOf(normalUser);
         const allowable = bn(normalUserBalance * (trustLimit / 100));
         (await hub.checkSendLimit(safeOwner, safeOwner, normalUser))
