@@ -220,7 +220,7 @@ contract Hub {
         uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
         
         // find the maximum possible amount based on dest's trust limit for this token
-        uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
+        uint256 max = (userToToken[dest].balanceOf(dest).mul(limits[dest][tokenOwner])).div(100);
         
         // if trustLimit has already been overriden by a direct transfer, nothing more can be sent
         if (max < destBalance) return 0;
