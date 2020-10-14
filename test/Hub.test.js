@@ -11,6 +11,7 @@ const {
   inflation,
   period,
   symbol,
+  name,
   signupBonus,
   initialIssuance,
   timeout,
@@ -43,6 +44,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
         inflation,
         period,
         symbol,
+        name,
         signupBonus,
         initialIssuance,
         timeout,
@@ -63,6 +65,10 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
   it('has a symbol', async () => {
     (await hub.symbol()).should.be.equal(symbol);
+  });
+
+  it('has a name', async () => {
+    (await hub.name()).should.be.equal(name);
   });
 
   it('has the right deployed time', async () => {
@@ -100,6 +106,10 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
     it('throws if sender tries to sign up twice', async () => {
       await assertRevert(hub.signup({ from: safeOwner }));
     });
+
+    it('throws if sender tries to sign up as an organization', async () => {
+      await assertRevert(hub.organizationSignup({ from: safeOwner }));
+    });
   });
 
   describe('new user can signup as an organization', async () => {
@@ -114,8 +124,12 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
       return event.args.organization.should.equal(organization);
     });
 
-    it('throws if sender tries to sign up twice', async () => {
+    it('throws if organization tries to sign up twice', async () => {
       await assertRevert(hub.organizationSignup({ from: organization }));
+    });
+
+    it('throws if organization tries to sign up as a token', async () => {
+      await assertRevert(hub.signup({ from: organization }));
     });
   });
 
@@ -155,6 +169,18 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
       const txParams = {
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
+      };
+      await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
+
+      const logs = await userSafe.getPastEvents('ExecutionFailure', { fromBlock: 0, toBlock: 'latest' });
+
+      return expect(logs).to.have.lengthOf(1);
+    });
+
+    it('throws if sender tries to sign up as an organization', async () => {
+      const txParams = {
+        to: hub.address,
+        data: await hub.contract.methods.organizationSignup().encodeABI(),
       };
       await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
 
@@ -203,6 +229,18 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
       const txParams = {
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
+      };
+      await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
+
+      const logs = await userSafe.getPastEvents('ExecutionFailure', { fromBlock: 0, toBlock: 'latest' });
+
+      return expect(logs).to.have.lengthOf(1);
+    });
+
+    it('throws if sender tries to sign up as an organization', async () => {
+      const txParams = {
+        to: hub.address,
+        data: await hub.contract.methods.organizationSignup().encodeABI(),
       };
       await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
 

@@ -7,14 +7,15 @@ import "./Token.sol";
 contract Hub {
     using SafeMath for uint256;
 
-    uint256 public inflation; // the inflation rate expressed as 1 + percentage inflation, aka 7% inflation is 107
-    uint256 public divisor; // the largest power of 10 the inflation rate can be divided by
-    uint256 public period; // the amount of sections between inflation steps
+    uint256 public immutable inflation; // the inflation rate expressed as 1 + percentage inflation, aka 7% inflation is 107
+    uint256 public immutable divisor; // the largest power of 10 the inflation rate can be divided by
+    uint256 public immutable period; // the amount of sections between inflation steps
     string public symbol;
-    uint256 public signupBonus; // a one-time payout made immediately on signup
-    uint256 public initialIssuance; // the starting payout per second, this gets inflated by the inflation rate
-    uint256 public deployedAt; // the timestamp this contract was deployed at
-    uint256 public timeout; // longest a token can go without a ubi payout before it gets deactivated
+    string public name;
+    uint256 public immutable signupBonus; // a one-time payout made immediately on signup
+    uint256 public immutable initialIssuance; // the starting payout per second, this gets inflated by the inflation rate
+    uint256 public immutable deployedAt; // the timestamp this contract was deployed at
+    uint256 public immutable timeout; // longest a token can go without a ubi payout before it gets deactivated
 
     mapping (address => Token) public userToToken;
     mapping (address => address) public tokenToUser;
@@ -39,6 +40,7 @@ contract Hub {
         uint256 _inflation,
         uint256 _period,
         string memory _symbol,
+        string memory _name,
         uint256 _signupBonus,
         uint256 _initialIssuance,
         uint256 _timeout
@@ -47,6 +49,7 @@ contract Hub {
         divisor = findDivisor(_inflation);
         period = _period;
         symbol = _symbol;
+        name = _name;
         signupBonus = _signupBonus;
         initialIssuance = _initialIssuance;
         deployedAt = block.timestamp;
@@ -98,10 +101,6 @@ contract Hub {
         uint256 d = pow(divisor, _periods);
         return (_initial.mul(q)).div(d);
     }
-
-    /// @notice helper function to return the block timestamp
-    /// @return the block timestamp
-    function time() public view returns (uint256) { return block.timestamp; }
 
     /// @notice signup to this circles hub - create a circles token and join the trust graph
     /// @dev signup is permanent, there's no way to unsignup
@@ -225,7 +224,7 @@ contract Hub {
         uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
         
         // find the maximum possible amount based on dest's trust limit for this token
-        uint256 max = (userToToken[dest].totalSupply().mul(limits[dest][tokenOwner])).div(100);
+        uint256 max = (userToToken[dest].balanceOf(dest).mul(limits[dest][tokenOwner])).div(100);
         
         // if trustLimit has already been overriden by a direct transfer, nothing more can be sent
         if (max < destBalance) return 0;
@@ -294,6 +293,7 @@ contract Hub {
         require(src != address(0), "Transaction must have a src");
         require(dest != address(0), "Transaction must have a dest");
         // sender should not recieve, recipient should not send
+        // by this point in the code, we should have one src and one dest and no one else's balance should change
         require(validation[src].received == 0, "Sender is receiving");
         require(validation[dest].sent == 0, "Recipient is sending");
         // the total amounts sent and received by sender and recipient should match

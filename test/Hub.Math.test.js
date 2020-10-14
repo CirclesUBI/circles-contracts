@@ -2,6 +2,7 @@ const {
   BigNumber,
   period,
   symbol,
+  name,
   signupBonus,
   maxGas,
   timeout,
@@ -29,6 +30,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
         inflation,
         period,
         symbol,
+        name,
         signupBonusConverted,
         signupBonusConverted,
         timeout,
@@ -126,6 +128,24 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
     });
   });
 
+  describe('issuanceByStep', () => {
+    it('returns the correct issuance at deployment', async () => {
+      (await hub.issuanceByStep(0)).should.be.bignumber.equal(convertToBaseUnit(100));
+    });
+
+    it('returns the correct issuance after 1 period', async () => {
+      await increase(period.toNumber());
+      const compounded = inflate(signupBonusConverted, inflation, divisor, bn(1));
+      (await hub.issuanceByStep(1)).should.be.bignumber.equal(compounded);
+    });
+
+    it('returns the correct issuance after x period', async () => {
+      const numPeriods = bn(5);
+      const compounded = inflate(signupBonusConverted, inflation, divisor, numPeriods);
+      (await hub.issuanceByStep(5)).should.be.bignumber.equal(compounded);
+    });
+  });
+
   describe('inflate', () => {
     it('returns the correct inflation with no periods passed', async () => {
       hub = await Hub
@@ -133,6 +153,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           signupBonusConverted,
           timeout,
@@ -147,6 +168,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           signupBonusConverted,
           timeout,
@@ -162,6 +184,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           signupBonusConverted,
           timeout,
@@ -179,6 +202,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           startingRate,
           timeout,
@@ -195,6 +219,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           startingRate,
           timeout,
@@ -212,6 +237,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           startingRate,
           timeout,
@@ -230,6 +256,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           signupBonusConverted,
           timeout,
@@ -245,6 +272,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           signupBonusConverted,
           timeout,
@@ -260,6 +288,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           signupBonusConverted,
           timeout,
@@ -275,6 +304,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           signupBonusConverted,
           timeout,
@@ -290,6 +320,7 @@ contract('Hub - math utils', ([_, owner, recipient, attacker, systemOwner]) => {
           inflation,
           period,
           symbol,
+          name,
           signupBonusConverted,
           signupBonusConverted,
           timeout,

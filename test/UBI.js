@@ -2,6 +2,7 @@ const {
   BigNumber,
   maxGas,
   symbol,
+  name,
   timeout,
 } = require('./helpers/constants');
 const { bn, convertToBaseUnit, ubiPayout, near, inflate } = require('./helpers/math');
@@ -41,6 +42,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
           inflation,
           period,
           symbol,
+          name,
           signupBonus,
           signupBonus,
           timeout,
@@ -79,6 +81,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
           inflation,
           period,
           symbol,
+          name,
           signupBonus,
           signupBonus,
           period.mul(bn(10)),
@@ -305,6 +308,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
           inflation,
           period,
           symbol,
+          name,
           signupBonus,
           startingIssuance,
           timeout,
