@@ -8,6 +8,7 @@ const maxGas = 0xfffffffffff;
 const inflation = new BigNumber(275);
 const period = new BigNumber(7885000000);
 const symbol = 'CRC';
+const name = 'Circles';
 const signupBonus = new BigNumber(100);
 const initialIssuance = new BigNumber(100);
 const timeout = new BigNumber(315400000000);
@@ -20,6 +21,7 @@ module.exports = {
   maxGas,
   inflation,
   period,
+  name,
   symbol,
   signupBonus,
   initialIssuance,

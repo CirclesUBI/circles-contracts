@@ -11,6 +11,7 @@ const {
   inflation,
   period,
   symbol,
+  name,
   signupBonus,
   initialIssuance,
   timeout,
@@ -43,6 +44,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
         inflation,
         period,
         symbol,
+        name,
         signupBonus,
         initialIssuance,
         timeout,
@@ -63,6 +65,10 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
   it('has a symbol', async () => {
     (await hub.symbol()).should.be.equal(symbol);
+  });
+
+  it('has a name', async () => {
+    (await hub.name()).should.be.equal(name);
   });
 
   it('has the right deployed time', async () => {

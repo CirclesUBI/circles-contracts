@@ -10,6 +10,7 @@ const {
   inflation,
   period,
   symbol,
+  name,
   signupBonus,
   timeout,
 } = require('./helpers/constants');
@@ -42,6 +43,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
         inflation,
         period,
         symbol,
+        name,
         signupBonus,
         signupBonus,
         timeout,

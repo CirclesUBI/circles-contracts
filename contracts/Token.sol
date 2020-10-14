@@ -8,11 +8,11 @@ import "./interfaces/HubI.sol";
 contract Token is ERC20 {
     using SafeMath for uint256;
 
-    uint8 public override decimals = 18;
+    uint8 public immutable override decimals = 18;
 
     uint256 public lastTouched; // the timestamp of the last ubi payout
     address public hub; // the address of the hub this token was deployed through
-    address public owner; // the safe that deployed this token
+    address public immutable owner; // the safe that deployed this token
     uint256 public inflationOffset; // the amount of seconds until the next inflation step
     uint256 public currentIssuance; // issanceRate at the time this token was deployed
     bool private manuallyStopped; // true if this token has been stopped by it's owner
@@ -50,6 +50,13 @@ contract Token is ERC20 {
     /// @return the token symbol
     function symbol() public view override returns (string memory) {
         return HubI(hub).symbol();
+    }
+
+    /// @notice helper function for the token name
+    /// @dev all circles tokens should have the same name
+    /// @return the token name
+    function name() public view returns (string memory) {
+        return HubI(hub).name();
     }
 
     /// @notice helper function for fetching the period length from the hub
