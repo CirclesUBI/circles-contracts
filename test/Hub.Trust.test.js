@@ -34,7 +34,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
   let hub = null;
   let safe = null;
   let proxyFactory = null;
-  let userSafe = null;
+  const organizationTrustLimit = 100;
 
   beforeEach(async () => {
     hub = await Hub
@@ -130,8 +130,8 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
         await assertRevert(hub.trust(organization, trustLimit, { from: safeOwner }));
       });
 
-      it('creates a trust event when organization trust user', async () => {
-        await hub.trust(safeOwner, trustLimit, { from: organization });
+      it('creates a trust event when organization trusts user', async () => {
+        await hub.trust(safeOwner, organizationTrustLimit, { from: organization });
         const logs = await hub.getPastEvents('Trust', { fromBlock: 0, toBlock: 'latest' });
 
         const event = expectEvent.inLogs(logs, 'Trust', {
@@ -139,22 +139,26 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           user: safeOwner,
         });
 
-        return event.args.limit.should.be.bignumber.equal(bn(trustLimit));
+        return event.args.limit.should.be.bignumber.equal(bn(organizationTrustLimit));
       });
 
       it('correctly sets the trust limit', async () => {
-        await hub.trust(safeOwner, trustLimit, { from: organization });
+        await hub.trust(safeOwner, organizationTrustLimit, { from: organization });
         (await hub.limits(organization, safeOwner))
-          .should.be.bignumber.equal(bn(trustLimit));
+          .should.be.bignumber.equal(bn(organizationTrustLimit));
       });
 
       it('checkSendLimit returns correct amount', async () => {
-        await hub.trust(safeOwner, trustLimit, { from: organization });
+        await hub.trust(safeOwner, organizationTrustLimit, { from: organization });
         const tokenAddress = await hub.userToToken(safeOwner);
         const token = await Token.at(tokenAddress);
         const balance = await token.balanceOf(safeOwner);
         (await hub.checkSendLimit(safeOwner, safeOwner, organization))
           .should.be.bignumber.equal(bn(balance));
+      });
+
+      it('throws when organization uses weighted trust', async () => {
+        await assertRevert(hub.trust(safeOwner, trustLimit, { from: organization }));
       });
     });
 

@@ -33,6 +33,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
   let safe = null;
   let proxyFactory = null;
   let userSafe = null;
+  const organizationTrustLimit = 100;
 
   beforeEach(async () => {
     hub = await Hub
@@ -466,7 +467,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
         await hub.organizationSignup({ from: organization });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: safeOwner });
-        await hub.trust(normalUser, trustLimit, { from: organization });
+        await hub.trust(normalUser, organizationTrustLimit, { from: organization });
         const amount = bn(25);
         const tokenAddress = await hub.userToToken(normalUser);
         const token = await Token.at(tokenAddress);
@@ -562,7 +563,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
         await hub.organizationSignup({ from: organization });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: safeOwner });
-        await hub.trust(normalUser, trustLimit, { from: organization });
+        await hub.trust(normalUser, organizationTrustLimit, { from: organization });
         const amount = bn(25);
         const tokenAddress = await hub.userToToken(normalUser);
         const token = await Token.at(tokenAddress);
