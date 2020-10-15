@@ -8,8 +8,8 @@ module.exports = async function (deployer) {
     31556952,
     'CRC',
     'Circles',
-    convertToBaseUnit(100),
-    '23148148148148',
-    '31540000000',
+    convertToBaseUnit(50),
+    '92592592592592',
+    '7776000',
   );
 };

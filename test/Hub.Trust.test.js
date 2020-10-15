@@ -216,7 +216,9 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           const amount = bn(25);
           await normalUserToken.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
           const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
-          const allowable = bn(safeOwnerBalance * (trustLimit / 100)).sub(amount);
+          const safeOwnerBalanceOfNormalUserToken = await normalUserToken.balanceOf(safeOwner);
+          const allowable = bn(safeOwnerBalance * (trustLimit / 100))
+            .sub(bn(safeOwnerBalanceOfNormalUserToken * (1 - (trustLimit / 100))));
           (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
             .should.be.bignumber.equal(allowable);
         });
@@ -229,12 +231,10 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
         });
 
         it('returns correct amount when no tokens are tradeable', async () => {
-          const amount = bn(50);
+          const amount = bn(100);
           await normalUserToken.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
-          const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
-          const allowable = bn(safeOwnerBalance * (trustLimit / 100)).sub(amount);
           (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
-            .should.be.bignumber.equal(allowable);
+            .should.be.bignumber.equal(bn(0));
         });
 
         it('returns correct amount when no tokens are returnable', async () => {
@@ -283,7 +283,9 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
             const amount = bn(25);
             await normalUserToken.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
             const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
-            const allowable = bn(safeOwnerBalance * (newTrustLimit / 100)).sub(amount);
+            const safeOwnerBalanceOfNormalUserToken = await normalUserToken.balanceOf(safeOwner);
+            const allowable = bn(safeOwnerBalance * (newTrustLimit / 100))
+              .sub(bn(safeOwnerBalanceOfNormalUserToken * (1 - (newTrustLimit / 100))));
             (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
               .should.be.bignumber.equal(allowable);
           });
@@ -300,11 +302,10 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
           it('returns correct amount when no tokens are tradeable', async () => {
             const amount = bn(50);
             await normalUserToken.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
-            const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
-            const allowable = bn(safeOwnerBalance * (newTrustLimit / 100)).sub(amount);
+            await safeOwnerToken.transfer(thirdUser, amount, { from: safeOwner, gas: extraGas });
             (await hub
               .checkSendLimit(normalUser, normalUser, safeOwner))
-              .should.be.bignumber.equal(allowable);
+              .should.be.bignumber.equal(bn(0));
           });
         });
 
@@ -343,7 +344,9 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
             const amount = bn(25);
             await normalUserToken.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
             const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
-            const allowable = bn(safeOwnerBalance * (newTrustLimit / 100)).sub(amount);
+            const safeOwnerBalanceOfNormalUserToken = await normalUserToken.balanceOf(safeOwner);
+            const allowable = bn(safeOwnerBalance * (newTrustLimit / 100))
+              .sub(bn(safeOwnerBalanceOfNormalUserToken * (1 - (newTrustLimit / 100))));
             (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
               .should.be.bignumber.equal(allowable);
           });
@@ -357,14 +360,12 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
               .should.be.bignumber.equal(allowable);
           });
 
-          it('returns correct amount when no tokens are tradeable', async () => {
-            const amount = bn(50);
+          it('should always accept tokens from someone trusted 100', async () => {
+            const amount = bn(100);
             await normalUserToken.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
-            const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
-            const allowable = bn(safeOwnerBalance * (newTrustLimit / 100)).sub(amount);
             (await hub
               .checkSendLimit(normalUser, normalUser, safeOwner))
-              .should.be.bignumber.equal(allowable);
+              .should.be.bignumber.equal(bn(100));
           });
         });
       });
@@ -396,10 +397,12 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
       });
 
       it('returns correct amount when user has received tokens', async () => {
-        const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
         const amount = bn(25);
-        const allowable = bn(safeOwnerBalance * (trustLimit / 100)).sub(amount);
         await normalUserToken.transfer(safeOwner, amount, { from: normalUser, gas: extraGas });
+        const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
+        const safeOwnerBalanceOfNormalUserToken = await normalUserToken.balanceOf(safeOwner);
+        const allowable = bn((safeOwnerBalance * trustLimit) / 100)
+          .sub(bn((safeOwnerBalanceOfNormalUserToken * trustLimit) / 100));
         (await hub.checkSendLimit(normalUser, normalUser, safeOwner))
           .should.be.bignumber.equal(allowable);
       });
@@ -432,11 +435,13 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
       });
 
       it('returns correct amount when fewer tokens are tradeable', async () => {
-        const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
         const normalUserBalance = await normalUserToken.balanceOf(normalUser);
-        const allowable = bn(safeOwnerBalance * (trustLimit / 100)).sub(normalUserBalance);
         await normalUserToken.transfer(
           safeOwner, normalUserBalance, { from: normalUser, gas: extraGas });
+        const safeOwnerBalance = await safeOwnerToken.balanceOf(safeOwner);
+        const safeOwnerBalanceOfNormalUserToken = await normalUserToken.balanceOf(safeOwner);
+        const allowable = bn((safeOwnerBalance * trustLimit) / 100)
+          .sub(bn((safeOwnerBalanceOfNormalUserToken * trustLimit) / 100));
         (await hub
           .checkSendLimit(normalUser, normalUser, safeOwner))
           .should.be.bignumber.equal(allowable);
@@ -452,10 +457,12 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
       });
 
       it('returns correct amount when user has received tokens', async () => {
-        const normalUserBalance = await normalUserToken.balanceOf(normalUser);
         const amount = bn(25);
-        const allowable = bn(normalUserBalance * (trustLimit / 100)).sub(amount);
         await safeOwnerToken.transfer(normalUser, amount, { from: safeOwner, gas: extraGas });
+        const normalUserBalance = await normalUserToken.balanceOf(normalUser);
+        const normalUserBalanceOfSafeOwnerToken = await safeOwnerToken.balanceOf(normalUser);
+        const allowable = bn((normalUserBalance * trustLimit) / 100)
+          .sub(bn((normalUserBalanceOfSafeOwnerToken * trustLimit) / 100));
         (await hub.checkSendLimit(safeOwner, safeOwner, normalUser))
           .should.be.bignumber.equal(allowable);
       });
@@ -491,6 +498,7 @@ contract('Hub - trust limits', ([_, systemOwner, attacker, safeOwner, normalUser
         const normalUserBalance = await normalUserToken.balanceOf(normalUser);
         const allowable = bn(normalUserBalance * (trustLimit / 100));
         await safeOwnerToken.transfer(normalUser, allowable, { from: safeOwner, gas: extraGas });
+        await normalUserToken.transfer(thirdUser, allowable, { from: normalUser, gas: extraGas });
         (await hub
           .checkSendLimit(safeOwner, safeOwner, normalUser))
           .should.be.bignumber.equal(bn(0));

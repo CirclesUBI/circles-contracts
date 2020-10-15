@@ -222,15 +222,19 @@ contract Hub {
 
         // find the amount dest already has of the token that's being sent
         uint256 destBalance = userToToken[tokenOwner].balanceOf(dest);
+
+        uint256 oneHundred = 100;
         
         // find the maximum possible amount based on dest's trust limit for this token
-        uint256 max = (userToToken[dest].balanceOf(dest).mul(limits[dest][tokenOwner])).div(100);
+        uint256 max = (userToToken[dest].balanceOf(dest).mul(limits[dest][tokenOwner])).div(oneHundred);
         
         // if trustLimit has already been overriden by a direct transfer, nothing more can be sent
         if (max < destBalance) return 0;
+
+        uint256 destBalanceScaled = destBalance.mul(oneHundred.sub(limits[dest][tokenOwner])).div(oneHundred);
         
         // return the max amount dest is willing to hold minus the amount they already have
-        return max.sub(destBalance);
+        return max.sub(destBalanceScaled);
     }
 
     /// @dev builds the validation data structures, called for each transaction step of a transtive transactions
