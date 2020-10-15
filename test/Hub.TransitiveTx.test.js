@@ -33,6 +33,8 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
   let hub = null;
   let safe = null;
   let proxyFactory = null;
+  let userSafe = null;
+  const organizationTrustLimit = 100;
   let safeOwnerToken = null;
   let normalUserToken = null;
   let fourthUserToken = null;
@@ -478,7 +480,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
         await hub.organizationSignup({ from: organization });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: safeOwner });
-        await hub.trust(normalUser, trustLimit, { from: organization });
+        await hub.trust(normalUser, organizationTrustLimit, { from: organization });
         const safeOwnertokenAddress = await hub.userToToken(safeOwner);
         safeOwnerToken = await Token.at(safeOwnertokenAddress);
         const normalUsertokenAddress = await hub.userToToken(normalUser);
@@ -564,7 +566,7 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
         await hub.organizationSignup({ from: organization });
         await hub.trust(safeOwner, trustLimit, { from: normalUser });
         await hub.trust(normalUser, trustLimit, { from: safeOwner });
-        await hub.trust(normalUser, trustLimit, { from: organization });
+        await hub.trust(normalUser, organizationTrustLimit, { from: organization });
         const safeOwnertokenAddress = await hub.userToToken(safeOwner);
         safeOwnerToken = await Token.at(safeOwnertokenAddress);
         const normalUsertokenAddress = await hub.userToToken(normalUser);

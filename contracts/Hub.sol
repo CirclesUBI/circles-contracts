@@ -146,6 +146,10 @@ contract Hub {
         require(organizations[user] == false, "You can't trust an organization");
         // must a percentage
         require(limit <= 100, "Limit must be a percentage out of 100");
+        // organizations don't have a token to base send limits off of, so they can only trust at rates 0 or 100
+        if (organizations[msg.sender]) {
+            require(limit == 0 || limit == 100, "Trust is binary for organizations");
+        }
         _trust(user, limit);
     }
 
@@ -211,6 +215,7 @@ contract Hub {
         uint256 srcBalance = userToToken[tokenOwner].balanceOf(src);
 
         // if sending dest's token to dest, src can send 100% of their holdings
+        // for organizations, trust is binary - if trust is not 0, src can send 100% of their holdings
         if (tokenOwner == dest || organizations[dest]) {
             return srcBalance;
         }
@@ -298,11 +303,9 @@ contract Hub {
         emit HubTransfer(src, dest, validation[src].sent);
         // clean up the validation datastructures
         for (uint i = seen.length; i >= 1; i--) {
-            validation[seen[i-1]].sent = 0;
-            validation[seen[i-1]].received = 0;
-            validation[seen[i-1]].seen = false;
-            seen.pop();
+            delete validation[seen[i-1]];
         }
+        delete seen;
         // sanity check that we cleaned everything up correctly
         require(seen.length == 0, "Seen should be empty");
     }
