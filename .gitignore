@@ -1,8 +1,9 @@
 # Dependency directory
-build
-
 node_modules
+
 package-lock.json
+
+build/
 
 *.swp
 *.txt
