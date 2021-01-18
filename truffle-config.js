@@ -49,7 +49,17 @@ module.exports = {
         "https://dai.poa.network")
       },
       network_id: 100,
-      gas: 12500000,
+      gas: 12487794,
+      gasPrice: 1000000000,
+    },
+    sokol: {
+      provider: function() {
+        return new HDWalletProvider(
+        process.env.MNEMONIC,
+        "https://sokol.poa.network")
+      },
+      network_id: 77,
+      gas: 12487759,
       gasPrice: 1000000000,
     },
   },
