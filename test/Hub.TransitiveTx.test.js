@@ -100,11 +100,6 @@ contract('Hub - transtive trust', ([_, systemOwner, attacker, safeOwner, normalU
           .should.be.bignumber.equal(bn(25));
       });
 
-      it('sends first users token to destination', async () => {
-        (await normalUserToken.balanceOf(thirdUser))
-          .should.be.bignumber.equal(bn(25));
-      });
-
       it('cleans up the seen array', async () => {
         const seen = await hub.getSeen();
         seen.should.be.bignumber.equal(bn(0));
