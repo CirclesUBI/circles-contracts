@@ -21,7 +21,6 @@
 
 This is the initial smart contract implementation for the Circles universal basic income platform.
 
-**Note:** This is not yet intended for deployment in a production system.
 
 [Website](http://www.joincircles.net) // [Whitepaper](https://github.com/CirclesUBI/circles-handbook/blob/master/docs/about/whitepaper.md) // [Chat](https://chat.joincircles.net)
 
@@ -31,11 +30,11 @@ There are several components:
 
 ### Token
 
-This is derived from standard ERC20 implementations, with two main differences: The balance for the "owner" (UBI receiver) is calculated based on the time elapsed since the contract was created, and there is an "hubTransfer" function that allows trusted transitive exchanges. Tokens belong to the hub that deployed them, and can only transact transitively with tokens from the same hub. Tokens have owners, which can be an external account or any kind of contract - in our deployment, they will be [gnosis safes](https://github.com/gnosis/safe-contracts).
+This is derived from standard ERC20 implementations, with two main differences: The ability to mint UBI to the token owner, and the "hubTransfer" function that allows transitive transfers. Token contracts store the address of the hub that deployed them, and can only transact transitively with tokens from the same hub. Tokens have owners, which can be an external account or any kind of contract - in our deployment, they are [gnosis safes](https://github.com/gnosis/safe-contracts).
 
 ### Hub
 
-This is the location of system-wide variables and the trust graph. It has special permissions on all tokens that were deployed through it and have authorized it to perform transitive exchanges. Hub has an owner, which should at least be a multisig, (in our deployment this will also be a [gnosis safe](https://github.com/gnosis/safe-contracts)) but can in practice be any type of address.
+This is the location of system-wide variables and the trust graph. It has special permissions on all tokens that were deployed through it and have authorized it to perform transitive exchanges. All the parameters in a Hub are immutable and it has no owner.
 
 ![contract diagram](/assets/ContractDiagram.jpg)
 
@@ -47,17 +46,14 @@ Illustrated here are some of the main available calls:
 
 ## Getting started
 
-Requires [node version 12](https://nodejs.org/en/download/)
+Requires [node version 14](https://nodejs.org/en/download/)
 
 Clone down this repo and `npm install`
 
-With ganache running (`npm run ganache`), in a new console window, `node_modules/.bin/truffle compile` then `node_modules/.bin/truffle migrate`
-
-**Note:** This is a work in progress and this should be done only for contribution and exploration purposes.
 
 ## Testing
 
-Requires [node version 10](https://nodejs.org/en/download/)
+Requires [node version 14](https://nodejs.org/en/download/)
 `npm test` will re-build the contracts / tests and run all of the tests in the [test](test) directory.
 
 Tests are executed with the help of [Truffle](https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript) and written in javascript using [Mocha](https://mochajs.org/) with the [Chai assertion library](https://www.chaijs.com/). 
