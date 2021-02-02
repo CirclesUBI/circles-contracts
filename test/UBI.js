@@ -325,6 +325,32 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       bal.should.bignumber.satisfy(() => near(bal, goal, startingIssuance));
     });
 
+    it('should show no payable ubi if timeout is shorter than period', async () => {
+      const period = new BigNumber(7885000000);
+      const timeout = new BigNumber(7885000000-1);
+      
+      hubTimeoutShorterThanPeriod = await Hub
+        .new(
+          inflation,
+          period,
+          symbol,
+          name,
+          signupBonus,
+          startingIssuance,
+          timeout,
+          { from: systemOwner, gas: maxGas },
+        );
+      const signup = await hubTimeoutShorterThanPeriod.signup({ from: owner, gas: 6721975 });
+      token = await Token.at(signup.logs[1].args.token);
+      deployTime = await getTimestampFromTx(signup.logs[0].transactionHash, web3);
+
+      const time = period.mul(bn(2));
+      await increase(time.toNumber() + 500);
+      await token.stop({ from: owner });
+      const bal = await token.look();
+      bal.should.be.bignumber.equal(bn(0));
+    });
+
     it('doesnt change balance at deployment', async () => {
       await token.update();
       const balance = await token.balanceOf(owner);

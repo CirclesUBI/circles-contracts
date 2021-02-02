@@ -44,6 +44,12 @@ Illustrated here are some of the main available calls:
  - Users send transitive transactions with the hub, which has special permissions on tokens
 
 
+## Docker Users
+
+Clone down this repo and `docker-compose up`
+
+See [docker-compose.yml](docker-compose.yml).
+
 ## Getting started
 
 Requires [node version 14](https://nodejs.org/en/download/)

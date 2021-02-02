@@ -1,0 +1,18 @@
+version: "3"
+services:
+  ganache-cli:
+    image: trufflesuite/ganache-cli
+    container_name: ganache-cli
+    ports:
+      - "8145:8545"
+    #command: ["--accounts=100", "--hostname=0.0.0.0", "--gasLimit=100000000", "--defaultBalanceEther=1000000", "--mnemonic=xxx", "--networkId=99999"]
+  circles-contracts:
+    image: node:12
+    container_name: circles-contracts
+    #environment:
+    volumes:
+      - .:/usr/src/app:cached
+    entrypoint: |
+      bash -c "cd /usr/src/app
+      npm install
+      npm test"
