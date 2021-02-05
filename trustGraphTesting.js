@@ -24,7 +24,7 @@ const test = async () => {
   const ganacheAccounts = await web3.eth.getAccounts();
   const gasPrice = await web3.eth.getGasPrice();
 
-  // signup block
+  // step 1
 
   const accountA = web3.eth.accounts.create();
   const accountB = web3.eth.accounts.create();
@@ -73,9 +73,9 @@ const test = async () => {
 
   console.log('signed up');
 
-  // end signup block
+  // end step 1
 
-  // trust block
+  // step 2
 
   const trustTxA = {
     to: hubAddress,
@@ -99,9 +99,9 @@ const test = async () => {
 
   console.log('trusted');
 
-  // end trust block
+  // end step 2
 
-  // first transfer block
+  // step 3
 
   setTimeout(async () => {
     const transferTx = {
@@ -122,9 +122,9 @@ const test = async () => {
     console.log('transfered');
   }, 2000);
 
-  // end first transfer block
+  // end step 3
 
-  // second transfer block
+  // step 4
 
   setTimeout(async () => {
     const transferTx = {
@@ -132,22 +132,75 @@ const test = async () => {
       data: hub.contract.methods.transferThrough(
         [accountB.address],
         [accountA.address],
-        [accountB.address],
+        [accountC.address],
         ['12000000000000000000'],
       ).encodeABI(),
       gas: 17721975,
       from: accountA.address,
     };
 
-    const transferA = await web3.eth.accounts.signTransaction(transferTx, accountA.privateKey);
-    await web3.eth.sendSignedTransaction(transferA.rawTransaction);
+    const transferC = await web3.eth.accounts.signTransaction(transferTx, accountA.privateKey);
+    await web3.eth.sendSignedTransaction(transferC.rawTransaction);
 
-    console.log('transfered 2');
+    console.log('transfered');
   }, 4000);
 
-  // end second transfer block
+  // end step 4
 
-  // ubi block
+  // step 5
+
+  setTimeout(async () => {
+    const accountD = web3.eth.accounts.create();
+
+    await web3.eth.sendTransaction({
+      to: accountD.address,
+      value: (17721975 * 2 * gasPrice),
+      from: ganacheAccounts[1],
+    });
+
+    const signD = await web3.eth.accounts.signTransaction(
+      { ...signupTx, from: accountD.address }, accountD.privateKey);
+    await web3.eth.sendSignedTransaction(signD.rawTransaction);
+
+    const trustTxD = {
+      to: hubAddress,
+      data: hub.contract.methods.trust(accountD.address, 50).encodeABI(),
+      gas: 17721975,
+      from: accountD.address,
+    };
+
+    const trustD = await web3.eth.accounts.signTransaction(trustTxD, accountD.privateKey);
+    await web3.eth.sendSignedTransaction(trustD.rawTransaction);
+
+    console.log('new sign up')
+  }, 5000)
+
+  // end step 5
+
+  // step 6
+
+  setTimeout(async () => {
+    const transferTx = {
+      to: hubAddress,
+      data: hub.contract.methods.transferThrough(
+        [accountB.address],
+        [accountC.address],
+        [accountB.address],
+        ['12000000000000000000'],
+      ).encodeABI(),
+      gas: 17721975,
+      from: accountC.address,
+    };
+
+    const transferC = await web3.eth.accounts.signTransaction(transferTx, accountC.privateKey);
+    await web3.eth.sendSignedTransaction(transferC.rawTransaction);
+
+    console.log('transfered');
+  }, 4000);
+
+  // end step 6
+
+  // step 7
 
   setTimeout(async () => {
     const tokenAAddress = await hub.contract.methods.userToToken(accountA.address).call();
@@ -166,22 +219,19 @@ const test = async () => {
     console.log('ubi');
   }, 10000);
 
-  // end ubi block
+  // end step 7
 
-  // burn block
-
-  // const trust = await hub.checkSendLimit(accountB.address, accountB.address, accountA.address);
-  // console.log(trust.toString());
+  // step 8
 
   setTimeout(async () => {
     const tokenBAddress = await hub.contract.methods.userToToken(accountB.address).call();
     const tokenB = await Token.at(tokenBAddress);
 
-    const accountD = web3.eth.accounts.create();
+    const accountE = web3.eth.accounts.create();
 
     const burnTx = {
       to: tokenBAddress,
-      data: tokenB.contract.methods.transfer(accountD.address, '30000000000000000000').encodeABI(),
+      data: tokenB.contract.methods.transfer(accountE.address, '30000000000000000000').encodeABI(),
       gas: 10000000,
       from: accountB.address,
     };
