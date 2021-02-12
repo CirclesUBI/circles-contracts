@@ -152,6 +152,8 @@ const test = async () => {
   setTimeout(async () => {
     const accountD = web3.eth.accounts.create();
 
+    console.log(`D: ${accountD.address}`);
+
     await web3.eth.sendTransaction({
       to: accountD.address,
       value: (17721975 * 2 * gasPrice),
@@ -164,7 +166,7 @@ const test = async () => {
 
     const trustTxD = {
       to: hubAddress,
-      data: hub.contract.methods.trust(accountD.address, 50).encodeABI(),
+      data: hub.contract.methods.trust(accountB.address, 50).encodeABI(),
       gas: 17721975,
       from: accountD.address,
     };
@@ -172,7 +174,7 @@ const test = async () => {
     const trustD = await web3.eth.accounts.signTransaction(trustTxD, accountD.privateKey);
     await web3.eth.sendSignedTransaction(trustD.rawTransaction);
 
-    console.log('new sign up')
+    console.log('new sign up & trust')
   }, 5000)
 
   // end step 5
@@ -196,7 +198,7 @@ const test = async () => {
     await web3.eth.sendSignedTransaction(transferC.rawTransaction);
 
     console.log('transfered');
-  }, 4000);
+  }, 6000);
 
   // end step 6
 
@@ -217,7 +219,7 @@ const test = async () => {
     await web3.eth.sendSignedTransaction(ubiA.rawTransaction);
 
     console.log('ubi');
-  }, 10000);
+  }, 7000);
 
   // end step 7
 
@@ -227,22 +229,20 @@ const test = async () => {
     const tokenBAddress = await hub.contract.methods.userToToken(accountB.address).call();
     const tokenB = await Token.at(tokenBAddress);
 
-    const accountE = web3.eth.accounts.create();
+    const accountE = "0xA6452911d5274e2717BC1Fa793b21aB600EC9133" //relayer
 
     const burnTx = {
       to: tokenBAddress,
-      data: tokenB.contract.methods.transfer(accountE.address, '30000000000000000000').encodeABI(),
+      data: tokenB.contract.methods.transfer(accountE, '30000000000000000000').encodeABI(),
       gas: 10000000,
       from: accountB.address,
     };
-
-    console.log(accountD.address)
 
     const burnB = await web3.eth.accounts.signTransaction(burnTx, accountB.privateKey);
     await web3.eth.sendSignedTransaction(burnB.rawTransaction);
 
     console.log('burned');
-  }, 10000);
+  }, 9000);
 };
 
 test();
