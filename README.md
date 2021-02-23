@@ -53,7 +53,7 @@ Clone down this repo and `npm install`
 
 ## Testing
 
-Requires [node version 14](https://nodejs.org/en/download/)
+Requires [node](https://nodejs.org/en/download/) version 11 (works well with version 11 on Debian and version 12 on MacOS).
 `npm test` will re-build the contracts / tests and run all of the tests in the [test](test) directory.
 
 Tests are executed with the help of [Truffle](https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript) and written in javascript using [Mocha](https://mochajs.org/) with the [Chai assertion library](https://www.chaijs.com/). 
