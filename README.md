@@ -67,20 +67,21 @@ There are several components:
 
 ### Token contract
 
-This is derived from standard `ERC20` implementations, with two main differences: The ability to mint UBI to the token owner, and the "hubTransfer" function that allows transitive transfers. Token contracts store the address of the hub that deployed them, and can only transact transitively with tokens from the same hub. Tokens have owners, which can be an external account or any kind of contract - in our deployment, they are [`Gnosis Safes`].
+This is derived from standard `ERC20` implementations, with two main differences: The ability to mint UBI to the token owner, and the `hubTransfer` function that allows transitive transfers. `Token` contracts store the address of the `Hub` that deployed them, and can only transact transitively with tokens from the same hub. Tokens have owners, which can be an external account or any kind of contract - in our deployment, they are [`Gnosis Safes`].
 
 [`Gnosis Safes`]: https://github.com/gnosis/safe-contracts
 
 ### Hub contract
 
-This is the location of system-wide variables and the trust graph. It has special permissions on all tokens that were deployed through it and have authorized it to perform transitive exchanges. All the parameters in a Hub are immutable and it has no owner.
+This is the location of system-wide variables and the trust graph. It has special permissions on all tokens that were deployed through it and have authorized it to perform transitive exchanges. All the parameters in a `Hub` are immutable and it has no owner.
 
-![contract diagram](/assets/ContractDiagram.jpg)
+![Circles contract diagram](/assets/ContractDiagram.jpg)
 
 Illustrated here are some of the main available calls:
- - Signup method of the hub deploys a circles token
- - Safe or external account makes trust connections within the hub with the trust method
- - Users send transitive transactions with the hub, which has special permissions on tokens
+
+- `signup` method of the `Hub` deploys a Circles token
+- Safe or external account makes trust connections within the hub with the trust method
+- Users send transitive transactions with the hub, which has special permissions on tokens
 
 ## Installation
 
@@ -88,7 +89,9 @@ Illustrated here are some of the main available calls:
 npm i circles-contracts
 ```
 
-Requires [Node version 11](https://nodejs.org/en/download/).
+Requires [`Node`] version 11.
+
+[`Node`]: https://nodejs.org/en/download
 
 ## Development
 
