@@ -80,7 +80,7 @@ This is the location of system-wide variables and the trust graph. It has specia
 Illustrated here are some of the main available calls:
 
 - `signup` method of the `Hub` deploys a Circles token
-- Safe or external account makes trust connections within the hub with the trust method
+- Safe or external accounts make trust connections within the hub with the trust method
 - Users send transitive transactions with the hub, which has special permissions on tokens
 
 ## Installation
