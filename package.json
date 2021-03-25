@@ -31,7 +31,7 @@
     "dotenv": "^8.2.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "ganache-cli": "^6.10.1",
+    "ganache-cli": "^6.12.2",
     "truffle": "^5.1.40"
   },
   "dependencies": {
