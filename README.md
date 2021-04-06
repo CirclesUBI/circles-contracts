@@ -97,7 +97,7 @@ Requires [`Node`] version 12.
 
 Install all required dependencies via `npm install`.
 
-Requires [node](https://nodejs.org/en/download/) version 12.
+Requires [Node](https://nodejs.org/en/download/) version 12.
 `npm test` will re-build the contracts / tests and run all of the tests in the [test](test) directory.
 
 Tests are executed with the help of [`Truffle`] and written in javascript using [`Mocha`] with the [`Chai`] assertion library. 
