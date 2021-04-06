@@ -97,7 +97,8 @@ Requires [`Node`] version 11.
 
 Install all required dependencies via `npm install`.
 
-`npm test` will re-build the contracts / tests and run all of the tests in the [`test`](test) directory.
+Requires [node](https://nodejs.org/en/download/) version 11 (works well with version 11 on Debian and version 12 on MacOS).
+`npm test` will re-build the contracts / tests and run all of the tests in the [test](test) directory.
 
 Tests are executed with the help of [`Truffle`] and written in javascript using [`Mocha`] with the [`Chai`] assertion library. 
 
