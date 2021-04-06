@@ -89,7 +89,7 @@ Illustrated here are some of the main available calls:
 npm i circles-contracts
 ```
 
-Requires [`Node`] version 11.
+Requires [`Node`] version 12.
 
 [`Node`]: https://nodejs.org/en/download
 
@@ -97,7 +97,7 @@ Requires [`Node`] version 11.
 
 Install all required dependencies via `npm install`.
 
-Requires [node](https://nodejs.org/en/download/) version 11 (works well with version 11 on Debian and version 12 on MacOS).
+Requires [Node](https://nodejs.org/en/download/) version 12.
 `npm test` will re-build the contracts / tests and run all of the tests in the [test](test) directory.
 
 Tests are executed with the help of [`Truffle`] and written in javascript using [`Mocha`] with the [`Chai`] assertion library. 
