@@ -95,9 +95,10 @@ Requires [`Node`] version 12.
 
 ## Development
 
+Requires [Node](https://nodejs.org/en/download/) version 12. You can change your node version to the tested version with `nvm use`.
+
 Install all required dependencies via `npm install`.
 
-Requires [Node](https://nodejs.org/en/download/) version 12.
 `npm test` will re-build the contracts / tests and run all of the tests in the [test](test) directory.
 
 Tests are executed with the help of [`Truffle`] and written in javascript using [`Mocha`] with the [`Chai`] assertion library. 
