@@ -41,7 +41,7 @@ contract Token is ERC20 {
 
     /// @notice helper function for block timestamp
     /// @return the block timestamp
-    function time() public view returns (uint) {
+    function time() public view returns (uint256) {
         return block.timestamp;
     }
 
@@ -98,7 +98,7 @@ contract Token is ERC20 {
 
     /// @notice checks whether this token has been either stopped manually, or whether it has timed out
     /// @dev combines the manual stop variable with a dead man's switch
-    /// @return true is the token is still paying out ubi, otherwise false
+    /// @return false is the token is still paying out ubi, otherwise true
     function stopped() public view returns (bool) {
         if (manuallyStopped) return true;
         uint256 secondsSinceLastTouched = time().sub(lastTouched);
@@ -111,7 +111,8 @@ contract Token is ERC20 {
     /// @return the amount of seconds until the next inflation step
     function findInflationOffset() public view returns (uint256) {
         // finds the timestamp of the next inflation step, and subtracts the current timestamp
-        uint256 nextInflation = ((period().mul(periods().add(1))).add(hubDeployedAt()));
+        uint256 nextInflation =
+            ((period().mul(periods().add(1))).add(hubDeployedAt()));
         return nextInflation.sub(time());
     }
 
@@ -126,7 +127,7 @@ contract Token is ERC20 {
         uint256 offset = inflationOffset;
         uint256 rate = currentIssuance;
         uint256 p = periodsWhenLastTouched();
-        // this while loop gets executed only when we're rolling over an inflation step 
+        // this while loop gets executed only when we're rolling over an inflation step
         // in the course of a ubi payout aka while we have to pay out ubi for more time
         // than lastTouched + inflationOffset
         while (clock.add(offset) <= time()) {
@@ -166,12 +167,14 @@ contract Token is ERC20 {
     /// @param to the address the tokens are being transferred to
     /// @param amount the amount of tokens to transfer
     function hubTransfer(
-        address from, address to, uint256 amount
+        address from,
+        address to,
+        uint256 amount
     ) public onlyHub returns (bool) {
         _transfer(from, to, amount);
     }
 
-    function transfer(address dst, uint wad) public override returns (bool) {
+    function transfer(address dst, uint256 wad) public override returns (bool) {
         // this code shouldn't be necessary, but when it's removed the gas estimation methods
         // in the gnosis safe no longer work, still true as of solidity 7.1
         return super.transfer(dst, wad);
