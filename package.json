@@ -32,7 +32,7 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "ganache-cli": "^6.12.2",
-    "truffle": "^5.1.40"
+    "truffle": "^5.3.0"
   },
   "dependencies": {
     "@circles/safe-contracts": "^1.0.14",
