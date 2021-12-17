@@ -107,6 +107,8 @@ When you run `npm test` a new local blockchain will be started with ganache-cli 
 
 Helper functions defined in [`test/helpers`](test/helpers) provides functionality for more complicated tests such as: reading the event log, or checking for an EVM "revert / throw", or changing the blockstamp times.
 
+Note that: We commit the build dir on purpose, because the rest of our stack pulls this repo in from npm and gets the abis from them.
+
 [`Truffle`]: https://truffleframework.com/docs/truffle/testing/writing-tests-in-javascript
 [`Mocha`]: https://mochajs.org
 [`Chai`]: https://www.chaijs.com
