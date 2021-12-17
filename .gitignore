@@ -6,3 +6,6 @@ node_modules
 
 .env
 .zos.session
+
+# We commit the build dir on purpose, because the rest of our stack pulls this repo in from npm and gets the abis from them
+# build
