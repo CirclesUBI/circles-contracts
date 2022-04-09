@@ -14,8 +14,8 @@ contract Token is ERC20 {
     address public hub; // the address of the hub this token was deployed through
     address public immutable owner; // the safe that deployed this token
     uint256 public inflationOffset; // the amount of seconds until the next inflation step
-    uint256 public currentIssuance; // issanceRate at the time this token was deployed
-    bool private manuallyStopped; // true if this token has been stopped by it's owner
+    uint256 public currentIssuance; // issuance rate at the time this token was deployed
+    bool private manuallyStopped; // true if this token has been stopped by its owner
 
     /// @dev modifier allowing function to be only called through the hub
     modifier onlyHub() {
