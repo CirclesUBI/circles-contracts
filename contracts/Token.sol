@@ -96,14 +96,11 @@ contract Token is ERC20 {
         manuallyStopped = true;
     }
 
-    /// @notice checks whether this token has been either stopped manually, or whether it has timed out
-    /// @dev combines the manual stop variable with a dead man's switch
+    /// @notice checks if this token has been stopped manually
+    /// @dev i.e if the token should no longer be minted
     /// @return false is the token is still paying out ubi, otherwise true
     function stopped() public view returns (bool) {
-        if (manuallyStopped) return true;
-        uint256 secondsSinceLastTouched = time().sub(lastTouched);
-        if (secondsSinceLastTouched > timeout()) return true;
-        return false;
+        return manuallyStopped;
     }
 
     /// @notice the amount of seconds until the ubi payout is next inflated
@@ -150,7 +147,7 @@ contract Token is ERC20 {
 
     /// @notice receive a ubi payout
     /// @dev this is the method to actually update storage with new token balance
-    function update() public {
+    function update() public onlyOwner {
         uint256 gift = look();
         // does nothing if there's no ubi to be payed out
         if (gift > 0) {
