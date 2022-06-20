@@ -42,7 +42,6 @@
     "@truffle/hdwallet-provider": "^1.7.0",
     "bluebird": "^3.7.2",
     "ethereumjs-abi": "^0.6.8",
-    "truffle-contract": "^4.0.31",
     "web3-eth-abi": "^1.7.3"
   }
 }
