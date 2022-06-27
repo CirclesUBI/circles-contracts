@@ -32,7 +32,7 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.26.0",
     "ganache-cli": "^6.12.2",
-    "truffle": "^5.5.18"
+    "truffle": "^5.5.19"
   },
   "dependencies": {
     "@circles/safe-contracts": "=1.0.14",
@@ -42,6 +42,6 @@
     "@truffle/hdwallet-provider": "^1.7.0",
     "bluebird": "^3.7.2",
     "ethereumjs-abi": "^0.6.8",
-    "web3-eth-abi": "^1.7.3"
+    "web3-eth-abi": "^1.7.4"
   }
 }
