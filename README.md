@@ -86,7 +86,7 @@ Illustrated here are some of the main available calls:
 ## Installation
 
 ```bash
-npm i circles-contracts
+npm i @circles/circles-contracts
 ```
 
 Requires [`Node`] version 14.
