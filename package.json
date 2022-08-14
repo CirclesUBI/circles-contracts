@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@circles/safe-contracts": "=1.0.14",
-    "@openzeppelin/contracts": "^3.4.2",
+    "@openzeppelin/contracts": "^4.7.2",
     "@truffle/contract": "^4.5.14",
     "@truffle/error": "0.0.9",
     "@truffle/hdwallet-provider": "^1.7.0",
