@@ -14,7 +14,7 @@
     "test": "scripts/test.sh",
     "migrate": "./node_modules/.bin/truffle migrate",
     "compile": "./node_modules/.bin/truffle compile",
-    "ganache": "ganache-cli -d -i 5777 --gasLimit 0xfffffffffff -m \"enable depend figure right kit daughter job giraffe news window tonight more\"",
+    "ganache": "ganache -d -i 5777 --gasLimit 0xfffffffffff -m \"enable depend figure right kit daughter job giraffe news window tonight more\""
   },
   "repository": {
     "type": "git",
