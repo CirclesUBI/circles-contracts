@@ -34,9 +34,9 @@ ProxyFactory.setProvider(web3.currentProvider);
 
 contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser, organization]) => { // eslint-disable-line no-unused-vars
   let hub = null;
-  let safe = null;
-  let proxyFactory = null;
-  let userSafe = null;
+  // let safe = null;
+  // let proxyFactory = null;
+  // let userSafe = null;
 
   beforeEach(async () => {
     hub = await Hub
@@ -50,9 +50,9 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
         timeout,
         { from: systemOwner, gas: maxGas },
       );
-    safe = await GnosisSafe.new({ from: systemOwner });
-    proxyFactory = await ProxyFactory.new({ from: systemOwner });
-    userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
+    // safe = await GnosisSafe.new({ from: systemOwner });
+    // proxyFactory = await ProxyFactory.new({ from: systemOwner });
+    // userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
   });
 
   it('has an inflation rate', async () => {
