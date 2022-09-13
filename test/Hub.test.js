@@ -197,6 +197,8 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
   describe('new user can signup, when user is a safe proxy', async () => {
     let token = null;
+    let safe = await GnosisSafe.new({ from: systemOwner });
+    let proxyFactory = await ProxyFactory.new({ from: systemOwner })
     let userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
     beforeEach(async () => {
       const txParams = {
