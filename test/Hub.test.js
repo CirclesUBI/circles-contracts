@@ -134,12 +134,15 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
   });
 
   describe('new user can signup, when user is a safe', async () => {
+    let userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
     beforeEach(async () => {
-      userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
       const txParams = {
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
       };
+      console.log(txParams)
+      console.log(userSafe)
+
       await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
     });
 
@@ -192,9 +195,8 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
   describe('new user can signup, when user is a safe proxy', async () => {
     let token = null;
-
+    let userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
     beforeEach(async () => {
-      userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
       const txParams = {
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
