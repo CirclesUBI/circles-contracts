@@ -9,7 +9,7 @@ const formatTypedData = (
   gasToken,
   refundReceiver,
   nonce,
-  chainID,
+  chainId,
   verifyingContract) => {
   const typedData = {
     types: {
@@ -31,8 +31,8 @@ const formatTypedData = (
       ],
     },
     domain: {
+      chainId,
       verifyingContract,
-      chainID
     },
     primaryType: 'SafeTx',
     message: {

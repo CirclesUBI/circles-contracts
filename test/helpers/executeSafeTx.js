@@ -14,15 +14,15 @@ const executeSafeTx = async (safe, txParams, from, baseGas, safeTxGas, signer, w
   const gasToken = txParams.gasToken || ZERO_ADDRESS;
   const refundReceiver = txParams.refundReceiver || ZERO_ADDRESS;
   const nonce = (await safe.nonce()).toNumber();
-  const chainID =   await web3.eth.getChainId()
+  const chainId =   await web3.eth.getChainId()
   // this is mirroring the safe contracts gas checks inside execTransaction that account for EIP-150
   const max = Math.floor(Math.max((safeTxGas * 64) / 63, safeTxGas + 2500) + 500);
   const gas = baseGas + safeTxGas + max;
 
   const typedData = formatTypedData(
     to, value, data, operation, signedSafeTxGas, signedBaseGas, gasPrice,
-    gasToken, refundReceiver, nonce, chainID, safe.address);
-
+    gasToken, refundReceiver, nonce, chainId, safe.address);
+  
   const signatureBytes = await signTypedData(signer, typedData, web3);
  
   await safe.execTransaction(
