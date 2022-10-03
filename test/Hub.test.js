@@ -34,9 +34,9 @@ ProxyFactory.setProvider(web3.currentProvider);
 
 contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thirdUser, fourthUser, organization]) => { // eslint-disable-line no-unused-vars
   let hub = null;
-  // let safe = null;
-  // let proxyFactory = null;
-  // let userSafe = null;
+  let safe = null;
+  let proxyFactory = null;
+  let userSafe = null;
 
   beforeEach(async () => {
     hub = await Hub
@@ -50,9 +50,9 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
         timeout,
         { from: systemOwner, gas: maxGas },
       );
-    // safe = await GnosisSafe.new({ from: systemOwner });
-    // proxyFactory = await ProxyFactory.new({ from: systemOwner });
-    // userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
+    safe = await GnosisSafe.new({ from: systemOwner });
+    proxyFactory = await ProxyFactory.new({ from: systemOwner });
+    userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
   });
 
   it('has an inflation rate', async () => {
@@ -134,18 +134,12 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
   });
 
   describe('new user can signup, when user is a safe', async () => {
-    
     beforeEach(async () => {
-      let safe = await GnosisSafe.new({ from: systemOwner });
-      let proxyFactory = await ProxyFactory.new({ from: systemOwner });
-      let userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
+      userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
       const txParams = {
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
       };
-      console.log(txParams)
-      console.log(userSafe)
-
       await executeSafeTx(userSafe, txParams, safeOwner, 0, extraGas, safeOwner, web3);
     });
 
@@ -161,7 +155,6 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
     it('token is owned by correct sender', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
-
       const event = expectEvent.inLogs(logs, 'Signup', {
         user: userSafe.address,
       });
@@ -197,11 +190,9 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
   });
 
   describe('new user can signup, when user is a safe proxy', async () => {
-    let token = null;
-       beforeEach(async () => {
-      let safe = await GnosisSafe.new({ from: systemOwner });
-      let proxyFactory = await ProxyFactory.new({ from: systemOwner })
-      let userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
+      let token = null;
+      beforeEach(async () => {
+      userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
       const txParams = {
         to: hub.address,
         data: await hub.contract.methods.signup().encodeABI(),
@@ -211,7 +202,6 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
     it('signup emits an event with correct sender', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
-
       const event = expectEvent.inLogs(logs, 'Signup', {
         user: userSafe.address,
       });
