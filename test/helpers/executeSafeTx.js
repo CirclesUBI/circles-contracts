@@ -8,7 +8,7 @@ const executeSafeTx = async (safe, txParams, from, baseGas, safeTxGas, signer, w
   const operation = txParams.operation || 0;
   // gas parameters that were signed don't have to match those sent with the transaction
   // in cases where not using a token payment
-  const signedSafeTxGas = txParams.safeTxGas || 0;
+  const signedSafeTxGas = txParams.safeTxGas || 1;
   const signedBaseGas = txParams.baseGas || 0;
   const gasPrice = txParams.gasPrice || 0;
   const gasToken = txParams.gasToken || ZERO_ADDRESS;
