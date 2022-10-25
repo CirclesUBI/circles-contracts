@@ -97,11 +97,11 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
       bal.should.bignumber.satisfy(() => near(bal, goal, signupBonus));
     });
 
-    // it('doesnt change balance at deployment', async () => {
-    //   debug(await token.update());
-    //   const balance = await token.balanceOf(owner);
-    //   (balance).should.bignumber.satisfy(() => near(balance, signupBonus, signupBonus));
-    // });
+    it('doesnt change balance at deployment', async () => {
+      debug(await token.update());
+      const balance = await token.balanceOf(owner);
+      (balance).should.bignumber.satisfy(() => near(balance, signupBonus, signupBonus));
+    });
 
     it('correctly calculates the ubi payout after 1 period', async () => {
       await increase(period.toNumber());
