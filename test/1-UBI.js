@@ -49,6 +49,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
           { from: systemOwner, gas: maxGas },
         );
     });
+    
     it('returns the correct issuance at deployment', async () => {
       (await hub.issuance()).should.be.bignumber.equal(signupBonus);
     });
