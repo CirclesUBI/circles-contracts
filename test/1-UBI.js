@@ -98,7 +98,7 @@ contract('UBI', ([_, owner, recipient, attacker, systemOwner]) => { // eslint-di
     });
 
     it('doesnt change balance at deployment', async () => {
-      debug(await token.update());
+      await token.update();
       const balance = await token.balanceOf(owner);
       (balance).should.bignumber.satisfy(() => near(balance, signupBonus, signupBonus));
     });
