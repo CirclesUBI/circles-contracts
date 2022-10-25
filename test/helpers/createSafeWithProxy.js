@@ -9,7 +9,6 @@ const createSafeWithProxy = async (proxy, safe, GnosisSafe, owner) => {
   const tx = await proxy
     .createProxy(safe.address, proxyData, { from: owner, gas: extraGas });
   const { logs } = tx;
-
   const userSafeAddress = logs[0].args.proxy;
 
   return GnosisSafe.at(userSafeAddress);
