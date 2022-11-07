@@ -47,16 +47,9 @@ start_ganache() {
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208,1000000000000000000000000000000"
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501209,1000000000000000000000000000000"
   )
-
-echo $SOLIDITY_COVERAGE
-echo $SOLC_NIGHTLY
-echo $CONTINUOUS_INTEGRATION
   if [ "$SOLIDITY_COVERAGE" = true ]; then
-    echo "heeer"
     node_modules/.bin/testrpc-sc --gasLimit 0xfffffffffffff --port "$ganache_port" "${accounts[@]}" > /dev/null &
   else
-      echo "DASAFASDFSDA"
-
     node_modules/.bin/ganache --l 0xfffffffffffff "${accounts[@]}"  --logging.debug > ganache.logs &
   fi
 
@@ -72,7 +65,6 @@ fi
 
 if [ "$SOLC_NIGHTLY" = true ]; then
   echo "Downloading solc nightly"
-  echo "dfasdfs"
   wget -q https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-nightly.js -O /tmp/soljson.js && find . -name soljson.js -exec cp /tmp/soljson.js {} \;
 fi
 
@@ -80,7 +72,7 @@ node_modules/.bin/truffle version
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BUILD_DIR=$SCRIPT_DIR/../build/
-echo $BUILD_DIR
+
 
 if [ -d "$BUILD_DIR" ]; then
   echo "clearing build folder"
