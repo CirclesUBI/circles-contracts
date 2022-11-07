@@ -5,6 +5,7 @@
 # Exit script as soon as a command fails.
 set -o errexit
 set -eE -o functrace
+
 # Executes cleanup function at script exit.
 trap cleanup EXIT
 failure() {
@@ -46,6 +47,7 @@ start_ganache() {
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208,1000000000000000000000000000000"
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501209,1000000000000000000000000000000"
   )
+
 echo $SOLIDITY_COVERAGE
 echo $SOLC_NIGHTLY
 echo $CONTINUOUS_INTEGRATION
