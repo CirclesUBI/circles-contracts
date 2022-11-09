@@ -47,10 +47,11 @@ start_ganache() {
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208,1000000000000000000000000000000"
     --account="0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501209,1000000000000000000000000000000"
   )
+
   if [ "$SOLIDITY_COVERAGE" = true ]; then
     node_modules/.bin/testrpc-sc --gasLimit 0xfffffffffffff --port "$ganache_port" "${accounts[@]}" > /dev/null &
   else
-    node_modules/.bin/ganache --l 0xfffffffffffff "${accounts[@]}"  --logging.debug > ganache.logs &
+    node_modules/.bin/ganache --l 0xfffffffffffff "${accounts[@]}" > /dev/null &
   fi
 
   ganache_pid=$!
