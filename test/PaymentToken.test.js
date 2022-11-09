@@ -72,6 +72,7 @@ contract('Token payments', ([_, safeOwner, recipient, anotherAccount, systemOwne
   describe('user can use their token as payment token', () => {
     const amount = convertToBaseUnit(50);
     const gasCosts = bn(89645);
+
     it('should transfer tokens', async () => {
       const to = token.address;
       const data = await token.contract.methods

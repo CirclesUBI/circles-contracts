@@ -155,6 +155,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
     it('token is owned by correct sender', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
+
       const event = expectEvent.inLogs(logs, 'Signup', {
         user: userSafe.address,
       });
@@ -190,8 +191,8 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
   });
 
   describe('new user can signup, when user is a safe proxy', async () => {
-      let token = null;
-      beforeEach(async () => {
+    let token = null;
+    beforeEach(async () => {
       userSafe = await createSafeWithProxy(proxyFactory, safe, GnosisSafe, safeOwner);
       const txParams = {
         to: hub.address,
@@ -202,6 +203,7 @@ contract('Hub - signup', ([_, systemOwner, attacker, safeOwner, normalUser, thir
 
     it('signup emits an event with correct sender', async () => {
       const logs = await hub.getPastEvents('Signup', { fromBlock: 0, toBlock: 'latest' });
+
       const event = expectEvent.inLogs(logs, 'Signup', {
         user: userSafe.address,
       });
