@@ -1,5 +1,5 @@
 const truffleContract = require('@truffle/contract');
-const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
+const proxyArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafeProxyFactory.json');
 const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
 
 const GnosisSafe = truffleContract(safeArtifacts);
