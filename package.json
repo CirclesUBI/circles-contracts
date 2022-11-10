@@ -9,7 +9,7 @@
     "Ashoka Finley (https://github.com/shkfnly)",
     "Martin Lundfall (https://github.com/MrChico)"
   ],
-  "license": "AGPL",
+  "license": "AGPL-3.0",
   "scripts": {
     "test": "scripts/test.sh",
     "migrate": "./node_modules/.bin/truffle migrate",
@@ -25,10 +25,12 @@
   },
   "homepage": "https://github.com/CirclesUBI/circles-contracts",
   "devDependencies": {
+    "@babel/core": "^7.20.2",
+    "bn.js": "^5.2.1",
     "chai": "^4.3.6",
-    "chai-bignumber": "^3.1.0",
     "chai-bn": "^0.3.1",
     "dotenv": "^16.0.3",
+    "eslint": "^8.27.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "ethers": "^5.7.2",
@@ -41,6 +43,7 @@
     "@openzeppelin/contracts": "^3.1.0-solc-0.7",
     "@truffle/contract": "^4.6.6",
     "@truffle/error": "^0.1.1",
-    "@truffle/hdwallet-provider": "^2.1.1"
+    "@truffle/hdwallet-provider": "^2.1.1",
+    "web3": "^1.8.0"
   }
 }
