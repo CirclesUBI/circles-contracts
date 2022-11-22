@@ -9,10 +9,12 @@ const formatTypedData = (
   gasToken,
   refundReceiver,
   nonce,
+  chainId,
   verifyingContract) => {
   const typedData = {
     types: {
       EIP712Domain: [
+        { type: 'uint256', name: 'chainId' },
         { type: 'address', name: 'verifyingContract' },
       ],
       SafeTx: [
@@ -29,6 +31,7 @@ const formatTypedData = (
       ],
     },
     domain: {
+      chainId,
       verifyingContract,
     },
     primaryType: 'SafeTx',
