@@ -32,10 +32,11 @@ module.exports = {
       network_id: '*',
     },
     kovan: {
-      provider: function () {
+      provider() {
         return new HDWalletProvider(
           process.env.MNEMONIC,
-          `https://kovan.infura.io/v3/${process.env.PROJECT_ID}`)
+          `https://kovan.infura.io/v3/${process.env.PROJECT_ID}`,
+        );
       },
       port: 8545,
       network_id: 42,
@@ -43,24 +44,35 @@ module.exports = {
       gasPrice: 12500000000,
     },
     xdai: {
-      provider: function() {
+      provider() {
         return new HDWalletProvider(
-        process.env.MNEMONIC,
-        "https://dai.poa.network")
+          process.env.MNEMONIC,
+          'https://dai.poa.network',
+        );
       },
       network_id: 100,
       gas: 12487794,
       gasPrice: 1000000000,
     },
     sokol: {
-      provider: function() {
+      provider() {
         return new HDWalletProvider(
-        process.env.MNEMONIC,
-        "https://sokol.poa.network")
+          process.env.MNEMONIC,
+          'https://sokol.poa.network',
+        );
       },
       network_id: 77,
       gas: 12487759,
       gasPrice: 1000000000,
+    },
+    chiado: {
+      provider() {
+        return new HDWalletProvider(
+          process.env.MNEMONIC,
+          'https://rpc.chiadochain.net',
+        );
+      },
+      network_id: 10200,
     },
   },
 };
