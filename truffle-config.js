@@ -54,17 +54,6 @@ module.exports = {
       gas: 12487794,
       gasPrice: 1000000000,
     },
-    sokol: {
-      provider() {
-        return new HDWalletProvider(
-          process.env.MNEMONIC,
-          'https://sokol.poa.network',
-        );
-      },
-      network_id: 77,
-      gas: 12487759,
-      gasPrice: 1000000000,
-    },
     chiado: {
       provider() {
         return new HDWalletProvider(
