@@ -49,7 +49,7 @@ module.exports = async function (deployer, network, accounts) {
     });
   });
   return deployer.deploy(GnosisSafeL2, { from: accounts[0] }).then((result) => {
-    fs.appendFile('addresses', `${result.address}`, (err) => {
+    fs.appendFile('addresses', `${result.address} \n`, (err) => {
       if (err) throw err;
     });
   });
