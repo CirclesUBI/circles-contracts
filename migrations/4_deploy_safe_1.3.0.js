@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const truffleContract = require('@truffle/contract');
 const proxyArtifacts = require('@gnosis.pm/safe-contracts/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json');
 const safeArtifacts = require('@gnosis.pm/safe-contracts/build/artifacts/contracts/GnosisSafe.sol/GnosisSafe.json');
@@ -21,10 +23,34 @@ DefaultCallbackHandler.setProvider(web3.currentProvider);
 GnosisSafeL2.setProvider(web3.currentProvider);
 
 module.exports = async function (deployer, network, accounts) {
-  await deployer.deploy(MultiSend, { from: accounts[0] });
-  await deployer.deploy(GnosisSafe, { from: accounts[0] });
-  await deployer.deploy(MultiSendCallOnly, { from: accounts[0] });
-  await deployer.deploy(ProxyFactory, { from: accounts[0] });
-  await deployer.deploy(DefaultCallbackHandler, { from: accounts[0] });
-  return deployer.deploy(GnosisSafeL2, { from: accounts[0] });
+  await deployer.deploy(MultiSend, { from: accounts[0] }).then((result) => {
+    fs.appendFile('addresses', `${result.address} \n`, (err) => {
+      if (err) throw err;
+    });
+  });
+  await deployer.deploy(GnosisSafe, { from: accounts[0] }).then((result) => {
+    fs.appendFile('addresses', `${result.address} \n`, (err) => {
+      if (err) throw err;
+    });
+  });
+  await deployer.deploy(MultiSendCallOnly, { from: accounts[0] }).then((result) => {
+    fs.appendFile('addresses', `${result.address} \n`, (err) => {
+      if (err) throw err;
+    });
+  });
+  await deployer.deploy(ProxyFactory, { from: accounts[0] }).then((result) => {
+    fs.appendFile('addresses', `${result.address} \n`, (err) => {
+      if (err) throw err;
+    });
+  });
+  await deployer.deploy(DefaultCallbackHandler, { from: accounts[0] }).then((result) => {
+    fs.appendFile('addresses', `${result.address} \n`, (err) => {
+      if (err) throw err;
+    });
+  });
+  return deployer.deploy(GnosisSafeL2, { from: accounts[0] }).then((result) => {
+    fs.appendFile('addresses', `${result.address}`, (err) => {
+      if (err) throw err;
+    });
+  });
 };
