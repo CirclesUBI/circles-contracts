@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2023-03-20
+
+### Added
+
+- Save contract addresses in a file for the pathfinder2 service [#180](https://github.com/CirclesUBI/circles-contracts/pull/180)
+
+### Fixed
+
+- Update dependencies
+- Update GH Actions dependencies [#183](https://github.com/CirclesUBI/circles-contracts/pull/183)
+
+### Changed
+
+- Change sokol with chiado in truffle config [#176](https://github.com/CirclesUBI/circles-contracts/pull/176)
+
 ## [3.2.0] - 2022-11-29
 
 ### Added
