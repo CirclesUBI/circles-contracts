@@ -4,9 +4,17 @@
 
 # Exit script as soon as a command fails.
 set -o errexit
+set -eE -o functrace
 
 # Executes cleanup function at script exit.
 trap cleanup EXIT
+failure() {
+  local lineno=$1
+  local msg=$2
+  echo "Failed at $lineno: $msg"
+}
+trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
+
 
 cleanup() {
   # Kill the ganache instance that we started (if we started one and if it's still running).
@@ -43,7 +51,7 @@ start_ganache() {
   if [ "$SOLIDITY_COVERAGE" = true ]; then
     node_modules/.bin/testrpc-sc --gasLimit 0xfffffffffffff --port "$ganache_port" "${accounts[@]}" > /dev/null &
   else
-    node_modules/.bin/ganache-cli --gasLimit 0xfffffffffffff "${accounts[@]}" > /dev/null &
+    node_modules/.bin/ganache --l 0xfffffffffffff "${accounts[@]}" > /dev/null &
   fi
 
   ganache_pid=$!

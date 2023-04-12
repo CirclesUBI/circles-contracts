@@ -35,7 +35,7 @@ const estimateBaseGas = async (safe, to, value, data, operation,
   return baseGasEstimate + 32000; // Add aditional gas costs (e.g. base tx costs, transfer costs)
 };
 
-const parseRevert = message => new BigNumber(message.substring(67), 16);
+const parseRevert = message => new BigNumber(message.substring(96));
 
 const estimateTxGas = async (safe, to, value, data, operation) => {
   let txGasEstimate;

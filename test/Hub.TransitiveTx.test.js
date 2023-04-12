@@ -1,8 +1,8 @@
 const truffleContract = require('@truffle/contract');
 const { assertRevert } = require('./helpers/assertRevert');
 const expectEvent = require('./helpers/expectEvent');
-const safeArtifacts = require('@circles/safe-contracts/build/contracts/GnosisSafe.json');
-const proxyArtifacts = require('@circles/safe-contracts/build/contracts/ProxyFactory.json');
+const safeArtifacts = require('@gnosis.pm/safe-contracts/build/artifacts/contracts/GnosisSafeL2.sol/GnosisSafeL2.json');
+const proxyArtifacts = require('@gnosis.pm/safe-contracts/build/artifacts/contracts/proxies/GnosisSafeProxyFactory.sol/GnosisSafeProxyFactory.json');
 const {
   BigNumber,
   extraGas,

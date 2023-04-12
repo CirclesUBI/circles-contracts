@@ -1,6 +1,6 @@
 {
-  "name": "circles-contracts",
-  "version": "2.3.1",
+  "name": "@circles/circles-contracts",
+  "version": "3.3.1",
   "contributors": [
     "Sarah Friend (https://github.com/ana0)",
     "Jake Gillberg (https://github.com/Jake-Gillberg)",
@@ -9,12 +9,12 @@
     "Ashoka Finley (https://github.com/shkfnly)",
     "Martin Lundfall (https://github.com/MrChico)"
   ],
-  "license": "AGPL",
+  "license": "AGPL-3.0",
   "scripts": {
     "test": "scripts/test.sh",
     "migrate": "./node_modules/.bin/truffle migrate",
     "compile": "./node_modules/.bin/truffle compile",
-    "ganache": "ganache-cli -d -i 5777 --gasLimit 0xfffffffffff -m \"enable depend figure right kit daughter job giraffe news window tonight more\""
+    "ganache": "ganache -d -i 5777 --l 0xfffffffffff -m \"enable depend figure right kit daughter job giraffe news window tonight more\""
   },
   "repository": {
     "type": "git",
@@ -25,24 +25,25 @@
   },
   "homepage": "https://github.com/CirclesUBI/circles-contracts",
   "devDependencies": {
-    "chai": "^4.1.2",
-    "chai-bignumber": "^2.0.2",
-    "chai-bn": "^0.1.1",
-    "dotenv": "^8.2.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.18.2",
-    "ganache-cli": "^6.12.2",
-    "truffle": "^5.3.0"
+    "@babel/core": "^7.20.2",
+    "bn.js": "^5.2.1",
+    "chai": "^4.3.6",
+    "chai-bn": "^0.3.1",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.27.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "ethers": "^5.7.2",
+    "ganache": "^7.5.0",
+    "truffle": "^5.6.5"
   },
   "dependencies": {
-    "@circles/safe-contracts": "^1.0.14",
+    "@circles/safe-contracts": "=1.0.14",
+    "@gnosis.pm/safe-contracts": "^1.3.0",
     "@openzeppelin/contracts": "^3.1.0-solc-0.7",
-    "@truffle/contract": "^4.2.21",
-    "@truffle/error": "0.0.9",
-    "@truffle/hdwallet-provider": "^1.2.0",
-    "bluebird": "^3.7.1",
-    "ethereumjs-abi": "^0.6.8",
-    "truffle-contract": "^4.0.31",
-    "web3-eth-abi": "^1.3.0"
+    "@truffle/contract": "^4.6.18",
+    "@truffle/error": "^0.1.1",
+    "@truffle/hdwallet-provider": "^2.1.9",
+    "web3": "^1.8.0"
   }
 }

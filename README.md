@@ -86,16 +86,16 @@ Illustrated here are some of the main available calls:
 ## Installation
 
 ```bash
-npm i circles-contracts
+npm i @circles/circles-contracts
 ```
 
-Requires [`Node`] version 12.
+Requires [`Node`] version 14.
 
 [`Node`]: https://nodejs.org/en/download
 
 ## Development
 
-Requires [Node](https://nodejs.org/en/download/) version 12. You can change your node version to the tested version with `nvm use`.
+Requires [Node](https://nodejs.org/en/download/) version 14. You can change your node version to the tested version with `nvm use`.
 
 Install all required dependencies via `npm install`.
 
