@@ -10,6 +10,9 @@
     "Martin Lundfall (https://github.com/MrChico)"
   ],
   "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "test": "scripts/test.sh",
     "migrate": "./node_modules/.bin/truffle migrate",
