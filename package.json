@@ -44,6 +44,6 @@
     "@openzeppelin/contracts": "^3.4.0-solc-0.7",
     "@truffle/contract": "^4.6.21",
     "@truffle/hdwallet-provider": "^2.1.11",
-    "web3": "^1.8.0"
+    "web3": "^1.10.0"
   }
 }
